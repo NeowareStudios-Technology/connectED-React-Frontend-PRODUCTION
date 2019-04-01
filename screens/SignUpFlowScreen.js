@@ -22,12 +22,15 @@ export default class SignUpFlowScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    // Listen for authentication state to change.
+    /**
+     * Listen for authentication state to change. If we receive a user
+     * get the user token and post the user profile to the /profiles endpoint.
+     */
     firebase.auth().onAuthStateChanged(user => {
       if (user != null) {
-        // if (User.login(user)) {
-        //   this.props.navigation.navigate("Profile");
-        // }
+        user.getIdToken().then(token => {
+          this.saveUserProfile(user, token);
+        });
       }
 
       // Do other things
@@ -199,7 +202,8 @@ export default class SignUpFlowScreen extends React.Component {
 
     this.state = {
       currentStepIndex: 0,
-      processingProfile: false,
+      profileData: null,
+      profileStatus: "creating",
       processingErrors: null
     };
 
@@ -264,6 +268,38 @@ export default class SignUpFlowScreen extends React.Component {
     }
   };
 
+  saveUserProfile = (firebaseUser, token) => {
+    if (this.state.profileData) {
+      try {
+        let bodyData = JSON.stringify(this.state.profileData);
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles";
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: bodyData
+        })
+          .then(response => {
+            if (response.ok) {
+              /**
+               * Profile created but the response doesnt have the profile
+               * Use the firebaseUser plus the state.profileData to login with User
+               *  */
+              this.setState({ profileStatus: "created" });
+            }
+          })
+          .catch(error => {
+            console.error("Error posting to Endpoint", error);
+          });
+      } catch (error) {
+        console.log("error parsing profile data", error.message);
+      }
+    }
+  };
+
   processProfile = () => {
     let sequence = new Sequencer();
     sequence.data = null;
@@ -271,7 +307,7 @@ export default class SignUpFlowScreen extends React.Component {
     sequence.promise(() => {
       this.setState(
         {
-          processingProfile: true
+          profileStatus: "processing"
         },
         () => {
           sequence.next();
@@ -280,7 +316,7 @@ export default class SignUpFlowScreen extends React.Component {
     });
 
     sequence.promise(() => {
-      let profileData = [];
+      var profileData = {};
       Object.keys(this.fields).map(field => {
         profileData[field] = this.state[field];
       });
@@ -290,16 +326,18 @@ export default class SignUpFlowScreen extends React.Component {
 
     sequence.promise(() => {
       if (sequence.data) {
-        firebase
-          .auth()
-          .createUserWithEmailAndPassword(
-            sequence.data.email,
-            sequence.data.password
-          )
-          .catch(function(error) {
-            sequence.errors = [error.message];
-            sequence.next();
-          });
+        this.setState({ profileData: sequence.data }, () => {
+          firebase
+            .auth()
+            .createUserWithEmailAndPassword(
+              sequence.data.email,
+              sequence.data.password
+            )
+            .catch(function(error) {
+              sequence.errors = [error.message];
+              sequence.next();
+            });
+        });
       } else {
         sequence.errors = [
           "We could not create a user account with the data provided.  Please restart the App and try again."
@@ -311,7 +349,7 @@ export default class SignUpFlowScreen extends React.Component {
     sequence.onStop = () => {
       if (sequence.errors.length > 0) {
         this.setState({
-          processingProfile: false,
+          profileStatus: "creatings",
           processingErrors: sequence.errors
         });
       }
@@ -426,7 +464,6 @@ export default class SignUpFlowScreen extends React.Component {
           encoding: FileSystem.EncodingTypes.Base64
         });
         if (data) {
-          console.log("Photo Binary", data);
           this.setState({ photo: data });
         }
       }
@@ -475,7 +512,23 @@ export default class SignUpFlowScreen extends React.Component {
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
           >
-            {this.state.processingProfile ? (
+            {this.state.profileStatus === "created" && (
+              <>
+                <View style={{ paddingHorizontal: 10, paddingTop: 24 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      textAlign: "center",
+                      marginBottom: 8
+                    }}
+                  >
+                    User account successfully created. We will redirect you to
+                    your account momentarily...
+                  </Text>
+                </View>
+              </>
+            )}
+            {this.state.profileStatus === "processing" && (
               <>
                 <View style={{ paddingHorizontal: 10, paddingTop: 24 }}>
                   <Text
@@ -489,7 +542,8 @@ export default class SignUpFlowScreen extends React.Component {
                   </Text>
                 </View>
               </>
-            ) : (
+            )}
+            {this.state.profileStatus === "creating" && (
               <>
                 <View
                   style={{
@@ -1003,30 +1057,35 @@ export default class SignUpFlowScreen extends React.Component {
               </>
             )}
           </ScrollView>
-          {!this.state.processingProfile && !this.state.processingErrors && (
-            <>
-              <View
-                style={{
-                  backgroundColor: "transparent",
-                  height: 20,
-                  flex: 0.1,
-                  justifyContent: "flex-end"
-                }}
-              >
+          {!this.state.profileStatus === "creating" &&
+            !this.state.processingErrors && (
+              <>
                 <View
                   style={{
-                    backgroundColor: "#ffffff",
-                    paddingVertical: 4,
-                    borderWidth: 0.5,
-                    borderTopColor: "#ececec",
-                    justifyContent: "center"
+                    backgroundColor: "transparent",
+                    height: 20,
+                    flex: 0.1,
+                    justifyContent: "flex-end"
                   }}
                 >
-                  <Button type="clear" title="Next" onPress={this.goForward} />
+                  <View
+                    style={{
+                      backgroundColor: "#ffffff",
+                      paddingVertical: 4,
+                      borderWidth: 0.5,
+                      borderTopColor: "#ececec",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <Button
+                      type="clear"
+                      title="Next"
+                      onPress={this.goForward}
+                    />
+                  </View>
                 </View>
-              </View>
-            </>
-          )}
+              </>
+            )}
         </View>
       </ImageBackground>
     );

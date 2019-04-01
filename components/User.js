@@ -6,14 +6,18 @@ const User = {
   displayName: null,
   email: null,
   uid: null,
+  data: [],
+  firebase: null,
   isloggedIn: function() {
     return this.uid;
   },
-  login: function(user) {
-    Object.keys(user).map(key => {
-      this[key] = user[key];
-    });
-    return this.uid;
+  login: function(firebaseUser, data) {
+    this.displayName = firebaseUser.displayName;
+    this.email = firebaseUser.email;
+    this.uid = firebaseUser.uid;
+    this.data = data;
+    this.firebase = firebaseUser;
+    return this;
   }
 };
 
