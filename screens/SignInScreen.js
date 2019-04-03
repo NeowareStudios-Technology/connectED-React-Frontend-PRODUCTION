@@ -26,7 +26,7 @@ export default class SignInScreen extends React.Component {
     this.state = {
       email: "",
       password: "",
-      isLoggedIn:false,
+      isLoggedIn: false,
       loginData: null,
       errors: {
         email: [],
@@ -196,6 +196,9 @@ export default class SignInScreen extends React.Component {
               </View>
               <View>
                 <Text
+                  onPress={() => {
+                    this.props.navigation.navigate("ForgotPassword");
+                  }}
                   style={{
                     marginTop: 6,
                     fontSize: 18,
