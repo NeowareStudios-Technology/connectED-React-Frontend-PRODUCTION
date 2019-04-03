@@ -32,8 +32,6 @@ export default class SignUpFlowScreen extends React.Component {
           this.saveUserProfile(user, token);
         });
       }
-
-      // Do other things
     });
 
     this.steps = [
@@ -283,12 +281,19 @@ export default class SignUpFlowScreen extends React.Component {
           body: bodyData
         })
           .then(response => {
+            console.log("Response from save profile", response);
             if (response.ok) {
               /**
                * Profile created but the response doesnt have the profile
                * Use the firebaseUser plus the state.profileData to login with User
                *  */
-              this.setState({ profileStatus: "created" });
+              this.setState({ profileStatus: "created" }, () => {
+                User.login(firebaseUser, this.state.profileData).then(login => {
+                  if (login) {
+                    this.props.navigation.navigate("ProfileHome");
+                  }
+                });
+              });
             }
           })
           .catch(error => {
@@ -1057,7 +1062,7 @@ export default class SignUpFlowScreen extends React.Component {
               </>
             )}
           </ScrollView>
-          {!this.state.profileStatus === "creating" &&
+          {this.state.profileStatus === "creating" &&
             !this.state.processingErrors && (
               <>
                 <View

@@ -28,29 +28,12 @@ export default class App extends React.Component {
         />
       );
     } else {
-      if (User.isloggedIn()) {
-        return (
-          <View style={styles.container}>
-            {Platform.OS === "ios" && <StatusBar barStyle="default" />}
-            <AppNavigator />
-          </View>
-        );
-      } else {
-        return (
-          <View style={styles.container}>
-            {Platform.OS === "ios" && <StatusBar barStyle="default" />}
-            {this.state.started ? (
-              <>
-                <SigninNavigator />
-              </>
-            ) : (
-              <>
-                <HomeScreen onGetStarted={this.getStarted} />
-              </>
-            )}
-          </View>
-        );
-      }
+      return (
+        <View style={styles.container}>
+          {Platform.OS === "ios" && <StatusBar barStyle="default" />}
+          <AppNavigator />
+        </View>
+      );
     }
   }
 

@@ -13,9 +13,10 @@ import { WebBrowser, Icon } from "expo";
 import { Input, Card, Button } from "react-native-elements";
 
 import { MonoText } from "../components/StyledText";
+import User from "../components/User";
 
 import Sequencer from "../components/Sequencer";
-const firebase = require("../components/Firebase");
+import firebase from "../components/Firebase";
 const validator = require("validator");
 
 export default class SignInScreen extends React.Component {
@@ -25,12 +26,51 @@ export default class SignInScreen extends React.Component {
     this.state = {
       email: "",
       password: "",
+      isLoggedIn:false,
+      loginData: null,
       errors: {
         email: [],
         password: []
       }
     };
   }
+  static navigationOptions = {
+    header: null
+  };
+
+  listenForAuthChangeAndTriggerFirebaseLogin = () => {
+    if (!this.state.isLoggedIn && this.state.loginData) {
+      console.log("Listing for auth change", this.state);
+      /**
+       * Listen for authentication state to change. If we receive a user
+       * get the user token and post the user profile to the /profiles endpoint.
+       */
+      firebase.auth().onAuthStateChanged(user => {
+        if (user != null) {
+          User.login(user).then(login => {
+            if (login) {
+              this.props.navigation.navigate("ProfileHome");
+            }
+          });
+        }
+      });
+
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.state.email, this.state.password)
+        .catch(error => {
+          if (error) {
+            let errors = {
+              email: [error.message],
+              password: []
+            };
+            this.setState({
+              errors: errors
+            });
+          }
+        });
+    }
+  };
 
   onInputChange = value => {
     let attribute = e.target.name;
@@ -63,7 +103,17 @@ export default class SignInScreen extends React.Component {
 
     sequence.promise(() => {
       if (Object.keys(sequence.errors).length === 0) {
-        console.log("FIRE BASE!", firebase);
+        this.setState(
+          {
+            loginData: {
+              email: email,
+              password: password
+            }
+          },
+          () => {
+            this.listenForAuthChangeAndTriggerFirebaseLogin();
+          }
+        );
       }
       sequence.next();
     });
@@ -79,9 +129,7 @@ export default class SignInScreen extends React.Component {
     sequence.next();
   };
 
-  static navigationOptions = {
-    header: null
-  };
+  componentDidMount() {}
 
   render() {
     return (
@@ -94,93 +142,76 @@ export default class SignInScreen extends React.Component {
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
           >
-            <View
-              style={{
-                marginVertical: 3,
-                paddingHorizontal: 12
-              }}
-            >
-              <Icon.Ionicons
-                name={
-                  Platform.OS === "ios"
-                    ? "ios-arrow-round-back"
-                    : "md-arrow-back"
-                }
-                size={44}
-                color="#ffffff"
-                onPress={() => {
-                  this.props.navigation.goBack();
-                }}
-              />
-            </View>
-            <Card
-              containerStyle={styles.cardContainerStyle}
-              wrapperStyle={styles.cardWrapperStyle}
-            >
-              <Input
-                name="email"
-                autoComplete="email"
-                value={this.state.email}
-                onChangeText={value => {
-                  this.setState({ email: value });
-                }}
-                type="email"
-                containerStyle={{ marginBottom: 12 }}
-                placeholder="E-mail"
-                errorMessage={
-                  this.state.errors.email.length > 0
-                    ? this.state.errors.email[0]
-                    : ""
-                }
-              />
-              <Input
-                name="password"
-                value={this.state.password}
-                onChangeText={value => {
-                  this.setState({ password: value });
-                }}
-                secureTextEntry={true}
-                type="password"
-                placeholder="Password"
-                errorMessage={
-                  this.state.errors.password.length > 0
-                    ? this.state.errors.password[0]
-                    : ""
-                }
-              />
-            </Card>
-            <View style={{ paddingHorizontal: 12, marginTop: 18 }}>
-              <Button title="Sign In" onPress={this.login} />
-            </View>
-            <View>
+            <>
               <Text
                 style={{
-                  marginTop: 6,
+                  paddingHorizontal: 12,
                   fontSize: 18,
+                  color: "#fff",
                   textAlign: "center",
-                  color: "#ffffff"
+                  marginTop: 12,
+                  marginBottom: 12
                 }}
               >
-                Forgot your password?
+                Use your ConnectED credentials to Sign In to your account.
               </Text>
-            </View>
+              <Card
+                containerStyle={styles.cardContainerStyle}
+                wrapperStyle={styles.cardWrapperStyle}
+              >
+                <Input
+                  name="email"
+                  autoComplete="email"
+                  value={this.state.email}
+                  onChangeText={value => {
+                    this.setState({ email: value });
+                  }}
+                  type="email"
+                  containerStyle={{ marginBottom: 12 }}
+                  placeholder="E-mail"
+                  errorMessage={
+                    this.state.errors.email.length > 0
+                      ? this.state.errors.email[0]
+                      : ""
+                  }
+                />
+                <Input
+                  name="password"
+                  value={this.state.password}
+                  onChangeText={value => {
+                    this.setState({ password: value });
+                  }}
+                  secureTextEntry={true}
+                  type="password"
+                  placeholder="Password"
+                  errorMessage={
+                    this.state.errors.password.length > 0
+                      ? this.state.errors.password[0]
+                      : ""
+                  }
+                />
+              </Card>
+              <View style={{ paddingHorizontal: 12, marginTop: 18 }}>
+                <Button title="Sign In" onPress={this.login} />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    marginTop: 6,
+                    fontSize: 18,
+                    textAlign: "center",
+                    color: "#ffffff"
+                  }}
+                >
+                  Forgot your password?
+                </Text>
+              </View>
+            </>
           </ScrollView>
         </View>
       </ImageBackground>
     );
   }
-
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync(
-      "https://docs.expo.io/versions/latest/guides/development-mode"
-    );
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      "https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes"
-    );
-  };
 }
 
 const styles = StyleSheet.create({

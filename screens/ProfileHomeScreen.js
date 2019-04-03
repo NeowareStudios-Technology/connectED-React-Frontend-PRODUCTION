@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  ActivityIndicator,
   Image,
   ImageBackground,
   Platform,
@@ -12,28 +11,13 @@ import {
 } from "react-native";
 import { WebBrowser } from "expo";
 import { Button } from "react-native-elements";
-import User from "../components/User";
-export default class HomeScreen extends React.Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      processing: false
-    };
-  }
+import { MonoText } from "../components/StyledText";
+import User from "../components/User";
+
+export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null
-  };
-
-  getStarted = async () => {
-    this.setState({ processing: true }, async () => {
-      let user = await User.isLoggedIn();
-      if (user) {
-        this.props.navigation.navigate("Profile");
-      } else {
-        this.props.navigation.navigate("SignIn");
-      }
-    });
   };
 
   render() {
@@ -55,26 +39,20 @@ export default class HomeScreen extends React.Component {
             </View>
             <View style={styles.getStartedContainer}>
               <Text style={styles.getStartedHeading}>
-                THE{"\n"}NEW{"\n"}PHILANTROPY
-              </Text>
-              <Text style={styles.getStartedText}>
-                Volunteer easier than ever, build your local community by
-                lending a hand with explored opportunities.
+                THIS IS THE TEMPORARY PROFILE PAGE
               </Text>
             </View>
             <View style={{ paddingHorizontal: 12, marginTop: 18 }}>
-              {this.state.processing ? (
-                <ActivityIndicator size="large" color="#ffffff" />
-              ) : (
-                <>
-                  <Button
-                    type="outline"
-                    raised={true}
-                    onPress={this.getStarted}
-                    title="Get Started"
-                  />
-                </>
-              )}
+              <Button
+                type="outline"
+                raised={true}
+                onPress={() => {
+                  User.logout(() => {
+                    this.props.navigation.navigate("Main");
+                  });
+                }}
+                title="Logout"
+              />
             </View>
           </ScrollView>
         </View>
