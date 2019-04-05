@@ -7,44 +7,56 @@ const User = {
   displayName: null,
   email: null,
   uid: null,
-  firebaseUser: null,
+  firebase: null,
   profile: null,
   isLoggedIn: async function() {
     if (firebase.auth().currentUser) {
-      this.firebaseUser = firebase.auth().currentUser;
+      this.firebase = firebase.auth().currentUser;
     }
 
-    if (this.firebaseUser) {
-      this.displayName = this.firebaseUser.displayName;
-      this.email = this.firebaseUser.email;
-      this.uid = this.firebaseUser.uid;
-      let token = await this.firebaseUser.getIdToken();
-      if (token) {
-        try {
-          let url =
-            "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
-            this.firebaseUser.email;
-          let profileResponse = await fetch(url, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + token
-            }
-          });
-
-          if (profileResponse.ok) {
-            try {
-              let profile = JSON.parse(profileResponse._bodyText);
-              if (profile) {
-                this.profile = profile;
+    if (this.firebase) {
+      this.displayName = this.firebase.displayName;
+      this.email = this.firebase.email;
+      this.uid = this.firebase.uid;
+      if (!this.profile) {
+        let token = await this.firebase.getIdToken();
+        if (token) {
+          try {
+            let url =
+              "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
+              this.firebase.email;
+            let profileResponse = await fetch(url, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
               }
-            } catch (error) {}
-          }
-        } catch (error) {}
+            });
+
+            if (profileResponse.ok) {
+              try {
+                let profile = JSON.parse(profileResponse._bodyText);
+                if (profile) {
+                  this.profile = profile;
+                }
+              } catch (error) {}
+            }
+          } catch (error) {}
+        }
+      }
+      /**
+       * If we still dont have a profile, let's create an empty one
+       * with the default info to prevent "undefined" errors
+       */
+      if (!this.profile) {
+        this.profile = {
+          first_name: "",
+          last_name: ""
+        };
       }
     }
 
-    if (this.uid && this.firebaseUser) {
+    if (this.uid && this.firebase) {
       return this;
     } else {
       return false;
@@ -57,7 +69,7 @@ const User = {
         try {
           let url =
             "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
-            this.firebaseUser.email;
+            firebaseUser.email;
           let profileResponse = await fetch(url, {
             method: "GET",
             headers: {
@@ -90,7 +102,7 @@ const User = {
     this.email = null;
     this.uid = null;
     this.profile = null;
-    this.firebaseUser = null;
+    this.firebase = null;
     if (typeof callback === "function") {
       callback();
     }
