@@ -32,13 +32,6 @@ class ProfileInfo extends React.Component {
   };
 
   componentDidMount() {
-    if (
-      this.props.user &&
-      this.props.user.profile &&
-      this.props.user.profile.photo
-    ) {
-      this.setState({ photo: this.props.user.profile.photo });
-    }
   }
   render() {
     return (
@@ -48,7 +41,7 @@ class ProfileInfo extends React.Component {
             <Input
               name="first_name"
               label="First Name"
-              value={this.state.first_name}
+              value={this.props.first_name}
               onChangeText={value => {
                 this.props.onChange("first_name", value);
               }}
@@ -63,7 +56,7 @@ class ProfileInfo extends React.Component {
             <Input
               name="last_name"
               label="Last Name"
-              value={this.state.last_name}
+              value={this.props.last_name}
               onChangeText={value => {
                 this.props.onChange("last_name", value);
               }}

@@ -106,6 +106,9 @@ const User = {
     if (typeof callback === "function") {
       callback();
     }
+  },
+  setProfile: function(profile) {
+    this.profile = profile;
   }
 };
 
