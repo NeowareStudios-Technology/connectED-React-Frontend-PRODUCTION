@@ -6,19 +6,70 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Platform
+  Platform,
+  LayoutAnimation
 } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
 import { Icon } from "expo";
+import InterestSelector from "../components/InterestSelector";
 
-import DatePicker from "react-native-datepicker";
+const validator = require("validator");
 
 class EventEditLeadersAndTags extends React.Component {
   constructor(props) {
     super(props);
+
+    this.model = {
+      fields: ["interests"],
+      rules: []
+    };
+
+    this.state = {
+      interestSelectorOpen: false
+    };
   }
 
+  componentDidMount() {
+    if (this.props.onLoadModel) {
+      this.props.onLoadModel(this.model);
+    }
+  }
+
+  onRemoveInterest = index => {
+    if (typeof this.props.interests[index] !== "undefined") {
+      this.props.interests.splice(index, 1);
+      this.props.onInputChange("interests", this.props.interests);
+    }
+  };
+
+  openInterestSelector = index => {
+    this.props.onModalOpen(() => {
+      LayoutAnimation.linear();
+      this.setState({ interestSelectorOpen: true });
+    });
+  };
+
+  closeInterestSelector = index => {
+    this.props.onModalClose(() => {
+      LayoutAnimation.linear();
+      this.setState({ interestSelectorOpen: false });
+    });
+  };
+
   render() {
+    let selectedInterests = this.props.interests || [];
+    let interestOne =
+      this.props.interests && this.props.interests[0]
+        ? this.props.interests[0]
+        : "";
+    let interestTwo =
+      this.props.interests && this.props.interests[1]
+        ? this.props.interests[1]
+        : "";
+    let interestThree =
+      this.props.interests && this.props.interests[2]
+        ? this.props.interests[2]
+        : "";
     return (
       <>
         <View style={{ marginTop: -6 }}>
@@ -44,14 +95,63 @@ class EventEditLeadersAndTags extends React.Component {
               style={{
                 fontSize: 16,
                 color: "#adadad",
-                paddingHorizontal: 12
+                paddingHorizontal: 12,
+                marginBottom:6
               }}
             >
               Add up to 3 Tags Related to this Event
             </Text>
-            <TagInput name="interests_1" {...this.props} />
-            <TagInput name="interests_2" {...this.props} />
-            <TagInput name="interests_2" {...this.props} />
+            <TagInput
+              name="interests"
+              index={0}
+              value={interestOne}
+              {...this.props}
+              onRemoveInterest={this.onRemoveInterest}
+              onSelectOpen={this.openInterestSelector}
+            />
+            <TagInput
+              name="interests"
+              index={1}
+              value={interestTwo}
+              {...this.props}
+              onRemoveInterest={this.onRemoveInterest}
+              onSelectOpen={this.openInterestSelector}
+            />
+            <TagInput
+              name="interests"
+              index={2}
+              value={interestThree}
+              {...this.props}
+              onRemoveInterest={this.onRemoveInterest}
+              onSelectOpen={this.openInterestSelector}
+            />
+          </View>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              width: "100%",
+              height: "110%",
+              position: "absolute",
+              paddingTop: 12,
+              paddingHorizontal: 0,
+              top: this.state.interestSelectorOpen ? 0 : "200%",
+              left: 0
+            }}
+          >
+            <InterestSelector
+              closeAction={this.closeInterestSelector}
+              selectedInterests={selectedInterests}
+              onSelect={interest => {
+                let currentInterests = selectedInterests;
+                if (
+                  currentInterests.indexOf(interest) === -1 &&
+                  currentInterests.length < 3
+                ) {
+                  currentInterests.push(interest);
+                  this.props.onInputChange("interests", currentInterests);
+                }
+              }}
+            />
           </View>
         </View>
       </>
@@ -65,24 +165,80 @@ function TagInput(props) {
     props.errors[props.name].length > 0
       ? props.errors[props.name][0]
       : "";
-  let value = typeof props[props.name] !== "undefined" ? props[props.name] : "";
   return (
     <>
-      <Input
-        name={props.name}
-        value={value}
-        onChangeText={value => {
-          props.onInputChange(props.name, value);
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          paddingLeft: 0,
+          paddingRight: 12,
+          paddingVertical: 6,
+          marginBottom: 6
         }}
-        inputStyle={{ fontSize: 16 }}
-        errorMessage={errorMessage}
-        rightIcon={
+      >
+        <View style={{ flex: 2, alignItems: "center" }}>
+          {props.value.trim() === "" ? (
+            <>
+              <TouchableOpacity
+                style={{ padding: 1, marginRight: 6 }}
+                onPress={() => {
+                  props.onSelectOpen(props.index);
+                }}
+              >
+                <Icon.Ionicons
+                  name={
+                    Platform.OS === "ios" ? "ios-add-circle" : "md-add-circle"
+                  }
+                  size={24}
+                />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={{ padding: 1, marginRight: 6 }}
+                onPress={() => {
+                  props.onRemoveInterest(props.index);
+                }}
+              >
+                <Icon.Ionicons
+                  name={
+                    Platform.OS === "ios"
+                      ? "ios-close-circle"
+                      : "md-close-circle"
+                  }
+                  size={24}
+                />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+        <View
+          style={{
+            flex: 8,
+            borderBottomColor: "#adadad",
+            borderBottomWidth: 1
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>{props.value}</Text>
+        </View>
+        <View
+          style={{
+            flex: 2,
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            borderBottomColor: "#adadad",
+            borderBottomWidth: 1
+          }}
+        >
           <Icon.Ionicons
             name={Platform.OS === "ios" ? "ios-pricetag" : "md-pricetag"}
             size={18}
           />
-        }
-      />
+        </View>
+      </View>
     </>
   );
 }

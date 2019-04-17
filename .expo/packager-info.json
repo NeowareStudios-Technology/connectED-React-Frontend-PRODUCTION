@@ -3,8 +3,8 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": "https://8x-gp4.connect-ed.connected-react-frontend-production.exp.direct",
-  "packagerNgrokUrl": "https://packager.8x-gp4.connect-ed.connected-react-frontend-production.exp.direct",
-  "ngrokPid": 11224,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
   "webpackServerPort": null
 }

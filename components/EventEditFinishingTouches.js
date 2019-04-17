@@ -10,14 +10,43 @@ import {
   Image
 } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
-import { Icon } from "expo";
+import { Icon, ImagePicker, Permissions, FileSystem } from "expo";
 import styles from "../constants/Styles";
-
-import DatePicker from "react-native-datepicker";
+const validator = require("validator");
 
 class EventEditFinishingTouches extends React.Component {
   constructor(props) {
     super(props);
+
+    this.model = {
+      fields: ["env", "e_photo"],
+      rules: []
+    };
+  }
+
+  setPhoto = async () => {
+    const { status, permissions } = await Permissions.askAsync(
+      Permissions.CAMERA_ROLL
+    );
+    if (status === "granted") {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        aspect: [4, 3]
+      });
+      if (!result.cancelled) {
+        let data = await FileSystem.readAsStringAsync(result.uri, {
+          encoding: FileSystem.EncodingTypes.Base64
+        });
+        if (data) {
+          this.props.onInputChange("e_photo",data);
+        }
+      }
+    }
+  };
+
+  componentDidMount() {
+    if (this.props.onLoadModel) {
+      this.props.onLoadModel(this.model);
+    }
   }
 
   render() {
@@ -49,10 +78,13 @@ class EventEditFinishingTouches extends React.Component {
                       justifyContent: "center",
                       flexDirection: "column"
                     }}
+                    onPress={() => {
+                      this.props.onInputChange("env", "o");
+                    }}
                   >
                     <Image
                       source={
-                        this.props.env === "outdoor"
+                        this.props.env === "o"
                           ? require("../assets/images/environment-outdoor-filled.png")
                           : require("../assets/images/environment-outdoor-outline.png")
                       }
@@ -71,10 +103,13 @@ class EventEditFinishingTouches extends React.Component {
                       justifyContent: "center",
                       flexDirection: "column"
                     }}
+                    onPress={() => {
+                      this.props.onInputChange("env", "i");
+                    }}
                   >
                     <Image
                       source={
-                        this.props.env === "outdoor"
+                        this.props.env === "i"
                           ? require("../assets/images/environment-indoor-filled.png")
                           : require("../assets/images/environment-indoor-outline.png")
                       }
@@ -93,10 +128,13 @@ class EventEditFinishingTouches extends React.Component {
                       justifyContent: "center",
                       flexDirection: "column"
                     }}
+                    onPress={() => {
+                      this.props.onInputChange("env", "b");
+                    }}
                   >
                     <Image
                       source={
-                        this.props.env === "outdoor"
+                        this.props.env === "b"
                           ? require("../assets/images/environment-both-filled.png")
                           : require("../assets/images/environment-both-outline.png")
                       }

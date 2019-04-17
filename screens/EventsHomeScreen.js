@@ -34,16 +34,26 @@ class EventsHomeScreen extends React.Component {
       try {
         let url =
           "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/prefill";
-        let response = await fetch(url, {
+        fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + token
           }
-        });
-
-        this.setState({
-          loading: false
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                console.log("Prefill response", responseData);
+              }
+            } catch (error) {
+            }
+          } else {
+            this.setState({
+              loading: false
+            });
+          }
         });
       } catch (error) {}
     }

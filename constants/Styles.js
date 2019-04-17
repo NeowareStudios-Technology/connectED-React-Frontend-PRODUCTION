@@ -12,16 +12,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#adadad",
     paddingHorizontal: 12,
-    marginBottom:12
+    marginBottom: 12
   },
   displayH1: {
     fontSize: 30,
     color: "#000",
-    fontWeight:"bold",
-    paddingHorizontal: 12,
+    fontWeight: "bold",
+    paddingHorizontal: 12
   },
   btnSm: {
     padding: 6
+  },
+  errorMessage: {
+    fontSize: 12,
+    color: "red",
+    marginTop: 6,
+    paddingHorizontal:6
   }
 });
 

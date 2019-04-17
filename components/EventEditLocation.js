@@ -11,11 +11,51 @@ import {
 import { Input, Card, Button, Avatar } from "react-native-elements";
 import { Icon } from "expo";
 
-import DatePicker from "react-native-datepicker";
+const validator = require("validator");
 
 class EventEditLocation extends React.Component {
   constructor(props) {
     super(props);
+
+    this.model = {
+      fields: ["street", "city", "state", "zip_code"],
+      rules: [
+        {
+          validator: value => {
+            return !validator.isEmpty(value);
+          },
+          fields: ["street"],
+          message: "Please enter the street address for this event."
+        },
+        {
+          validator: value => {
+            return !validator.isEmpty(value);
+          },
+          fields: ["city"],
+          message: "Please enter the city where the event will take place."
+        },
+        {
+          validator: value => {
+            return !validator.isEmpty(value);
+          },
+          fields: ["state"],
+          message: "Please enter the state where the event will take place."
+        },
+        {
+          validator: value => {
+            return !validator.isEmpty(value);
+          },
+          fields: ["zip_code"],
+          message: "Please enter the zip code for this event."
+        }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    if (this.props.onLoadModel) {
+      this.props.onLoadModel(this.model);
+    }
   }
 
   render() {
@@ -26,6 +66,7 @@ class EventEditLocation extends React.Component {
             Add Event Location
           </Text>
           <Input
+            label="Street"
             name="street"
             value={this.props.street}
             onChangeText={value => {
@@ -34,12 +75,13 @@ class EventEditLocation extends React.Component {
             containerStyle={{ marginBottom: 6 }}
             placeholder="Street"
             errorMessage={
-              this.props.errors.street.length > 0
+              typeof this.props.errors.street !== "undefined"
                 ? this.props.errors.street[0]
                 : ""
             }
           />
           <Input
+            label="City"
             name="city"
             value={this.props.city}
             onChangeText={value => {
@@ -48,11 +90,14 @@ class EventEditLocation extends React.Component {
             containerStyle={{ marginBottom: 6 }}
             placeholder="City"
             errorMessage={
-              this.props.errors.city.length > 0 ? this.props.errors.city[0] : ""
+              typeof this.props.errors.city !== "undefined"
+                ? this.props.errors.city[0]
+                : ""
             }
           />
 
           <Input
+            label="State"
             name="state"
             value={this.props.state}
             onChangeText={value => {
@@ -61,12 +106,13 @@ class EventEditLocation extends React.Component {
             containerStyle={{ marginBottom: 6 }}
             placeholder="State"
             errorMessage={
-              this.props.errors.state.length > 0
+              typeof this.props.errors.state !== "undefined"
                 ? this.props.errors.state[0]
                 : ""
             }
           />
           <Input
+            label="Zip Code"
             name="zip_code"
             value={this.props.zip_code}
             onChangeText={value => {
@@ -75,7 +121,7 @@ class EventEditLocation extends React.Component {
             containerStyle={{ marginBottom: 6 }}
             placeholder="Zip Code"
             errorMessage={
-              this.props.errors.zip_code.length > 0
+              typeof this.props.errors.zip_code !== "undefined"
                 ? this.props.errors.zip_code[0]
                 : ""
             }
