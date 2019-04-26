@@ -1,18 +1,24 @@
 import React from "react";
 import {
+  Image,
+  ImageBackground,
   ActivityIndicator,
   StyleSheet,
   ScrollView,
+  FlatList,
   TouchableOpacity,
   Text,
   View,
   Platform
 } from "react-native";
-import { Button } from "react-native-elements";
+import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
 import User from "../components/User";
 import styles from "../constants/Styles";
-
+import Carousel from "react-native-snap-carousel";
+import EventListCard from "../components/EventListCard";
+import Sequencer from "../components/Sequencer";
+import moment from "moment";
 class EventsHomeScreen extends React.Component {
   static navigationOptions = {
     header: null
@@ -23,9 +29,71 @@ class EventsHomeScreen extends React.Component {
 
     this.state = {
       loading: true,
+      eventsNames: [],
+      distances: [],
       events: []
     };
   }
+
+  loadEvent = async (eventName, index, callback) => {
+    let token = await User.firebase.getIdToken();
+
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                if (typeof responseData.e_title === "string") {
+                  let events = this.state.events;
+                  let event = responseData;
+                  console.log("Event availabiility", event);
+                  event.key = "event-" + index;
+                  event.distance = this.state.distances[index];
+                  events.push(event);
+                  this.setState(
+                    {
+                      events: events,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    }
+                  );
+                }
+              }
+            } catch (error) {}
+          }
+        });
+      } catch (error) {}
+    }
+  };
+
+  loadEvents = () => {
+    let sequence = new Sequencer();
+
+    if (this.state.eventsNames.length > 0) {
+      this.state.eventsNames.map((eventName, index) => {
+        sequence.promise(() => {
+          this.loadEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+
+    sequence.next();
+  };
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
@@ -45,10 +113,21 @@ class EventsHomeScreen extends React.Component {
             try {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
-                console.log("Prefill response", responseData);
+                if (typeof responseData.events === "object") {
+                  this.setState(
+                    {
+                      eventsNames: responseData.events,
+                      distances: responseData.distances
+                    },
+                    () => {
+                      this.loadEvents();
+                    }
+                  );
+                } else {
+                  this.setState({ loading: false });
+                }
               }
-            } catch (error) {
-            }
+            } catch (error) {}
           } else {
             this.setState({
               loading: false
@@ -117,7 +196,41 @@ class EventsHomeScreen extends React.Component {
               <>
                 {this.state.events.length > 0 ? (
                   <>
-                    <Text>Events...</Text>
+                    <Carousel
+                      layout="default"
+                      ref={c => {
+                        this._carousel = c;
+                      }}
+                      data={this.state.events}
+                      extraData={this.state}
+                      renderItem={({ item }) => {
+                        if (item.e_title) {
+                          return (
+                            <View
+                              style={{
+                                marginHorizontal: -20,
+                                paddingHorizontal: 2
+                              }}
+                            >
+                              <TouchableOpacity
+                                onPress={() => {
+                                  this.props.navigation.navigate("Event", {
+                                    ...item
+                                  });
+                                }}
+                              >
+                                <EventListCard event={item} />
+                              </TouchableOpacity>
+                            </View>
+                          );
+                        } else {
+                          return null;
+                        }
+                      }}
+                      itemWidth={230}
+                      sliderWidth={300}
+                      windowSize={280}
+                    />
                   </>
                 ) : (
                   <>
