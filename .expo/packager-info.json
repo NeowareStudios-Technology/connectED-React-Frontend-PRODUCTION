@@ -3,8 +3,8 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null,
+  "expoServerNgrokUrl": "https://7d-fz5.connect-ed.connected-react-frontend-production.exp.direct",
+  "packagerNgrokUrl": "https://packager.7d-fz5.connect-ed.connected-react-frontend-production.exp.direct",
+  "ngrokPid": 3608,
   "webpackServerPort": null
 }

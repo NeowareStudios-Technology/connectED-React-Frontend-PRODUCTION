@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   Text,
   View,
-  Platform
+  Platform,
+  LayoutAnimation
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
@@ -17,6 +18,7 @@ import User from "../components/User";
 import styles from "../constants/Styles";
 import Carousel from "react-native-snap-carousel";
 import EventListCard from "../components/EventListCard";
+import EventDetails from "../components/EventDetails";
 import Sequencer from "../components/Sequencer";
 import moment from "moment";
 class EventsHomeScreen extends React.Component {
@@ -28,6 +30,7 @@ class EventsHomeScreen extends React.Component {
     super(props);
 
     this.state = {
+      activeItem: null,
       loading: true,
       eventsNames: [],
       distances: [],
@@ -138,12 +141,39 @@ class EventsHomeScreen extends React.Component {
     }
   };
 
+  openItem = item => {
+    LayoutAnimation.linear();
+    this.setState({ activeItem: item });
+  };
+
+  closeItem = item => {
+    LayoutAnimation.linear();
+    this.setState({ activeItem: null });
+  };
+
   async componentDidMount() {
     let user = await User.isLoggedIn();
     if (user) {
       this.fetchData();
     }
   }
+
+  _renderItem = ({ item }) => (
+    <View
+      style={{
+        marginHorizontal: -20,
+        paddingHorizontal: 2
+      }}
+    >
+      <TouchableOpacity
+        onPress={() => {
+          this.openItem(item);
+        }}
+      >
+        <EventListCard event={item} />
+      </TouchableOpacity>
+    </View>
+  );
 
   render() {
     return (
@@ -153,108 +183,110 @@ class EventsHomeScreen extends React.Component {
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
           >
-            <View
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 12
-              }}
-            >
-              <View>
-                <TouchableOpacity
-                  style={{
-                    paddingHorizontal: 10,
-                    borderRadius: 90,
-                    borderColor: "#000",
-                    borderWidth: 0
-                  }}
-                  onPress={() => {
-                    this.props.navigation.navigate("EventCreate");
-                  }}
-                >
-                  <Icon.Ionicons
-                    name={Platform.OS === "ios" ? "ios-add" : "md-add"}
-                    size={38}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View>
-                <Text style={styles.displayH1}>Events</Text>
-              </View>
-            </View>
-            {this.state.loading ? (
+            {this.state.activeItem ? (
               <>
-                <View
-                  style={{ justifyContent: "center", alignContent: "center" }}
-                >
-                  <ActivityIndicator size="large" style={{ marginTop: 120 }} />
+                <View style={{flex: 1 }}>
+                  <EventDetails
+                    event={this.state.activeItem}
+                    onClose={this.closeItem}
+                  />
                 </View>
               </>
             ) : (
               <>
-                {this.state.events.length > 0 ? (
-                  <>
-                    <Carousel
-                      layout="default"
-                      ref={c => {
-                        this._carousel = c;
-                      }}
-                      data={this.state.events}
-                      extraData={this.state}
-                      renderItem={({ item }) => {
-                        if (item.e_title) {
-                          return (
-                            <View
-                              style={{
-                                marginHorizontal: -20,
-                                paddingHorizontal: 2
-                              }}
-                            >
-                              <TouchableOpacity
-                                onPress={() => {
-                                  this.props.navigation.navigate("Event", {
-                                    ...item
-                                  });
-                                }}
-                              >
-                                <EventListCard event={item} />
-                              </TouchableOpacity>
-                            </View>
-                          );
-                        } else {
-                          return null;
-                        }
-                      }}
-                      itemWidth={230}
-                      sliderWidth={300}
-                      windowSize={280}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <View
-                      style={{
-                        marginTop: 12,
-                        paddingHorizontal: 24,
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}
-                    >
-                      <Text style={{ fontSize: 18, textAlign: "center" }}>
-                        There are no active events at this moment.
-                      </Text>
-                      <Button
-                        style={{ marginTop: 12 }}
-                        title="Create An Event"
+                <View style={{ flex: 1 }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom: 12
+                    }}
+                  >
+                    <View>
+                      <TouchableOpacity
+                        style={{
+                          paddingHorizontal: 10,
+                          borderRadius: 90,
+                          borderColor: "#000",
+                          borderWidth: 0
+                        }}
                         onPress={() => {
                           this.props.navigation.navigate("EventCreate");
                         }}
-                      />
+                      >
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-add" : "md-add"}
+                          size={38}
+                        />
+                      </TouchableOpacity>
                     </View>
-                  </>
-                )}
+                    <View>
+                      <Text style={styles.displayH1}>Events</Text>
+                    </View>
+                  </View>
+                  <View style={{ flex: 10 }}>
+                    {this.state.loading ? (
+                      <>
+                        <View
+                          style={{
+                            justifyContent: "center",
+                            alignContent: "center"
+                          }}
+                        >
+                          <ActivityIndicator
+                            size="large"
+                            style={{ marginTop: 120 }}
+                          />
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        {this.state.events.length > 0 ? (
+                          <>
+                            <Carousel
+                              layout="default"
+                              ref={c => {
+                                this._carousel = c;
+                              }}
+                              data={this.state.events}
+                              extraData={this.state}
+                              renderItem={this._renderItem}
+                              itemWidth={230}
+                              sliderWidth={300}
+                              windowSize={280}
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <View
+                              style={{
+                                marginTop: 12,
+                                paddingHorizontal: 24,
+                                justifyContent: "center",
+                                alignItems: "center"
+                              }}
+                            >
+                              <Text
+                                style={{ fontSize: 18, textAlign: "center" }}
+                              >
+                                There are no active events at this moment.
+                              </Text>
+                              <Button
+                                style={{ marginTop: 12 }}
+                                title="Create An Event"
+                                onPress={() => {
+                                  this.props.navigation.navigate("EventCreate");
+                                }}
+                              />
+                            </View>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </View>
+                </View>
               </>
             )}
           </ScrollView>

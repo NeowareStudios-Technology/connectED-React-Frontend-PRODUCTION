@@ -2,11 +2,11 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "transparent"
+    flex: 1
   },
   contentContainer: {
-    paddingTop: 30
+    paddingTop: 30,
+    flex:1
   },
   displayH4: {
     fontSize: 16,

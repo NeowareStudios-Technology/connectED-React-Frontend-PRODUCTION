@@ -31,9 +31,6 @@ class EventListCard extends React.Component {
       <>
         <Card
           containerStyle={{
-            flexDirection: "column",
-            flex: 1,
-            height: 360,
             padding: 0,
             paddingHorizontal: 0
           }}
