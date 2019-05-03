@@ -30,6 +30,7 @@ class EventsHomeScreen extends React.Component {
     super(props);
 
     this.state = {
+      carouselFirstItem: 0,
       activeItem: null,
       loading: true,
       eventsNames: [],
@@ -60,7 +61,6 @@ class EventsHomeScreen extends React.Component {
                 if (typeof responseData.e_title === "string") {
                   let events = this.state.events;
                   let event = responseData;
-                  console.log("Event availabiility", event);
                   event.key = "event-" + index;
                   event.distance = this.state.distances[index];
                   events.push(event);
@@ -141,13 +141,120 @@ class EventsHomeScreen extends React.Component {
     }
   };
 
-  openItem = item => {
-    LayoutAnimation.linear();
-    this.setState({ activeItem: item });
+  volunteer = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (!isRegistered) {
+        let token = await User.firebase.getIdToken();
+
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          let putData = {
+            user_action: "both"
+          };
+          try {
+            let bodyData = JSON.stringify(putData);
+            fetch(url, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              },
+              body: bodyData
+            })
+              .then(response => {
+                if (response.ok) {
+                  let events = this.state.events;
+                  let eventIndex = null;
+                  let event = events.find((anEvent, index) => {
+                    if (anEvent === this.state.activeItem) {
+                      eventIndex = index;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (eventIndex) {
+                    events[eventIndex].is_registered = "1";
+                  }
+                  this.setState({
+                    events: events,
+                    activeItem: events[eventIndex]
+                  });
+                }
+              })
+              .catch(error => {});
+          } catch (error) {}
+        }
+      }
+    }
+  };
+
+  deregister = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (isRegistered) {
+        let token = await User.firebase.getIdToken();
+
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          try {
+            fetch(url, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              }
+            })
+              .then(response => {
+                if (response.ok) {
+                  let events = this.state.events;
+                  let eventIndex = null;
+                  let event = events.find((anEvent, index) => {
+                    if (anEvent === this.state.activeItem) {
+                      eventIndex = index;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (eventIndex) {
+                    events[eventIndex].is_registered = "0";
+                  }
+                  this.setState({
+                    events: events,
+                    activeItem: events[eventIndex]
+                  });
+                }
+              })
+              .catch(error => {});
+          } catch (error) {}
+        }
+      }
+    }
+  };
+
+  openItem = (item, index) => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ activeItem: item, carouselFirstItem: index });
   };
 
   closeItem = item => {
-    LayoutAnimation.linear();
+    LayoutAnimation.easeInEaseOut();
     this.setState({ activeItem: null });
   };
 
@@ -158,7 +265,7 @@ class EventsHomeScreen extends React.Component {
     }
   }
 
-  _renderItem = ({ item }) => (
+  _renderItem = ({ item, index }) => (
     <View
       style={{
         marginHorizontal: -20,
@@ -167,7 +274,7 @@ class EventsHomeScreen extends React.Component {
     >
       <TouchableOpacity
         onPress={() => {
-          this.openItem(item);
+          this.openItem(item, index);
         }}
       >
         <EventListCard event={item} />
@@ -185,10 +292,16 @@ class EventsHomeScreen extends React.Component {
           >
             {this.state.activeItem ? (
               <>
-                <View style={{flex: 1 }}>
+                <View style={{ flex: 1 }}>
                   <EventDetails
                     event={this.state.activeItem}
                     onClose={this.closeItem}
+                    onVolunteer={() => {
+                      this.volunteer();
+                    }}
+                    onDeregister={() => {
+                      this.deregister();
+                    }}
                   />
                 </View>
               </>
@@ -253,6 +366,7 @@ class EventsHomeScreen extends React.Component {
                               data={this.state.events}
                               extraData={this.state}
                               renderItem={this._renderItem}
+                              firstItem={this.state.carouselFirstItem}
                               itemWidth={230}
                               sliderWidth={300}
                               windowSize={280}

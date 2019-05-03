@@ -12,16 +12,28 @@ import {
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
 import moment from "moment";
+import EventDetailsInfo from "./EventDetailsInfo";
+import EventDetailsTeam from "./EventDetailsTeam";
+import EventDetailsUpdates from "./EventDetailsUpdates";
 import AppData from "../constants/Data";
 
 class EventDetails extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      activeTab: 0
+    };
   }
+
+  setActiveTab = index => {
+    this.setState({
+      activeTab: index
+    });
+  };
 
   render() {
     let item = this.props.event;
-    console.log("Item", item);
+    let privacyLabel = item.privacy === "o" ? "Open" : "Private";
     let itemDate = moment(item.date, "MM/DD/YYYY");
     let environmentImage =
       item.env === "o"
@@ -38,7 +50,7 @@ class EventDetails extends React.Component {
         >
           <View
             style={{
-              flex: 4,
+              flex: 3,
               backgroundColor: "#124b73"
             }}
           >
@@ -75,7 +87,7 @@ class EventDetails extends React.Component {
                   style={{
                     flexDirection: "row",
                     flex: 3,
-                    paddingTop: 24,
+                    paddingTop: 0,
                     paddingHorizontal: 12
                   }}
                 >
@@ -107,63 +119,173 @@ class EventDetails extends React.Component {
             style={{
               flex: 10,
               flexDirection: "column",
+              justifyContent:"flex-end",
               paddingVertical: 12,
               paddingHorizontal: 12
             }}
           >
-            {item.e_title ? (
-              <>
+            <View style={{ flex: 20 }}>
+              {this.state.activeTab === 0 && (
+                <>
+                  <EventDetailsInfo event={item} />
+                </>
+              )}
+              {this.state.activeTab === 1 && (
+                <>
+                  <EventDetailsTeam event={item} />
+                </>
+              )}
+              {this.state.activeTab === 2 && (
+                <>
+                  <EventDetailsUpdates event={item} />
+                </>
+              )}
+            </View>
+            <>
+              <View
+                style={{
+                  flex: 6,
+                  paddingBottom: 12
+                }}
+              >
                 <View
                   style={{
-                    flexDirection: "column",
-                    flex: 1
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    marginBottom: 12
                   }}
                 >
-                  <View style={{ flex: 2}}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        marginBottom: 6
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <Button
+                      type={this.state.activeTab === 0 ? "solid" : "outline"}
+                      onPress={() => {
+                        this.setActiveTab(0);
                       }}
-                    >
-                      {item.e_title}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        marginBottom: 6
+                      containerStyle={{
+                        alignContent: "center",
+                        justifyContent: "center"
                       }}
-                    >
-                      {item.e_desc}
-                    </Text>
+                      buttonStyle={{
+                        padding: 5,
+                        borderRadius: 400,
+                        height: 40,
+                        width: 40
+                      }}
+                      icon={
+                        <Icon.Ionicons
+                          style={{
+                            color: this.state.activeTab === 0 ? "#fff" : "#ccc"
+                          }}
+                          name={
+                            Platform.OS === "ios"
+                              ? "ios-information"
+                              : "md-information"
+                          }
+                          size={32}
+                        />
+                      }
+                    />
                   </View>
                   <View
                     style={{
-                      flex: 6,
-                      paddingBottom: 12
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent: "center"
                     }}
                   >
-                    <View style={{ flex: 1 }}>
-                      <Text>Location:</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text>Opportunity Status:</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text>Tags:</Text>
-                    </View>
-                    <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                      <Button title="Volunteer" />
-                    </View>
+                    <Button
+                      onPress={() => {
+                        this.setActiveTab(1);
+                      }}
+                      type={this.state.activeTab === 1 ? "solid" : "outline"}
+                      containerStyle={{
+                        alignContent: "center",
+                        justifyContent: "center"
+                      }}
+                      buttonStyle={{
+                        padding: 5,
+                        borderRadius: 400,
+                        height: 40,
+                        width: 40
+                      }}
+                      icon={
+                        <Icon.Ionicons
+                          style={{
+                            color: this.state.activeTab === 1 ? "#fff" : "#ccc"
+                          }}
+                          name={
+                            Platform.OS === "ios" ? "ios-people" : "md-people"
+                          }
+                          size={32}
+                        />
+                      }
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <Button
+                      type={this.state.activeTab === 2 ? "solid" : "outline"}
+                      onPress={() => {
+                        this.setActiveTab(2);
+                      }}
+                      containerStyle={{
+                        alignContent: "center",
+                        justifyContent: "center"
+                      }}
+                      buttonStyle={{
+                        padding: 5,
+                        borderRadius: 400,
+                        height: 40,
+                        width: 40
+                      }}
+                      icon={
+                        <Icon.Ionicons
+                          style={{
+                            color: this.state.activeTab === 2 ? "#fff" : "#ccc"
+                          }}
+                          name={Platform.OS === "ios" ? "ios-more" : "md-more"}
+                          size={32}
+                        />
+                      }
+                    />
                   </View>
                 </View>
-              </>
-            ) : (
-              <>
-                <ActivityIndicator size="small" />
-              </>
-            )}
+                <View style={{ justifyContent: "flex-end" }}>
+                  {item.is_registered === "-1" && (
+                    <>
+                      <Button title="Pending..." />
+                    </>
+                  )}
+                  {item.is_registered === "0" && (
+                    <>
+                      <Button
+                        onPress={this.props.onVolunteer}
+                        title="Volunteer"
+                      />
+                    </>
+                  )}
+                  {item.is_registered === "1" && (
+                    <>
+                      <Button
+                        onPress={this.props.onDeregister}
+                        title="Deregister"
+                      />
+                    </>
+                  )}
+                </View>
+              </View>
+            </>
           </View>
         </View>
       </>

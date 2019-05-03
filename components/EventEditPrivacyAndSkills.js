@@ -87,7 +87,7 @@ class EventEditPrivacyAndSkills extends React.Component {
             >
               Open Event or Private Opportunity
             </Text>
-            <View style={{ flex: 1, flexDirection: "row" }}>
+            <View style={{ flexDirection: "row" }}>
               <View
                 style={{ flex: 10, flexDirection: "row", paddingVertical: 6 }}
               >
@@ -210,7 +210,6 @@ function SkillsInput(props) {
     <>
       <View
         style={{
-          flex: 1,
           flexDirection: "row",
           paddingLeft: 0,
           paddingRight: 12,

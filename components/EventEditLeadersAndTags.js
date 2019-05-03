@@ -96,35 +96,37 @@ class EventEditLeadersAndTags extends React.Component {
                 fontSize: 16,
                 color: "#adadad",
                 paddingHorizontal: 12,
-                marginBottom:6
+                marginBottom: 6
               }}
             >
               Add up to 3 Tags Related to this Event
             </Text>
-            <TagInput
-              name="interests"
-              index={0}
-              value={interestOne}
-              {...this.props}
-              onRemoveInterest={this.onRemoveInterest}
-              onSelectOpen={this.openInterestSelector}
-            />
-            <TagInput
-              name="interests"
-              index={1}
-              value={interestTwo}
-              {...this.props}
-              onRemoveInterest={this.onRemoveInterest}
-              onSelectOpen={this.openInterestSelector}
-            />
-            <TagInput
-              name="interests"
-              index={2}
-              value={interestThree}
-              {...this.props}
-              onRemoveInterest={this.onRemoveInterest}
-              onSelectOpen={this.openInterestSelector}
-            />
+            <View style={{}}>
+              <TagInput
+                name="interests"
+                index={0}
+                value={interestOne}
+                {...this.props}
+                onRemoveInterest={this.onRemoveInterest}
+                onSelectOpen={this.openInterestSelector}
+              />
+              <TagInput
+                name="interests"
+                index={1}
+                value={interestTwo}
+                {...this.props}
+                onRemoveInterest={this.onRemoveInterest}
+                onSelectOpen={this.openInterestSelector}
+              />
+              <TagInput
+                name="interests"
+                index={2}
+                value={interestThree}
+                {...this.props}
+                onRemoveInterest={this.onRemoveInterest}
+                onSelectOpen={this.openInterestSelector}
+              />
+            </View>
           </View>
           <View
             style={{
@@ -165,18 +167,87 @@ function TagInput(props) {
     props.errors[props.name].length > 0
       ? props.errors[props.name][0]
       : "";
+
   return (
     <>
       <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          paddingLeft: 0,
-          paddingRight: 12,
-          paddingVertical: 6,
-          marginBottom: 6
-        }}
+        style={{ flexDirection: "row", paddingVertical: 6, marginBottom: 6 }}
       >
+        <View style={{ flex: 2, alignItems: "center" }}>
+          {props.value.trim() === "" ? (
+            <>
+              <TouchableOpacity
+                style={{ padding: 1, marginRight: 6 }}
+                onPress={() => {
+                  props.onSelectOpen(props.index);
+                }}
+              >
+                <Icon.Ionicons
+                  name={
+                    Platform.OS === "ios" ? "ios-add-circle" : "md-add-circle"
+                  }
+                  size={24}
+                />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={{ padding: 1, marginRight: 6 }}
+                onPress={() => {
+                  props.onRemoveInterest(props.index);
+                }}
+              >
+                <Icon.Ionicons
+                  name={
+                    Platform.OS === "ios"
+                      ? "ios-close-circle"
+                      : "md-close-circle"
+                  }
+                  size={24}
+                />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+        <View
+          style={{
+            flex: 8,
+            borderBottomColor: "#adadad",
+            borderBottomWidth: 1
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>{props.value}</Text>
+        </View>
+        <View
+          style={{
+            flex: 2,
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            borderBottomColor: "#adadad",
+            borderBottomWidth: 1
+          }}
+        >
+          <Icon.Ionicons
+            name={Platform.OS === "ios" ? "ios-pricetag" : "md-pricetag"}
+            size={18}
+          />
+        </View>
+      </View>
+    </>
+  );
+}
+
+function TagInputOff(props) {
+  let errorMessage =
+    typeof props.errors[props.name] !== "undefined" &&
+    props.errors[props.name].length > 0
+      ? props.errors[props.name][0]
+      : "";
+  return (
+    <>
+      <View style={{}}>
         <View style={{ flex: 2, alignItems: "center" }}>
           {props.value.trim() === "" ? (
             <>

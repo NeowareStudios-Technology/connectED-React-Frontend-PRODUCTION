@@ -67,7 +67,7 @@ class EventEditFinishingTouches extends React.Component {
             >
               Volunteering Environment
             </Text>
-            <View style={{ flex: 1, flexDirection: "row" }}>
+            <View style={{ flexDirection: "row" }}>
               <View
                 style={{ flex: 10, flexDirection: "row", paddingVertical: 6 }}
               >
