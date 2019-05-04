@@ -99,7 +99,6 @@ class EventsHomeScreen extends React.Component {
             sequence.next();
           });
         });
-        console.log(sequence.promises.length)
       });
     }
     sequence.next();

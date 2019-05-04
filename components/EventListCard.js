@@ -97,8 +97,8 @@ class EventListCard extends React.Component {
                         justifyContent: "flex-end"
                       }}
                     >
-                      <View style={{ flex: 4 }} />
-                      <View style={{ flex: 6 }}>
+                      <View style={{ flex: 3 }} />
+                      <View style={{ flex: 7 }}>
                         <Card
                           title="Availability"
                           containerStyle={{
