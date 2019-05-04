@@ -321,12 +321,18 @@ class EventsHomeScreen extends React.Component {
                     style={{
                       flex: 1,
                       flexDirection: "row",
-                      justifyContent: "center",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      marginBottom: 12
+                      marginBottom: 12,
+                      marginHorizontal: 15
                     }}
                   >
-                    <View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
                       <TouchableOpacity
                         style={{
                           paddingHorizontal: 10,
@@ -339,13 +345,55 @@ class EventsHomeScreen extends React.Component {
                         }}
                       >
                         <Icon.Ionicons
-                          name={Platform.OS === "ios" ? "ios-add" : "md-add"}
-                          size={38}
+                          name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
+                          size={30}
                         />
                       </TouchableOpacity>
+                      <View>
+                        <Text style={styles.displayH1}>Events</Text>
+                      </View>
                     </View>
-                    <View>
-                      <Text style={styles.displayH1}>Events</Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
+                      <TouchableOpacity
+                        style={{
+                          paddingHorizontal: 10,
+                          borderRadius: 90,
+                          borderColor: "#000",
+                          borderWidth: 0
+                        }}
+                        onPress={() => {
+                          console.log('search')
+                          // this.props.navigation.navigate("EventCreate");
+                        }}
+                      >
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          paddingHorizontal: 10,
+                          borderRadius: 90,
+                          borderColor: "#000",
+                          borderWidth: 0
+                        }}
+                        onPress={() => {
+                          console.log('search')
+                          // this.props.navigation.navigate("EventCreate");
+                        }}
+                      >
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-options" : "md-options"}
+                          size={30}
+                        />
+                      </TouchableOpacity>
+
                     </View>
                   </View>
                   <View style={{ flex: 10 }}>
