@@ -4,6 +4,7 @@ import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import MainTabNavigator from "./MainTabNavigator";
 import SigninNavigator from "./SigninNavigator";
 import HomeScreen from "../screens/HomeScreen";
+import Password from "../screens/ForgotPasswordScreen";
 import ProfileNavigator from "./ProfileNavigator";
 
 export default createAppContainer(

@@ -83,6 +83,10 @@ export default class HomeScreen extends React.Component {
     }
     return true;
   }
+  navigateToPage=(page) => {
+    this.props.navigation.navigate(page);
+    this.setState({open:false})
+  }
 
   openDrawer = () => {
     LayoutAnimation.linear();
@@ -284,7 +288,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
                           onPress={() => {
-                            this.props.navigation.navigate("ProfileEdit");
+                            this.navigateToPage("ProfileEdit")
                           }}
                         >
                           <View style={styles.menuItemContainer}>
@@ -309,7 +313,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
                           onPress={() => {
-                            this.props.navigation.navigate("Main");
+                            this.navigateToPage("ResetPassword")
                           }}
                         >
                           <View style={styles.menuItemContainer}>
