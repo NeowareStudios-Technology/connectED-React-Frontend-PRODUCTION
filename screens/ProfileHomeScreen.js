@@ -153,7 +153,7 @@ export default class HomeScreen extends React.Component {
                     onPress={this.openDrawer}
                   >
                     <Icon.Ionicons
-                      name={Platform.OS === "ios" ? "ios-menu" : "md-more-vert"}
+                      name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
                       size={26}
                       color={Colors.tabIconDefault}
                     />

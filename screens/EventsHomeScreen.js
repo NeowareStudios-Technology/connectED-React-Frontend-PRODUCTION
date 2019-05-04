@@ -10,7 +10,8 @@ import {
   Text,
   View,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
@@ -21,6 +22,10 @@ import EventListCard from "../components/EventListCard";
 import EventDetails from "../components/EventDetails";
 import Sequencer from "../components/Sequencer";
 import moment from "moment";
+
+// let {height, width} = Dimensions.get('window');
+let screenWidth = Dimensions.get('window').width;
+
 class EventsHomeScreen extends React.Component {
   static navigationOptions = {
     header: null
@@ -40,6 +45,7 @@ class EventsHomeScreen extends React.Component {
   }
 
   loadEvent = async (eventName, index, callback) => {
+    console.log("LOAD EVENT: " + eventName)
     let token = await User.firebase.getIdToken();
 
     if (token) {
@@ -59,7 +65,8 @@ class EventsHomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.e_title === "string") {
-                  let events = this.state.events;
+                  // keep state immutable by using slice to return new array
+                  let events = this.state.events.slice();
                   let event = responseData;
                   event.key = "event-" + index;
                   event.distance = this.state.distances[index];
@@ -84,7 +91,7 @@ class EventsHomeScreen extends React.Component {
 
   loadEvents = () => {
     let sequence = new Sequencer();
-
+    console.log("LOAD EVENTS")
     if (this.state.eventsNames.length > 0) {
       this.state.eventsNames.map((eventName, index) => {
         sequence.promise(() => {
@@ -92,15 +99,15 @@ class EventsHomeScreen extends React.Component {
             sequence.next();
           });
         });
+        console.log(sequence.promises.length)
       });
     }
-
     sequence.next();
   };
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
-
+    console.log("FETCH DATA")
     if (token) {
       try {
         let url =
@@ -115,6 +122,7 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
+              console.log(responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   this.setState(
@@ -123,6 +131,7 @@ class EventsHomeScreen extends React.Component {
                       distances: responseData.distances
                     },
                     () => {
+                      console.log('state eventsNames and distances set. load events...')
                       this.loadEvents();
                     }
                   );
@@ -141,6 +150,7 @@ class EventsHomeScreen extends React.Component {
     }
   };
 
+/* NEW */
   volunteer = async () => {
     if (this.state.activeItem) {
       let isRegistered = false;
@@ -196,7 +206,7 @@ class EventsHomeScreen extends React.Component {
       }
     }
   };
-
+/* NEW */
   deregister = async () => {
     if (this.state.activeItem) {
       let isRegistered = false;
@@ -368,7 +378,7 @@ class EventsHomeScreen extends React.Component {
                               renderItem={this._renderItem}
                               firstItem={this.state.carouselFirstItem}
                               itemWidth={230}
-                              sliderWidth={300}
+                              sliderWidth={screenWidth}
                               windowSize={280}
                             />
                           </>
