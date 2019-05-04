@@ -176,9 +176,13 @@ export default class HomeScreen extends React.Component {
                 }}
               >
                 <View style={{ flex: 1 }}>
+                {this.state.user.profile.hours ? 
                   <Text style={styles.largeNumber}>
                     {this.state.user.profile.hours}
                   </Text>
+                  :
+                  <Text style={styles.largeNumber}>0</Text>
+                }
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>

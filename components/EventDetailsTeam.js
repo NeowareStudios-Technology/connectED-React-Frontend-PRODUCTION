@@ -25,6 +25,10 @@ class EventDetailsTeam extends React.Component {
     return (
       <>
         <Text>Event Team</Text>
+        <Text>Pending:</Text>
+        {item.pending_attendees.map((attendee, index)=>(
+          <Text key={index}>{attendee}</Text>
+        ))}
       </>
     );
   }
