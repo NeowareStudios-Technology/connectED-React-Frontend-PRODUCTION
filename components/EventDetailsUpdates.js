@@ -33,6 +33,7 @@ class EventDetailsUpdates extends React.Component {
       let eventOrigName = event.e_orig_title;
       let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/updates`;
       try {
+        console.log(url)
         fetch(url, {
           method: "GET",
           headers: {
@@ -72,7 +73,8 @@ class EventDetailsUpdates extends React.Component {
   };
 
   componentDidMount() {
-    this.fetchData();
+    // this.fetchData();
+    this.setState({loading: false})
   }
 
   render() {
