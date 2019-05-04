@@ -376,7 +376,7 @@ class EventsHomeScreen extends React.Component {
                               extraData={this.state}
                               renderItem={this._renderItem}
                               firstItem={this.state.carouselFirstItem}
-                              itemWidth={230}
+                              itemWidth={screenWidth - 50*2}
                               sliderWidth={screenWidth}
                               windowSize={280}
                             />
