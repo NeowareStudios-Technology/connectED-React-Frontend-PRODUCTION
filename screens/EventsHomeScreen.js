@@ -21,6 +21,7 @@ import Carousel from "react-native-snap-carousel";
 import EventListCard from "../components/EventListCard";
 import EventDetails from "../components/EventDetails";
 import Sequencer from "../components/Sequencer";
+import EventSearch from "../components/EventSearch";
 import moment from "moment";
 
 // let {height, width} = Dimensions.get('window');
@@ -267,6 +268,10 @@ class EventsHomeScreen extends React.Component {
     this.setState({ activeItem: null });
   };
 
+  closeEventSearch = () => {
+    this.setState({showSearchBar: false})
+  }
+
   async componentDidMount() {
     let user = await User.isLoggedIn();
     if (user) {
@@ -292,6 +297,19 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
+    if(this.state.showSearchBar){
+      return (
+        <View style={styles.container}>
+          <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+          >
+          <EventSearch
+            handleClose={this.closeEventSearch}
+          />
+          </ScrollView></View>
+      )
+    }
     return (
       <>
         <View style={styles.container}>
@@ -368,7 +386,7 @@ class EventsHomeScreen extends React.Component {
                         }}
                         onPress={() => {
                           console.log('search')
-                          // this.props.navigation.navigate("EventCreate");
+                          this.setState({showSearchBar: true})
                         }}
                       >
                         <Icon.Ionicons

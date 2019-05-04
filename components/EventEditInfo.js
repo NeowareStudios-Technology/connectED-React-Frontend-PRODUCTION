@@ -175,7 +175,6 @@ class EventEditInfo extends React.Component {
                   borderTopWidth: 0,
                   borderRightWidth: 0,
                   borderLeftWidth: 0,
-                  alignItems: "left"
                 }
               }}
               onDateChange={value => {
@@ -208,7 +207,6 @@ class EventEditInfo extends React.Component {
                       borderTopWidth: 0,
                       borderRightWidth: 0,
                       borderLeftWidth: 0,
-                      alignItems: "center"
                     }
                   }}
                   onDateChange={value => {
@@ -241,7 +239,6 @@ class EventEditInfo extends React.Component {
                       borderTopWidth: 0,
                       borderRightWidth: 0,
                       borderLeftWidth: 0,
-                      alignItems: "center"
                     }
                   }}
                   onDateChange={value => {
@@ -285,7 +282,8 @@ class EventEditInfo extends React.Component {
                 color: "#000"
               }}
               inputStyle={{
-                fontSize: 16
+                fontSize: 16,
+                textAlign: "center"
               }}
               rightIcon={
                 <Icon.Ionicons
