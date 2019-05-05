@@ -10,11 +10,13 @@ import ProfileHomeScreen from "../screens/ProfileHomeScreen";
 import ProfileEditScreen from "../screens/ProfileEditScreen";
 import EventsHomeScreen from "../screens/EventsHomeScreen";
 import EventScreen from "../screens/EventScreen";
+import ResetPassword from "../screens/ForgotPasswordScreen";
 import EventCreateScreen from "../screens/EventCreateScreen";
 
 const ProfileHomeStack = createStackNavigator({
   ProfileHome: ProfileHomeScreen,
-  ProfileEdit: ProfileEditScreen
+  ProfileEdit: ProfileEditScreen,
+  ResetPassword: ResetPassword
 });
 
 ProfileHomeStack.navigationOptions = {

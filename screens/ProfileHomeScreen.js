@@ -83,6 +83,10 @@ export default class HomeScreen extends React.Component {
     }
     return true;
   }
+  navigateToPage=(page) => {
+    this.props.navigation.navigate(page);
+    this.setState({open:false})
+  }
 
   openDrawer = () => {
     LayoutAnimation.linear();
@@ -176,9 +180,13 @@ export default class HomeScreen extends React.Component {
                 }}
               >
                 <View style={{ flex: 1 }}>
+                {this.state.user.profile.hours ? 
                   <Text style={styles.largeNumber}>
                     {this.state.user.profile.hours}
                   </Text>
+                  :
+                  <Text style={styles.largeNumber}>0</Text>
+                }
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -280,7 +288,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
                           onPress={() => {
-                            this.props.navigation.navigate("ProfileEdit");
+                            this.navigateToPage("ProfileEdit")
                           }}
                         >
                           <View style={styles.menuItemContainer}>
@@ -305,7 +313,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
                           onPress={() => {
-                            this.props.navigation.navigate("Main");
+                            this.navigateToPage("ResetPassword")
                           }}
                         >
                           <View style={styles.menuItemContainer}>

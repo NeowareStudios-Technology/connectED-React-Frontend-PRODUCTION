@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { Icon } from 'expo'
 import { Input, Card, Button } from "react-native-elements";
 import User from "../components/User";
 
@@ -38,6 +39,10 @@ export default class ForgotPasswordScreen extends React.Component {
     this.setState({
       [attribute]: value
     });
+  };
+  
+  goBack = () => {
+    this.props.navigation.navigate("ProfileHome");
   };
 
   process = () => {
@@ -94,6 +99,33 @@ export default class ForgotPasswordScreen extends React.Component {
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
           >
+            <View
+              style={{
+                flex: 3
+              }}
+            >
+              <>
+                <TouchableOpacity
+                  style={{
+                    height: 60,
+                    width: 60,
+                    paddingHorizontal: 15
+                  }}
+                  onPress={this.goBack}
+                >
+                  <Icon.Ionicons
+                    style={{ padding: 0, margin: 0 }}
+                    name={
+                      Platform.OS === "ios"
+                        ? "ios-arrow-round-back"
+                        : "md-arrow-back"
+                    }
+                    size={44}
+                    color="#195074"
+                  />
+                </TouchableOpacity>
+              </>
+            </View>
             {this.state.emailSent ? (
               <>
                 <Card
