@@ -7,12 +7,16 @@ import {
   Platform,
   Image,
   ImageBackground,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
 import moment from "moment";
 import AppData from "../constants/Data";
+// let {height, width} = Dimensions.get('window');
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
 
 class EventListCard extends React.Component {
   constructor(props) {
@@ -35,7 +39,7 @@ class EventListCard extends React.Component {
             paddingHorizontal: 0
           }}
         >
-          <View style={{ height: 360 }}>
+          <View style={{ height: screenHeight - 260 }}>
             <View style={{ flex: 1 }}>
               <View
                 style={{
@@ -83,7 +87,11 @@ class EventListCard extends React.Component {
                             fontSize: 21,
                             paddingRight: 12,
                             paddingTop: 12,
-                            textAlign: "right"
+                            textAlign: "right",
+                            textShadowOffset: { width: 0.5, height: 0.5 },
+                            textShadowRadius: 2,
+                            textShadowColor: '#000',
+
                           }}
                         >
                           {moment(item.start[0], "hh:mm").format("h:mm a")}
@@ -180,10 +188,10 @@ class EventListCard extends React.Component {
                     </View>
                   </>
                 ) : (
-                  <>
-                    <ActivityIndicator size="small" />
-                  </>
-                )}
+                    <>
+                      <ActivityIndicator size="small" />
+                    </>
+                  )}
               </View>
             </View>
           </View>

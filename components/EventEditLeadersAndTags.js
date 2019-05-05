@@ -7,11 +7,15 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
 import { Icon } from "expo";
 import InterestSelector from "../components/InterestSelector";
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
+
 
 const validator = require("validator");
 
@@ -88,7 +92,7 @@ class EventEditLeadersAndTags extends React.Component {
             </Text>
             <LeaderInput name="leader_1" {...this.props} />
             <LeaderInput name="leader_2" {...this.props} />
-            <LeaderInput name="leader_2" {...this.props} />
+            <LeaderInput name="leader_3" {...this.props} />
           </View>
           <View>
             <Text
@@ -128,33 +132,32 @@ class EventEditLeadersAndTags extends React.Component {
               />
             </View>
           </View>
-          <View
-            style={{
-              backgroundColor: "#fff",
-              width: "100%",
-              height: "110%",
-              position: "absolute",
-              paddingTop: 12,
-              paddingHorizontal: 0,
-              top: this.state.interestSelectorOpen ? 0 : "200%",
-              left: 0
-            }}
-          >
-            <InterestSelector
-              closeAction={this.closeInterestSelector}
-              selectedInterests={selectedInterests}
-              onSelect={interest => {
-                let currentInterests = selectedInterests;
-                if (
-                  currentInterests.indexOf(interest) === -1 &&
-                  currentInterests.length < 3
-                ) {
-                  currentInterests.push(interest);
-                  this.props.onInputChange("interests", currentInterests);
-                }
+          {this.state.interestSelectorOpen && (
+            <View
+              style={{
+                backgroundColor: "#fff",
+                width: "100%",
+                height: screenHeight * 2/3,
+                position: "absolute",
+                top: 30,
               }}
-            />
-          </View>
+            >
+              <InterestSelector
+                closeAction={this.closeInterestSelector}
+                selectedInterests={selectedInterests}
+                onSelect={interest => {
+                  let currentInterests = selectedInterests;
+                  if (
+                    currentInterests.indexOf(interest) === -1 &&
+                    currentInterests.length < 3
+                  ) {
+                    currentInterests.push(interest);
+                    this.props.onInputChange("interests", currentInterests);
+                  }
+                }}
+              />
+            </View>
+          )}
         </View>
       </>
     );

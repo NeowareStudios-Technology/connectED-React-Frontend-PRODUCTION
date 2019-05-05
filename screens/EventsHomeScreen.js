@@ -10,7 +10,8 @@ import {
   Text,
   View,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
@@ -20,7 +21,12 @@ import Carousel from "react-native-snap-carousel";
 import EventListCard from "../components/EventListCard";
 import EventDetails from "../components/EventDetails";
 import Sequencer from "../components/Sequencer";
+import EventSearch from "../components/EventSearch";
 import moment from "moment";
+
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
+
 class EventsHomeScreen extends React.Component {
   static navigationOptions = {
     header: null
@@ -40,6 +46,7 @@ class EventsHomeScreen extends React.Component {
   }
 
   loadEvent = async (eventName, index, callback) => {
+    console.log("LOAD EVENT: " + eventName)
     let token = await User.firebase.getIdToken();
 
     if (token) {
@@ -59,7 +66,8 @@ class EventsHomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.e_title === "string") {
-                  let events = this.state.events;
+                  // keep state immutable by using slice to return new array
+                  let events = this.state.events.slice();
                   let event = responseData;
                   event.key = "event-" + index;
                   event.distance = this.state.distances[index];
@@ -84,7 +92,7 @@ class EventsHomeScreen extends React.Component {
 
   loadEvents = () => {
     let sequence = new Sequencer();
-
+    console.log("LOAD EVENTS")
     if (this.state.eventsNames.length > 0) {
       this.state.eventsNames.map((eventName, index) => {
         sequence.promise(() => {
@@ -94,13 +102,12 @@ class EventsHomeScreen extends React.Component {
         });
       });
     }
-
     sequence.next();
   };
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
-
+    console.log("FETCH DATA")
     if (token) {
       try {
         let url =
@@ -115,6 +122,7 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
+              console.log(responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   this.setState(
@@ -123,6 +131,7 @@ class EventsHomeScreen extends React.Component {
                       distances: responseData.distances
                     },
                     () => {
+                      console.log('state eventsNames and distances set. load events...')
                       this.loadEvents();
                     }
                   );
@@ -258,6 +267,10 @@ class EventsHomeScreen extends React.Component {
     this.setState({ activeItem: null });
   };
 
+  closeEventSearch = () => {
+    this.setState({showSearchBar: false})
+  }
+
   async componentDidMount() {
     let user = await User.isLoggedIn();
     if (user) {
@@ -283,6 +296,20 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
+    if(this.state.showSearchBar){
+      return (
+        <View style={styles.container}>
+          <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+          >
+          <EventSearch
+            handleClose={this.closeEventSearch}
+            data={this.state.events}
+          />
+          </ScrollView></View>
+      )
+    }
     return (
       <>
         <View style={styles.container}>
@@ -312,12 +339,18 @@ class EventsHomeScreen extends React.Component {
                     style={{
                       flex: 1,
                       flexDirection: "row",
-                      justifyContent: "center",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      marginBottom: 12
+                      marginBottom: 12,
+                      marginHorizontal: 15
                     }}
                   >
-                    <View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
                       <TouchableOpacity
                         style={{
                           paddingHorizontal: 10,
@@ -330,13 +363,53 @@ class EventsHomeScreen extends React.Component {
                         }}
                       >
                         <Icon.Ionicons
-                          name={Platform.OS === "ios" ? "ios-add" : "md-add"}
-                          size={38}
+                          name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
+                          size={30}
                         />
                       </TouchableOpacity>
+                      <View>
+                        <Text style={styles.displayH1}>Events</Text>
+                      </View>
                     </View>
-                    <View>
-                      <Text style={styles.displayH1}>Events</Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
+                      <TouchableOpacity
+                        style={{
+                          paddingHorizontal: 10,
+                          borderRadius: 90,
+                          borderColor: "#000",
+                          borderWidth: 0
+                        }}
+                        onPress={() => {
+                          this.setState({showSearchBar: true})
+                        }}
+                      >
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          paddingHorizontal: 10,
+                          borderRadius: 90,
+                          borderColor: "#000",
+                          borderWidth: 0
+                        }}
+                        onPress={() => {
+                          console.log('TODO: filter')
+                        }}
+                      >
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-options" : "md-options"}
+                          size={30}
+                        />
+                      </TouchableOpacity>
+
                     </View>
                   </View>
                   <View style={{ flex: 10 }}>
@@ -367,8 +440,8 @@ class EventsHomeScreen extends React.Component {
                               extraData={this.state}
                               renderItem={this._renderItem}
                               firstItem={this.state.carouselFirstItem}
-                              itemWidth={230}
-                              sliderWidth={300}
+                              itemWidth={screenWidth - 50*2}
+                              sliderWidth={screenWidth}
                               windowSize={280}
                             />
                           </>
