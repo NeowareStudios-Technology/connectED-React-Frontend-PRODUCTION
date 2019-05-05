@@ -24,8 +24,8 @@ import Sequencer from "../components/Sequencer";
 import EventSearch from "../components/EventSearch";
 import moment from "moment";
 
-// let {height, width} = Dimensions.get('window');
 let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
 
 class EventsHomeScreen extends React.Component {
   static navigationOptions = {
@@ -150,7 +150,6 @@ class EventsHomeScreen extends React.Component {
     }
   };
 
-/* NEW */
   volunteer = async () => {
     if (this.state.activeItem) {
       let isRegistered = false;
@@ -206,7 +205,7 @@ class EventsHomeScreen extends React.Component {
       }
     }
   };
-/* NEW */
+
   deregister = async () => {
     if (this.state.activeItem) {
       let isRegistered = false;
@@ -306,6 +305,7 @@ class EventsHomeScreen extends React.Component {
           >
           <EventSearch
             handleClose={this.closeEventSearch}
+            data={this.state.events}
           />
           </ScrollView></View>
       )
@@ -385,7 +385,6 @@ class EventsHomeScreen extends React.Component {
                           borderWidth: 0
                         }}
                         onPress={() => {
-                          console.log('search')
                           this.setState({showSearchBar: true})
                         }}
                       >
@@ -402,8 +401,7 @@ class EventsHomeScreen extends React.Component {
                           borderWidth: 0
                         }}
                         onPress={() => {
-                          console.log('search')
-                          // this.props.navigation.navigate("EventCreate");
+                          console.log('TODO: filter')
                         }}
                       >
                         <Icon.Ionicons

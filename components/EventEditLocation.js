@@ -120,6 +120,7 @@ class EventEditLocation extends React.Component {
             }}
             containerStyle={{ marginBottom: 6 }}
             placeholder="Zip Code"
+            keyboardType="numeric"
             errorMessage={
               typeof this.props.errors.zip_code !== "undefined"
                 ? this.props.errors.zip_code[0]

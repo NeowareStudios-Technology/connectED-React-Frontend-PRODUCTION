@@ -270,6 +270,7 @@ class EventEditInfo extends React.Component {
               }}
               label="Number of Volunteers Needed"
               placeholder="Number of Volunteers Needed"
+              keyboardType="numeric"
               errorMessage={
                 typeof this.props.errors.capacity !== "undefined" &&
                 this.props.errors.capacity.length > 0
