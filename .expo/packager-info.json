@@ -1,10 +1,10 @@
 {
   "devToolsPort": 19002,
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 22212,
-  "expoServerNgrokUrl": "https://7d-fz5.kendraz.connected-react-frontend-production.exp.direct",
-  "packagerNgrokUrl": "https://packager.7d-fz5.kendraz.connected-react-frontend-production.exp.direct",
-  "ngrokPid": 6348,
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
   "webpackServerPort": null
 }
