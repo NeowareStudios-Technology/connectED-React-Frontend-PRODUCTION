@@ -12,6 +12,7 @@ import EventsHomeScreen from "../screens/EventsHomeScreen";
 import EventScreen from "../screens/EventScreen";
 import ResetPassword from "../screens/ForgotPasswordScreen";
 import EventCreateScreen from "../screens/EventCreateScreen";
+import CalendarHomeScreen from "../screens/CalendarHomeScreen"
 
 const ProfileHomeStack = createStackNavigator({
   ProfileHome: ProfileHomeScreen,
@@ -44,7 +45,23 @@ EventsHomeStack.navigationOptions = {
   )
 };
 
+const CalendarStack = createStackNavigator({
+  CalendarHome: CalendarHomeScreen,
+
+});
+
+CalendarStack.navigationOptions = {
+  tabBarLabel: "Calendar",
+  tabBarIcon: ({ focused }) => (
+    <TabBarIcon
+      focused={focused}
+      name={Platform.OS === "ios" ? "ios-calendar" : "md-calendar"}
+    />
+  )
+};
+
 export default createBottomTabNavigator({
   EventsHomeStack,
-  ProfileHomeStack
+  ProfileHomeStack,
+  CalendarStack
 });
