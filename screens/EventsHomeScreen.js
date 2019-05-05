@@ -289,7 +289,7 @@ class EventsHomeScreen extends React.Component {
     <View
       style={{
         marginHorizontal: -20,
-        paddingHorizontal: 2
+        paddingHorizontal: 2,
       }}
     >
       <TouchableOpacity
@@ -297,7 +297,7 @@ class EventsHomeScreen extends React.Component {
           this.openItem(item, index);
         }}
       >
-        <EventListCard event={item} />
+        <EventListCard event={item}/>
       </TouchableOpacity>
     </View>
   );

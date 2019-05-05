@@ -36,10 +36,14 @@ class EventListCard extends React.Component {
         <Card
           containerStyle={{
             padding: 0,
-            paddingHorizontal: 0
+            paddingHorizontal: 0,
+            borderBottomRightRadius: 10,
+            borderBottomLeftRadius: 10,
+            borderTopRightRadius: 10,
+            borderTopLeftRadius: 10,
           }}
         >
-          <View style={{ height: screenHeight - 260 }}>
+          <View style={{ height: screenHeight - 180 }}>
             <View style={{ flex: 1 }}>
               <View
                 style={{
@@ -53,8 +57,9 @@ class EventListCard extends React.Component {
                   }}
                   style={{
                     width: "100%",
-                    height: "100%"
+                    height: "100%",
                   }}
+
                 >
                   <View
                     style={{
