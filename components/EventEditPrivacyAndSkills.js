@@ -7,13 +7,17 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
 import { Icon } from "expo";
 import SkillSelector from "../components/SkillSelector";
 
 import DatePicker from "react-native-datepicker";
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
+
 
 class EventEditPrivacyAndSkills extends React.Component {
   constructor(props) {
@@ -167,33 +171,32 @@ class EventEditPrivacyAndSkills extends React.Component {
               more limited, adding just 1 Required Skill will help leviate this.
             </Text>
           </View>
-          <View
-            style={{
-              backgroundColor: "#fff",
-              width: "100%",
-              height: "110%",
-              position: "absolute",
-              paddingTop: 12,
-              paddingHorizontal: 0,
-              top: this.state.skillSelectorOpen ? 0 : "200%",
-              left: 0
-            }}
-          >
-            <SkillSelector
-              closeAction={this.closeSkillSelector}
-              selectedSkills={selectedSkills}
-              onSelect={skill => {
-                let currentSkills = selectedSkills;
-                if (
-                  currentSkills.indexOf(skill) === -1 &&
-                  currentSkills.length < 3
-                ) {
-                  currentSkills.push(skill);
-                  this.props.onInputChange("req_skills", currentSkills);
-                }
+          {this.state.skillSelectorOpen && (
+            <View
+              style={{
+                backgroundColor: "#fff",
+                width: "100%",
+                height: screenHeight * 2/3,
+                position: "absolute",
+                top: 30,
               }}
-            />
-          </View>
+            >
+              <SkillSelector
+                closeAction={this.closeSkillSelector}
+                selectedSkills={selectedSkills}
+                onSelect={skill => {
+                  let currentSkills = selectedSkills;
+                  if (
+                    currentSkills.indexOf(skill) === -1 &&
+                    currentSkills.length < 3
+                  ) {
+                    currentSkills.push(skill);
+                    this.props.onInputChange("req_skills", currentSkills);
+                  }
+                }}
+              />
+            </View>
+          )}
         </View>
       </>
     );
