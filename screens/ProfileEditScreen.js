@@ -73,7 +73,6 @@ export default class ProfileEditScreen extends React.Component {
   };
 
   goBack = () => {
-    console.warn(this.props)
     this.props.navigation.navigate("ProfileHome");
   };
 
