@@ -10,6 +10,8 @@ import {
     TouchableOpacity,
     View
   } from "react-native";
+  import { Icon } from "expo";
+
   import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 
 export default class MyCalendar extends Component {
@@ -40,15 +42,31 @@ export default class MyCalendar extends Component {
                     // Handler which gets executed on day long press. Default = undefined
                     onDayLongPress={(day) => {console.log('selected day', day)}}
                     // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
-                    monthFormat={'yyyy MM'}
+                    monthFormat={'MMMM yyyy'}
                     // Handler which gets executed when visible month changes in calendar. Default = undefined
                     onMonthChange={(month) => {console.log('month changed', month)}}
                     // Hide month navigation arrows. Default = false
-                    hideArrows={true}
+                    hideArrows={false}
                     // Replace default arrows with custom ones (direction can be 'left' or 'right')
-                    renderArrow={(direction) => (<Arrow />)}
+                    renderArrow={(direction) => (
+                        <>
+                        {direction==="left"?
+                        
+                            <Icon.Ionicons
+                            name={Platform.OS === "ios" ? `ios-arrow-back` : "md-arrow-back"}
+                            size={30}
+                            />
+                            :
+                            <Icon.Ionicons
+                            name={Platform.OS === "ios" ? `ios-arrow-forward` : "md-arrow-forward"}
+                            size={30}
+                            />
+                        }
+
+                      </>
+                        )}
                     // Do not show days of other months in month page. Default = false
-                    hideExtraDays={true}
+                    hideExtraDays={false}
                     // If hideArrows=false and hideExtraDays=false do not switch month when tapping on greyed out
                     // day from another month that is visible in calendar page. Default = false
                     disableMonthChange={true}
@@ -57,7 +75,7 @@ export default class MyCalendar extends Component {
                     // Hide day names. Default = false
                     hideDayNames={true}
                     // Show week numbers to the left. Default = false
-                    showWeekNumbers={true}
+                    // showWeekNumbers={true}
                     // Handler which gets executed when press arrow icon left. It receive a callback can go back month
                     onPressArrowLeft={substractMonth => substractMonth()}
                     // Handler which gets executed when press arrow icon left. It receive a callback can go next month
