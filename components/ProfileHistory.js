@@ -2,6 +2,10 @@ import React from "react";
 import { Text, StyleSheet, View } from "react-native";
 
 class ProfileHistory extends React.Component {
+
+  componentDidMount () {
+    console.log("PROFILE HISTORY: ", this.props.events)
+  }
   render() {
     console.log(this.props.events)
     return (

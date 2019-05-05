@@ -9,7 +9,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import User from "../components/User";
@@ -18,6 +19,8 @@ import ProfileHistory from "../components/ProfileHistory";
 import ProfileCreated from "../components/ProfileCreated";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
+let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
+let screenWidth = Dimensions.get("window").width;
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -35,6 +38,7 @@ export default class HomeScreen extends React.Component {
     };
   }
   loadUserOpportunities = async () => {
+    console.log("LOAD USER OPPORTUNITIES")
     let userEvents = [];
     let token = await User.firebase.getIdToken();
     if (token) {
@@ -102,16 +106,17 @@ export default class HomeScreen extends React.Component {
   };
 
   updateTab = (activeTab) => {
-    this.setState({activeTab})
+    this.setState({ activeTab })
   }
 
   render() {
+    console.log("active tab: " + this.state.activeTab)
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>
         <ScrollView
           style={styles.container}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={[styles.contentContainer, {height: screenHeight}]}
         >
           {this.state.user ? (
             <>
@@ -181,7 +186,6 @@ export default class HomeScreen extends React.Component {
               </View>
               <View
                 style={{
-                  flex: 1,
                   flexDirection: "row",
                   paddingHorizontal: 24
                 }}
@@ -235,7 +239,7 @@ export default class HomeScreen extends React.Component {
                       <ProfileHistory events={this.state.events.registered_events} />
                     </>
                   )}
-                  {this.state.activeTab === 2 && this.state.events &&  (
+                  {this.state.activeTab === 2 && this.state.events && (
                     <>
                       <ProfileCreated events={this.state.events.created_events} />
                     </>
@@ -243,261 +247,265 @@ export default class HomeScreen extends React.Component {
 
                 </View>
               </View>
-              <View
-                style={{
-                  backgroundColor: "#fafafa",
-                  borderLeftColor: "#dedede",
-                  borderLeftWidth: 1,
-                  width: "75%",
-                  height: "100%",
-                  position: "absolute",
-                  left: this.state.open ? "25%" : "100%"
-                }}
-              >
-                <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
-                  <TouchableOpacity
-                    style={{
-                      padding: 10,
-                      height: 40,
-                      width: 40,
-                      marginBottom: 12
-                    }}
-                    onPress={this.closeDrawer}
-                  >
-                    <Icon.Ionicons
-                      name={
-                        Platform.OS === "ios"
-                          ? "ios-arrow-forward"
-                          : "md-arrow-forward"
-                      }
-                      size={26}
-                      color={Colors.tabIconDefault}
-                    />
-                  </TouchableOpacity>
-                  <View style={{ paddingHorizontal: 10 }}>
-                    <Text
+              {this.state.open && (
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#fafafa",
+                    borderLeftColor: "#dedede",
+                    borderLeftWidth: 1,
+                    width: screenWidth * 0.75,
+                    height: screenHeight,
+                    position: "absolute",
+                    left: screenWidth * 0.25
+                  }}
+                >
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
+                    <TouchableOpacity
                       style={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        marginBottom: 18
+                        padding: 10,
+                        height: 40,
+                        width: 40,
+                        marginBottom: 12
                       }}
+                      onPress={this.closeDrawer}
                     >
-                      SETTINGS
-                    </Text>
-                    <View style={styles.drawerSectionWrapper}>
-                      <View style={styles.drawerSectionLabelContainer}>
-                        <Icon.Ionicons
-                          name={
-                            Platform.OS === "ios" ? "ios-person" : "md-person"
-                          }
-                          size={20}
-                          color={Colors.tabIconDefault}
-                        />
-                        <Text style={styles.drawerSectionLabel}>Account</Text>
-                      </View>
-                      <Divider
-                        style={{
-                          height: 1,
-                          marginBottom: 8,
-                          backgroundColor: "#dddddd"
-                        }}
+                      <Icon.Ionicons
+                        name={
+                          Platform.OS === "ios"
+                            ? "ios-arrow-forward"
+                            : "md-arrow-forward"
+                        }
+                        size={26}
+                        color={Colors.tabIconDefault}
                       />
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => {
-                            this.navigateToPage("ProfileEdit")
+                    </TouchableOpacity>
+                    <View style={{ paddingHorizontal: 10 }}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 18,
+                          marginBottom: 18
+                        }}
+                      >
+                        SETTINGS
+                                  </Text>
+                      <View style={styles.drawerSectionWrapper}>
+                        <View style={styles.drawerSectionLabelContainer}>
+                          <Icon.Ionicons
+                            name={
+                              Platform.OS === "ios" ? "ios-person" : "md-person"
+                            }
+                            size={20}
+                            color={Colors.tabIconDefault}
+                          />
+                          <Text style={styles.drawerSectionLabel}>Account</Text>
+                        </View>
+                        <Divider
+                          style={{
+                            height: 1,
+                            marginBottom: 8,
+                            backgroundColor: "#dddddd"
                           }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Edit Profile
-                            </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
+                        />
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("ProfileEdit")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Edit Profile
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("ResetPassword")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Change Password
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => {
-                            this.navigateToPage("ResetPassword")
+                      <View style={styles.drawerSectionWrapper}>
+                        <View style={styles.drawerSectionLabelContainer}>
+                          <Icon.Ionicons
+                            name={
+                              Platform.OS === "ios"
+                                ? "ios-notifications"
+                                : "md-notifications"
+                            }
+                            size={20}
+                            color={Colors.tabIconDefault}
+                          />
+                          <Text style={styles.drawerSectionLabel}>
+                            Notifications
+                                      </Text>
+                        </View>
+                        <Divider
+                          style={{
+                            height: 1,
+                            marginBottom: 8,
+                            backgroundColor: "#dddddd"
                           }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Change Password
-                            </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <View style={styles.drawerSectionWrapper}>
-                      <View style={styles.drawerSectionLabelContainer}>
-                        <Icon.Ionicons
-                          name={
-                            Platform.OS === "ios"
-                              ? "ios-notifications"
-                              : "md-notifications"
-                          }
-                          size={20}
-                          color={Colors.tabIconDefault}
                         />
-                        <Text style={styles.drawerSectionLabel}>
-                          Notifications
-                        </Text>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => { }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Notifications
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => { }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                App Notifications
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <Divider
-                        style={{
-                          height: 1,
-                          marginBottom: 8,
-                          backgroundColor: "#dddddd"
-                        }}
-                      />
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => { }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Notifications
-                            </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => { }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              App Notifications
-                            </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <View style={styles.drawerSectionWrapper}>
-                      <View style={styles.drawerSectionLabelContainer}>
-                        <Icon.Ionicons
-                          name={Platform.OS === "ios" ? "ios-more" : "md-more"}
-                          size={20}
-                          color={Colors.tabIconDefault}
+                      <View style={styles.drawerSectionWrapper}>
+                        <View style={styles.drawerSectionLabelContainer}>
+                          <Icon.Ionicons
+                            name={Platform.OS === "ios" ? "ios-more" : "md-more"}
+                            size={20}
+                            color={Colors.tabIconDefault}
+                          />
+                          <Text style={styles.drawerSectionLabel}>More</Text>
+                        </View>
+                        <Divider
+                          style={{
+                            height: 1,
+                            marginBottom: 8,
+                            backgroundColor: "#dddddd"
+                          }}
                         />
-                        <Text style={styles.drawerSectionLabel}>More</Text>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => { }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>Agreements</Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => { }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Location Services
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                      <Divider
-                        style={{
-                          height: 1,
-                          marginBottom: 8,
-                          backgroundColor: "#dddddd"
-                        }}
-                      />
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => { }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>Agreements</Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
+                      <View
+                        style={{ flexDirection: "row", justifyContent: "center" }}
+                      >
+                        <Button
+                          title="Logout"
+                          onPress={() => {
+                            User.logout(() => {
+                              this.props.navigation.navigate("Main");
+                            });
+                          }}
+                        />
                       </View>
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => { }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Location Services
-                            </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <View
-                      style={{ flexDirection: "row", justifyContent: "center" }}
-                    >
-                      <Button
-                        title="Logout"
-                        onPress={() => {
-                          User.logout(() => {
-                            this.props.navigation.navigate("Main");
-                          });
-                        }}
-                      />
                     </View>
                   </View>
                 </View>
-              </View>
+
+              )}
             </>
           ) : (
               <>
