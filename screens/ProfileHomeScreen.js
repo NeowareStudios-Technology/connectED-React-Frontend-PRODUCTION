@@ -14,6 +14,8 @@ import {
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
+import ProfileHistory from "../components/ProfileHistory";
+import ProfileCreated from "../components/ProfileCreated";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
 
@@ -28,46 +30,47 @@ export default class HomeScreen extends React.Component {
     this.state = {
       user: null,
       userEvents: null,
+      events: null,
       activeTab: 0
     };
   }
-
   loadUserOpportunities = async () => {
     let userEvents = [];
-    try {
-      let token = await this.state.user.firebase.getIdToken();
-      let url =
-        "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
-        this.state.user.email +
-        "/events";
-      let eventsResponse = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        }
-      });
-      console.log("events response", eventsResponse);
-
-      if (eventsResponse.ok) {
-        console.log("Events response,", eventsResponse);
-        try {
-          let events = JSON.parse(eventsResponse._bodyText);
-          if (events) {
-            if (typeof events.completed_events !== "undefined") {
-              userEvents = events.completed_events;
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
+          this.state.user.email +
+          "/events";
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let events = JSON.parse(response._bodyText);
+              if (events) {
+                console.log("EVENTS", events)
+                if (typeof events.completed_events !== "undefined") {
+                  userEvents = events.completed_events;
+                }
+                this.setState(events)
+              }
+            } catch (error) {
+              console.log(error);
             }
           }
-        } catch (error) {
-          console.log("events error 1", error.message);
-        }
+        });
+      } catch (error) {
+        console.log("events error fetching", error.message);
       }
-    } catch (error) {
-      console.log("events error 2", error.message);
-    }
-
+    };
     this.setState({ userEvents: userEvents });
-  };
+  }
 
   async componentDidMount() {
     let user = await User.isLoggedIn();
@@ -83,9 +86,9 @@ export default class HomeScreen extends React.Component {
     }
     return true;
   }
-  navigateToPage=(page) => {
+  navigateToPage = (page) => {
     this.props.navigation.navigate(page);
-    this.setState({open:false})
+    this.setState({ open: false })
   }
 
   openDrawer = () => {
@@ -97,6 +100,10 @@ export default class HomeScreen extends React.Component {
     LayoutAnimation.linear();
     this.setState({ open: false });
   };
+
+  updateTab = (activeTab) => {
+    this.setState({activeTab})
+  }
 
   render() {
     const buttons = ["Info", "History", "Created"];
@@ -117,21 +124,21 @@ export default class HomeScreen extends React.Component {
               >
                 <View style={{ flex: 2 }}>
                   {this.state.user.profile &&
-                  this.state.user.profile.photo !== "" ? (
-                    <>
-                      <Avatar
-                        size={80}
-                        rounded
-                        source={{
-                          uri:
-                            "data:image/png;base64," +
-                            this.state.user.profile.photo
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <Avatar rounded size={80} icon={{ name: "face" }} />
-                  )}
+                    this.state.user.profile.photo !== "" ? (
+                      <>
+                        <Avatar
+                          size={80}
+                          rounded
+                          source={{
+                            uri:
+                              "data:image/png;base64," +
+                              this.state.user.profile.photo
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <Avatar rounded size={80} icon={{ name: "face" }} />
+                    )}
                   <Text
                     style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}
                   >
@@ -180,13 +187,13 @@ export default class HomeScreen extends React.Component {
                 }}
               >
                 <View style={{ flex: 1 }}>
-                {this.state.user.profile.hours ? 
-                  <Text style={styles.largeNumber}>
-                    {this.state.user.profile.hours}
-                  </Text>
-                  :
-                  <Text style={styles.largeNumber}>0</Text>
-                }
+                  {this.state.user.profile.hours ?
+                    <Text style={styles.largeNumber}>
+                      {this.state.user.profile.hours}
+                    </Text>
+                    :
+                    <Text style={styles.largeNumber}>0</Text>
+                  }
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -197,14 +204,14 @@ export default class HomeScreen extends React.Component {
                       </Text>
                     </>
                   ) : (
-                    <>
-                      <ActivityIndicator
-                        style={{ marginBottom: 16 }}
-                        size="small"
-                        color="#0d0d0d"
-                      />
-                    </>
-                  )}
+                      <>
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      </>
+                    )}
                   <Text style={styles.largeNumberCaption}>
                     Total Opportunities
                   </Text>
@@ -223,6 +230,17 @@ export default class HomeScreen extends React.Component {
                       <ProfileInfo user={this.state.user} />
                     </>
                   )}
+                  {this.state.activeTab === 1 && this.state.events && (
+                    <>
+                      <ProfileHistory events={this.state.events.registered_events} />
+                    </>
+                  )}
+                  {this.state.activeTab === 2 && this.state.events &&  (
+                    <>
+                      <ProfileCreated events={this.state.events.created_events} />
+                    </>
+                  )}
+
                 </View>
               </View>
               <View
@@ -360,7 +378,7 @@ export default class HomeScreen extends React.Component {
                       <View style={styles.menuItemWrapper}>
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
-                          onPress={() => {}}
+                          onPress={() => { }}
                         >
                           <View style={styles.menuItemContainer}>
                             <Text style={styles.menuItemLabel}>
@@ -383,7 +401,7 @@ export default class HomeScreen extends React.Component {
                       <View style={styles.menuItemWrapper}>
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
-                          onPress={() => {}}
+                          onPress={() => { }}
                         >
                           <View style={styles.menuItemContainer}>
                             <Text style={styles.menuItemLabel}>
@@ -423,7 +441,7 @@ export default class HomeScreen extends React.Component {
                       <View style={styles.menuItemWrapper}>
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
-                          onPress={() => {}}
+                          onPress={() => { }}
                         >
                           <View style={styles.menuItemContainer}>
                             <Text style={styles.menuItemLabel}>Agreements</Text>
@@ -444,7 +462,7 @@ export default class HomeScreen extends React.Component {
                       <View style={styles.menuItemWrapper}>
                         <TouchableOpacity
                           style={styles.menuItemTouchable}
-                          onPress={() => {}}
+                          onPress={() => { }}
                         >
                           <View style={styles.menuItemContainer}>
                             <Text style={styles.menuItemLabel}>
@@ -482,20 +500,20 @@ export default class HomeScreen extends React.Component {
               </View>
             </>
           ) : (
-            <>
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontSize: 18,
-                  marginTop: 24,
-                  marginBottom: 24
-                }}
-              >
-                Loading profile...
+              <>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 18,
+                    marginTop: 24,
+                    marginBottom: 24
+                  }}
+                >
+                  Loading profile...
               </Text>
-              <ActivityIndicator size="large" color="#0d0d0d" />
-            </>
-          )}
+                <ActivityIndicator size="large" color="#0d0d0d" />
+              </>
+            )}
         </ScrollView>
       </View>
     );
