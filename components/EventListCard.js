@@ -87,7 +87,11 @@ class EventListCard extends React.Component {
                             fontSize: 21,
                             paddingRight: 12,
                             paddingTop: 12,
-                            textAlign: "right"
+                            textAlign: "right",
+                            textShadowOffset: { width: 0.5, height: 0.5 },
+                            textShadowRadius: 2,
+                            textShadowColor: '#000',
+
                           }}
                         >
                           {moment(item.start[0], "hh:mm").format("h:mm a")}
@@ -184,10 +188,10 @@ class EventListCard extends React.Component {
                     </View>
                   </>
                 ) : (
-                  <>
-                    <ActivityIndicator size="small" />
-                  </>
-                )}
+                    <>
+                      <ActivityIndicator size="small" />
+                    </>
+                  )}
               </View>
             </View>
           </View>

@@ -73,7 +73,12 @@ class EventDetails extends React.Component {
                 <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
                   <TouchableOpacity onPress={this.props.onClose}>
                     <Icon.Ionicons
-                      style={{ color: "#fff" }}
+                      style={{
+                        color: "#fff",
+                        textShadowOffset: { width: 0.5, height: 0.5 },
+                        textShadowRadius: 2,
+                        textShadowColor: '#000',
+                      }}
                       name={
                         Platform.OS === "ios"
                           ? "ios-close-circle"
@@ -119,7 +124,7 @@ class EventDetails extends React.Component {
             style={{
               flex: 10,
               flexDirection: "column",
-              justifyContent:"flex-end",
+              justifyContent: "flex-end",
               paddingVertical: 12,
               paddingHorizontal: 12
             }}
