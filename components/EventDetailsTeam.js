@@ -19,8 +19,10 @@ class EventDetailsTeam extends React.Component {
     const remaining = parseInt(item.capacity)-(parseInt(item.num_pending_attendees)+parseInt(item.num_attendees))
     return remaining;
   }
-  render() {
+    render() {
     let item = this.props.event;
+    console.log(`ITEM`)
+    console.log(item)
     let privacyLabel = item.privacy === "o" ? "Open" : "Private";
     return (
       <ScrollView>
