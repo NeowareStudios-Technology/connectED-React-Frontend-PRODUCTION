@@ -96,6 +96,23 @@ class EventDetails extends React.Component {
                     paddingHorizontal: 12
                   }}
                 >
+                  {/* <View
+                    style={{
+                      flex: 6,
+                      alignContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "#000000",
+                        fontSize: 20,
+                        paddingVertical: 6,
+                      }}
+                    > 
+                    titleaskjd;coaisjd;oaijsdo;ciajdos;cj;asoicdjaios;djc
+                    </Text>
+                  </View> */}
                   <View style={{ flex: 2 }} />
                   <View
                     style={{

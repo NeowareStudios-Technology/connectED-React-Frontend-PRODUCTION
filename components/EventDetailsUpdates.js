@@ -62,6 +62,12 @@ class EventDetailsUpdates extends React.Component {
                       loading: false
                     });
                   }
+                  else {
+                    this.setState({
+                      loading: false,
+                      updates: []
+                    })
+                  }
                 }
               } catch (error) {}
             }
@@ -91,7 +97,14 @@ class EventDetailsUpdates extends React.Component {
             <View style={{ paddingBottom: 24 }}>
               {this.state.updates.length > 0 ? (
                 <>
-                  <Text style={{ marginBottom: 4, fontWeight: "bold" }}>
+                  <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                  <Text style={{ 
+                    marginBottom: 4, 
+                    fontSize: 20, 
+                    marginBottom: 5, 
+                    color: 'green',
+                    fontWeight: 'bold' 
+                  }}>
                     Latest Updates:
                   </Text>
                   <ScrollView contentContainerStyle={{ paddingVertical: 12 }}>
@@ -116,7 +129,11 @@ class EventDetailsUpdates extends React.Component {
                 </>
               ) : (
                 <>
-                  <Text>There no updates at this time.</Text>
+                  <View>
+                    <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                    <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
+                    <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
+                  </View>
                 </>
               )}
             </View>
@@ -124,6 +141,23 @@ class EventDetailsUpdates extends React.Component {
         )}
       </>
     );
+  }
+  styles={
+    title: {
+      fontSize: 26,
+      marginBottom: 10,
+      fontWeight: 'bold'
+    },
+    subtitle: {
+      fontSize: 18,
+      marginBottom: 5,
+      color: 'red',
+      fontWeight: 'bold'
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 24
+    }
   }
 }
 

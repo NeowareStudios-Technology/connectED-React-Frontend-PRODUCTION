@@ -29,16 +29,15 @@ class EventDetailsInfo extends React.Component {
             <Text
               style={{
                 fontWeight: "bold",
-                fontSize: 18,
-                marginBottom: 6
+                fontSize: 26,
+                marginBottom: 5
               }}
             >
               {item.e_title}
             </Text>
             <Text
               style={{
-                fontSize: 16,
-                marginBottom: 6
+                fontSize: 16
               }}
             >
               {item.e_desc}
@@ -46,14 +45,14 @@ class EventDetailsInfo extends React.Component {
           </View>
           <View style={{ flex: 10 }}>
             <View style={{ marginBottom: 12 }}>
-              <Text>Location:</Text>
-              <Text style={{ fontWeight: "bold" }}>
+              <Text style={this.styles.subtitle}>Location:</Text>
+              <Text style={{ fontSize: 16 }}>
                 {item.street} {item.city}, {item.state} {item.zip_code}
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text>Opportunity Status:</Text>
-              <Text style={{ fontWeight: "bold" }}>
+              <Text style={this.styles.subtitle}>Opportunity Status:</Text>
+              <Text style={{ fontSize: 16 }}>
                 {privacyLabel}{" "}
                 {item.req_skills && item.req_skills.length > 0 && (
                   <>
@@ -63,15 +62,15 @@ class EventDetailsInfo extends React.Component {
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text>Tags:</Text>
+              <Text style={this.styles.subtitle}>Tags:</Text>
               {item.interests && item.interests.length > 0 && (
                 <>
                   <View>
                     {item.interests.map((interest, index) => {
                       return (
                         <View key={"interest-" + index}>
-                          <Text style={{ fontWeight: "bold" }}>
-                            - {interest}
+                          <Text style={{ fontSize: 16 }}>
+                          { `\u2022  `}{interest}
                           </Text>
                         </View>
                       );
@@ -84,6 +83,21 @@ class EventDetailsInfo extends React.Component {
         </View>
       </>
     );
+  }
+  styles={
+    title: {
+      fontSize: 26,
+      marginBottom: 5
+    },
+    subtitle: {
+      fontSize: 20,
+      marginBottom: 5,
+      fontWeight: 'bold'
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 24
+    }
   }
 }
 
