@@ -13,6 +13,7 @@ import {
   Dimensions
 } from "react-native";
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
+import Sequencer from "../components/Sequencer";
 import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
 import ProfileHistory from "../components/ProfileHistory";
@@ -32,11 +33,151 @@ export default class HomeScreen extends React.Component {
 
     this.state = {
       user: null,
-      userEvents: null,
       events: null,
-      activeTab: 0
+      userEvents: null, // events created by user
+      pastEvents: null, // past events the user has volunteered for
+      activeTab: 0,
+      loading: true
     };
   }
+
+  // loads any events the user created and sorts by date
+  loadUserEvent = async (eventName, index, callback) => {
+    console.log("LOAD USER EVENT: " + eventName)
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                let userEvents = []
+                  // keep state immutable by using slice to return new array
+                  if (this.state.userEvents) {
+                    userEvents = this.state.userEvents.slice();
+                  }
+                  console.log("USER EVENTS", userEvents)
+                  let event = responseData;
+                  event.key = "user-event-" + index;
+                  userEvents.push(event);
+                  // console.log(event)
+                  this.setState(
+                    {
+                      userEvents: userEvents,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    }
+                  );
+              
+              }
+            } catch (error) { }
+          }
+          else {
+            callback();
+          }
+        });
+      } catch (error) { }
+    }
+  };
+
+  // Loads and filters registered events to only include past events sorted by date 
+  loadPastEvent = async (eventName, index, callback) => {
+    console.log("LOAD PAST EVENT: " + eventName)
+    // let token = await User.firebase.getIdToken();
+    // if (token) {
+    //   try {
+    //     let url =
+    //       "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+    //       eventName;
+    //     fetch(url, {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: "Bearer " + token
+    //       }
+    //     }).then(response => {
+    //       if (response.ok) {
+    //         try {
+    //           let responseData = JSON.parse(response._bodyText);
+    //           if (responseData) {
+    //             if (typeof responseData.e_title === "string") {
+    //               // keep state immutable by using slice to return new array
+    //               let events = this.state.events.slice();
+    //               let event = responseData;
+    //               event.key = "past-event-" + index;
+    //               event.distance = this.state.distances[index];
+    //               events.push(event);
+    //               this.setState(
+    //                 {
+    //                   events: events,
+    //                   loading: false
+    //                 },
+    //                 () => {
+    //                   callback();
+    //                 }
+    //               );
+    //             }
+    //           }
+    //         } catch (error) { }
+    //       }
+    //       else {
+    //         callback();
+    //       }
+    //     });
+    //   } catch (error) { }
+    // }
+  };
+
+  loadEvents = () => {
+    console.log("LOAD EVENTS")
+    // TODO: Don't include duplicate events. only fetch the event once
+    let sequence = new Sequencer();
+    // handle past events
+    let registeredEvents = this.state.events.registered_events
+    let userEvents = this.state.events.created_events
+    console.log("PAST: ", registeredEvents)
+    console.log("CREATED:", userEvents)
+    // filter registered_events from the past.
+    // sort by date
+    if (registeredEvents.length > 0) {
+      // this.setState({pastEvents: []})
+      // registeredEvents.map((eventName, index) => {
+      //   sequence.promise(() => {
+      //     this.loadPastEvent(eventName, index, () => {
+      //       sequence.next();
+      //     });
+      //   });
+      // });
+    } else {
+      this.setState({pastEvents: []})
+    }
+    if (userEvents.length > 0) {
+      userEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadUserEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    } else {
+      this.setState({userEvents: []})
+    }
+    sequence.next();
+  };
+
   loadUserOpportunities = async () => {
     console.log("LOAD USER OPPORTUNITIES")
     let userEvents = [];
@@ -57,23 +198,21 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
-              if (events) {
-                console.log("EVENTS", events)
-                if (typeof events.completed_events !== "undefined") {
-                  userEvents = events.completed_events;
-                }
-                this.setState(events)
+              console.log("EVENTS:", events)
+              if (typeof events === "object") {
+                this.setState({ events: events }, () => this.loadEvents())
+              } else {
+                this.setState({ loading: false });
               }
-            } catch (error) {
-              console.log(error);
-            }
+            } catch (error) { }
+          } else {
+            this.setState({
+              loading: false
+            });
           }
         });
-      } catch (error) {
-        console.log("events error fetching", error.message);
-      }
-    };
-    this.setState({ userEvents: userEvents });
+      } catch (error) { }
+    }
   }
 
   async componentDidMount() {
@@ -116,7 +255,7 @@ export default class HomeScreen extends React.Component {
       <View style={styles.container}>
         <ScrollView
           style={styles.container}
-          contentContainerStyle={[styles.contentContainer, {height: screenHeight}]}
+          contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
         >
           {this.state.user ? (
             <>
@@ -201,10 +340,10 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  {this.state.userEvents ? (
+                  {this.state.pastEvents ? (
                     <>
                       <Text style={styles.largeNumber}>
-                        {this.state.userEvents.length}
+                        {this.state.pastEvents.length}
                       </Text>
                     </>
                   ) : (
@@ -234,14 +373,32 @@ export default class HomeScreen extends React.Component {
                       <ProfileInfo user={this.state.user} />
                     </>
                   )}
-                  {this.state.activeTab === 1 && this.state.events && (
+                  {this.state.activeTab === 1 && (
                     <>
-                      <ProfileHistory events={this.state.events.registered_events} />
+                      {this.state.pastEvents ? (
+                        <ProfileHistory events={this.state.pastEvents} />
+                      ) : (
+                          <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="small"
+                            color="#0d0d0d"
+                          />
+                        )}
+
                     </>
                   )}
-                  {this.state.activeTab === 2 && this.state.events && (
+                  {this.state.activeTab === 2 && (
                     <>
-                      <ProfileCreated events={this.state.events.created_events} />
+                      {this.state.userEvents ? (
+                        <ProfileCreated events={this.state.userEvents} />
+                      ):(
+                        <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="small"
+                            color="#0d0d0d"
+                          />
+                      )}
+                      
                     </>
                   )}
 

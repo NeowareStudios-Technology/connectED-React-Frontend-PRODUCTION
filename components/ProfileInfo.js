@@ -3,7 +3,7 @@ import { Text, StyleSheet, View } from "react-native";
 
 class ProfileInfo extends React.Component {
   render() {
-    console.log(this.props.user)
+    console.log("PROFILE INFO: ", this.props.user)
     return (
       <>
         <View style={styles.container}>
