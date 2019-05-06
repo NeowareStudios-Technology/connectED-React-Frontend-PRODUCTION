@@ -335,7 +335,7 @@ export default class HomeScreen extends React.Component {
                         </TouchableOpacity>
                       </View>
                     </View>
-                    <View style={styles.drawerSectionWrapper}>
+                    {/* <View style={styles.drawerSectionWrapper}>
                       <View style={styles.drawerSectionLabelContainer}>
                         <Icon.Ionicons
                           name={
@@ -464,12 +464,13 @@ export default class HomeScreen extends React.Component {
                           </View>
                         </TouchableOpacity>
                       </View>
-                    </View>
+                    </View> */}
                     <View
-                      style={{ flexDirection: "row", justifyContent: "center" }}
+                      style={{ flexDirection: "row" }}
                     >
                       <Button
                         title="Logout"
+                        style={{width: 200}}
                         onPress={() => {
                           User.logout(() => {
                             this.props.navigation.navigate("Main");
@@ -505,11 +506,11 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
 
   contentContainer: {
-    paddingTop: 12
+    paddingTop: 12,
   },
   largeNumber: {
     fontSize: 30,

@@ -88,22 +88,24 @@ export default class MyCalendar extends Component {
                 }}
             />
             </View>
-            <ScrollView style={styles.scrollview}>
+            <View style={styles.eventsContainer}>
                 <Text style={styles.subtitle}>Volunteering</Text>
-                <FlatList
-                    data={DummyData}
-                    
-                    // extraData={this.state}
-                    keyExtractor={this._keyExtractor}
-                    renderItem={({item}) => 
-                        <View style={styles.eventListing}>
-                            <Text>{item.eventName}</Text>
-                            <Text>{item.date}</Text>
-                        </View>
-                    }
-                />
-      
-            </ScrollView>
+                <ScrollView >
+                    <FlatList
+                        data={DummyData}
+                        
+                        // extraData={this.state}
+                        keyExtractor={this._keyExtractor}
+                        renderItem={({item}) => 
+                            <View style={styles.eventListing}>
+                                <Text>{item.eventName}</Text>
+                                <Text>{item.date}</Text>
+                            </View>
+                        }
+                    />
+        
+                </ScrollView>
+            </View>
           </View>
         //     <View style={styles.container}>
         //     <ScrollView
@@ -199,9 +201,10 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: "#3788E0"
     },
-    scrollview: {
+    eventsContainer: {
       paddingLeft: 30,
       paddingRight: 30,
+      paddingTop: 15,
     },
     contentContainer: {
       paddingTop: 12
@@ -211,10 +214,10 @@ const styles = StyleSheet.create({
       fontWeight: "bold"
     },
     subtitle: {
-        fontSize: 24,
+        fontSize: 22,
         color: 'white',
         width: 180,
-        marginBottom: 10,
+        marginBottom: 5,
     },
     largeNumberCaption: {
       fontSize: 14,
