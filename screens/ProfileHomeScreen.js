@@ -158,7 +158,7 @@ export default class HomeScreen extends React.Component {
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
     let userEvents = this.state.events.created_events
-    if (registeredEvents.length > 0) {
+    if (registeredEvents && registeredEvents.length > 0) {
       registeredEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
         sequence.promise(() => {
@@ -170,7 +170,7 @@ export default class HomeScreen extends React.Component {
     } else {
       this.setState({ pastEvents: [] })
     }
-    if (userEvents.length > 0) {
+    if (userEvents && userEvents.length > 0) {
       userEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
         sequence.promise(() => {
