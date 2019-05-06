@@ -99,7 +99,7 @@ export default class MyCalendar extends Component {
                     calendarBackground: 'transparent',
                     textSectionTitleColor: 'white',
                     dayTextColor: 'white',
-                    todayTextColor: 'lightgray',
+                    todayTextColor: 'black',
                     textMonthFontSize: 30,
                     textMonthFontWeight: "bold",
                     textDayFontSize: 18,
