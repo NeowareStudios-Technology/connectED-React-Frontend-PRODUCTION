@@ -46,9 +46,7 @@ class EventsHomeScreen extends React.Component {
   }
 
   loadEvent = async (eventName, index, callback) => {
-    console.log("LOAD EVENT: " + eventName)
     let token = await User.firebase.getIdToken();
-    console.log(token)
     if (token) {
       try {
         let url =
@@ -61,10 +59,8 @@ class EventsHomeScreen extends React.Component {
             Authorization: "Bearer " + token
           }
         }).then(response => {
-          console.log("OKAY? " + response.ok)
           if (response.ok) {
             try {
-              console.log("RESPONSE:", response)
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.e_title === "string") {
@@ -97,7 +93,6 @@ class EventsHomeScreen extends React.Component {
 
   loadEvents = () => {
     let sequence = new Sequencer();
-    console.log("LOAD EVENTS")
     if (this.state.eventsNames.length > 0) {
       this.state.eventsNames.map((eventName, index) => {
         sequence.promise(() => {
@@ -112,7 +107,6 @@ class EventsHomeScreen extends React.Component {
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
-    console.log("FETCH DATA")
     if (token) {
       try {
         let url =
@@ -127,7 +121,6 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              console.log(responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   this.setState(
@@ -136,7 +129,6 @@ class EventsHomeScreen extends React.Component {
                       distances: responseData.distances
                     },
                     () => {
-                      console.log('state eventsNames and distances set. load events...')
                       this.loadEvents();
                     }
                   );
@@ -278,8 +270,6 @@ class EventsHomeScreen extends React.Component {
 
   async componentDidMount() {
     let user = await User.isLoggedIn();
-    let token = await User.firebase.getIdToken();
-    console.log(token)
     if (user) {
       this.fetchData();
     }
