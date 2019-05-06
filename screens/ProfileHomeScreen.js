@@ -20,6 +20,9 @@ import ProfileHistory from "../components/ProfileHistory";
 import ProfileCreated from "../components/ProfileCreated";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
+import moment from 'moment';
+import uuidv4 from 'uuid/v4';
+
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
 
@@ -43,7 +46,6 @@ export default class HomeScreen extends React.Component {
 
   // loads any events the user created and sorts by date
   loadUserEvent = async (eventName, index, callback) => {
-    console.log("LOAD USER EVENT: " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -62,25 +64,23 @@ export default class HomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 let userEvents = []
-                  // keep state immutable by using slice to return new array
-                  if (this.state.userEvents) {
-                    userEvents = this.state.userEvents.slice();
+                // keep state immutable by using slice to return new array
+                if (this.state.userEvents) {
+                  userEvents = this.state.userEvents.slice();
+                }
+                let event = responseData;
+                event.key = "user-event-" + uuidv4();
+                userEvents.push(event);
+                this.setState(
+                  {
+                    userEvents: userEvents,
+                    loading: false
+                  },
+                  () => {
+                    callback();
                   }
-                  console.log("USER EVENTS", userEvents)
-                  let event = responseData;
-                  event.key = "user-event-" + index;
-                  userEvents.push(event);
-                  // console.log(event)
-                  this.setState(
-                    {
-                      userEvents: userEvents,
-                      loading: false
-                    },
-                    () => {
-                      callback();
-                    }
-                  );
-              
+                );
+
               }
             } catch (error) { }
           }
@@ -94,74 +94,81 @@ export default class HomeScreen extends React.Component {
 
   // Loads and filters registered events to only include past events sorted by date 
   loadPastEvent = async (eventName, index, callback) => {
-    console.log("LOAD PAST EVENT: " + eventName)
-    // let token = await User.firebase.getIdToken();
-    // if (token) {
-    //   try {
-    //     let url =
-    //       "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
-    //       eventName;
-    //     fetch(url, {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: "Bearer " + token
-    //       }
-    //     }).then(response => {
-    //       if (response.ok) {
-    //         try {
-    //           let responseData = JSON.parse(response._bodyText);
-    //           if (responseData) {
-    //             if (typeof responseData.e_title === "string") {
-    //               // keep state immutable by using slice to return new array
-    //               let events = this.state.events.slice();
-    //               let event = responseData;
-    //               event.key = "past-event-" + index;
-    //               event.distance = this.state.distances[index];
-    //               events.push(event);
-    //               this.setState(
-    //                 {
-    //                   events: events,
-    //                   loading: false
-    //                 },
-    //                 () => {
-    //                   callback();
-    //                 }
-    //               );
-    //             }
-    //           }
-    //         } catch (error) { }
-    //       }
-    //       else {
-    //         callback();
-    //       }
-    //     });
-    //   } catch (error) { }
-    // }
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              // check if date is in past
+              let now = moment()
+              let eventDate = moment(responseData.date, "MM/DD/YYYY")
+              if (responseData && now.isAfter(eventDate, 'day')) {
+                let pastEvents = []
+                // keep state immutable by using slice to return new array
+                if (this.state.pastEvents) {
+                  pastEvents = this.state.pastEvents.slice();
+                }
+                let event = responseData;
+                event.key = "past-event-" + uuidv4();
+                pastEvents.push(event);
+                this.setState(
+                  {
+                    pastEvents: pastEvents,
+                    loading: false
+                  },
+                  () => {
+                    callback();
+                  }
+                );
+
+              } else {
+                // event not in the past
+                if (!this.state.pastEvents) {
+                  this.setState({ pastEvents: [] },
+                    () => {
+                      callback();
+                    })
+                } else {
+                  callback()
+                }
+              }
+            } catch (error) { }
+          }
+          else {
+            callback();
+          }
+        });
+      } catch (error) { }
+    }
   };
 
   loadEvents = () => {
-    console.log("LOAD EVENTS")
     // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
-    // handle past events
     let registeredEvents = this.state.events.registered_events
     let userEvents = this.state.events.created_events
-    console.log("PAST: ", registeredEvents)
-    console.log("CREATED:", userEvents)
-    // filter registered_events from the past.
-    // sort by date
     if (registeredEvents.length > 0) {
-      // this.setState({pastEvents: []})
-      // registeredEvents.map((eventName, index) => {
-      //   sequence.promise(() => {
-      //     this.loadPastEvent(eventName, index, () => {
-      //       sequence.next();
-      //     });
-      //   });
-      // });
+      registeredEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadPastEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
     } else {
-      this.setState({pastEvents: []})
+      this.setState({ pastEvents: [] })
     }
     if (userEvents.length > 0) {
       userEvents.map((eventName, index) => {
@@ -173,13 +180,12 @@ export default class HomeScreen extends React.Component {
         });
       });
     } else {
-      this.setState({userEvents: []})
+      this.setState({ userEvents: [] })
     }
     sequence.next();
   };
 
   loadUserOpportunities = async () => {
-    console.log("LOAD USER OPPORTUNITIES")
     let userEvents = [];
     let token = await User.firebase.getIdToken();
     if (token) {
@@ -198,7 +204,6 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
-              console.log("EVENTS:", events)
               if (typeof events === "object") {
                 this.setState({ events: events }, () => this.loadEvents())
               } else {
@@ -249,7 +254,6 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    console.log("active tab: " + this.state.activeTab)
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>
@@ -391,14 +395,14 @@ export default class HomeScreen extends React.Component {
                     <>
                       {this.state.userEvents ? (
                         <ProfileCreated events={this.state.userEvents} />
-                      ):(
-                        <ActivityIndicator
+                      ) : (
+                          <ActivityIndicator
                             style={{ marginBottom: 16 }}
                             size="small"
                             color="#0d0d0d"
                           />
-                      )}
-                      
+                        )}
+
                     </>
                   )}
 

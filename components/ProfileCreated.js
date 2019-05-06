@@ -1,14 +1,13 @@
 import React from "react";
 import { Text, StyleSheet, View } from "react-native";
-import { ListItem, Image } from 'react-native-elements';
-import moment from 'moment'
+import { ListItem } from 'react-native-elements';
+import moment from 'moment';
 
 class ProfileCreated extends React.Component {
   render() {
     if (!this.props.events) {
       return null
     }
-    console.log(this.props.events)
     // sort events in ascending order
     let sortedEvents = this.props.events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
     return (
@@ -17,10 +16,10 @@ class ProfileCreated extends React.Component {
           <View style={styles.section}>
             <Text style={styles.sectionHeader}>Your Created Events:</Text>
             <View>
-              {sortedEvents.map((event, key) => (
+              {sortedEvents.map((event) => (
                 <>
                   <ListItem
-                    key={key}
+                    key={event.key}
                     leftAvatar={{ source: { uri: "data:image/png;base64," + event.e_photo }, rounded: false }}
                     title={event.e_title}
                     subtitle={moment(event.date, "MM/DD/YYYY").format("MMM Do")}
