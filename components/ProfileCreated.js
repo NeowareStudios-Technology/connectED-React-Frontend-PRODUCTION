@@ -17,7 +17,6 @@ class ProfileCreated extends React.Component {
             <Text style={styles.sectionHeader}>Your Created Events:</Text>
             <View>
               {sortedEvents.map((event) => (
-                <>
                   <ListItem
                     key={event.key}
                     leftAvatar={{ source: { uri: "data:image/png;base64," + event.e_photo }, rounded: false }}
@@ -25,7 +24,6 @@ class ProfileCreated extends React.Component {
                     subtitle={moment(event.date, "MM/DD/YYYY").format("MMM Do")}
                     contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
                   />
-                </>
               ))
               }
             </View>
