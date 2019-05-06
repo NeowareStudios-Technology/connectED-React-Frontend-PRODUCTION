@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   },
 
   contentContainer: {
-    paddingTop: 12,
+    paddingTop: 12
   },
   largeNumber: {
     fontSize: 30,

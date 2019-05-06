@@ -50,9 +50,30 @@ export default class MyCalendar extends Component {
     };
     this.updateTab = this.updateTab.bind(this)
     }
+
+    componentDidMount() {
+        this.getEventDates(DummyData)
+        // this.getMarkedDates()
+    }
     updateTab (selectedIndex) {
         this.setState({selectedIndex})
     }
+    getEventDates(array) {
+        let DatesArray = []
+        for(var i = 0; i < array.length; i++){
+            DatesArray.push(array[i].date)
+            this.setState({markedDates: DatesArray})
+        }
+    }
+    // getMarkedDates(){
+    //     let datesObject={}
+    //     for(var i=0; i<this.state.markedDates.length; i++){
+    //         this.state.markedDates[i] = {selected: true, selectedColor: '#275FBC'}
+    //         console.warn(this.state.markedDates[i], 'state')
+    //     }
+    //     console.warn(datesObject, 'datesobject')
+    //     // '2019-05-16': {selected: true, selectedColor: '#275FBC'},
+    // }
     _keyExtractor = (item, index) => item.id;
 
     render() {
@@ -66,13 +87,13 @@ export default class MyCalendar extends Component {
                 current={()=>DateNow()}
                 pastScrollRange={24}
                 futureScrollRange={24}
-                // pagingEnabled
                 style={{
                     backgroundColor: "transparent",
                     paddingTop: 40,
                 }}
                 markedDates={{
-                    '2019-05-16': {selected: true, selectedColor: '#275FBC'},
+                    '2019-05-12': {selected: true, selectedColor: '#275FBC'},
+                    '2019-05-22': {selected: true, selectedColor: '#275FBC'},
                 }}
                 theme={{
                     calendarBackground: 'transparent',
@@ -98,8 +119,17 @@ export default class MyCalendar extends Component {
                         keyExtractor={this._keyExtractor}
                         renderItem={({item}) => 
                             <View style={styles.eventListing}>
-                                <Text>{item.eventName}</Text>
-                                <Text>{item.date}</Text>
+                                <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
+                                <View style={{
+                                    marginLeft:10,
+                                    paddingLeft:10,
+                                    borderLeftColor: 'gray',
+                                    borderLeftWidth: 2
+                                }}>
+                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.eventName}</Text>
+                                    <Text>{item.date}</Text>
+                                    <Text>{item.time}</Text>
+                                </View>
                             </View>
                         }
                     />
@@ -107,91 +137,6 @@ export default class MyCalendar extends Component {
                 </ScrollView>
             </View>
           </View>
-        //     <View style={styles.container}>
-        //     <ScrollView
-        //       style={styles.container}
-        //       contentContainerStyle={styles.contentContainer}
-        //     >
-        //         <>
-        //             <Calendar
-        //             style={{
-        //                 backgroundColor: "transparent",
-        //                 paddingTop: 20
-        //             }}
-        //             markedDates={{
-        //                 '2019-05-16': {selected: true, selectedColor: '#275FBC'},
-        //               }}
-        //             // Initially visible month. Default = Date()
-        //             current={()=>DateNow()}
-        //             // Handler which gets executed on day press. Default = undefined
-        //             onDayPress={(day) => {console.log('selected day', day)}}
-        //             // Handler which gets executed on day long press. Default = undefined
-        //             onDayLongPress={(day) => {console.log('selected day', day)}}
-        //             // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
-        //             monthFormat={'MMMM yyyy'}
-        //             // Handler which gets executed when visible month changes in calendar. Default = undefined
-        //             onMonthChange={(month) => {console.log('month changed', month)}}
-        //             // Hide month navigation arrows. Default = false
-        //             hideArrows={false}
-        //             // Replace default arrows with custom ones (direction can be 'left' or 'right')
-        //             renderArrow={(direction) => (
-        //                 <>
-        //                 {direction==="left"?
-                        
-        //                     <Icon.Ionicons
-        //                     name={Platform.OS === "ios" ? `ios-arrow-back` : "md-arrow-back"}
-        //                     size={30}
-        //                     color="white"
-        //                     />
-        //                     :
-        //                     <Icon.Ionicons
-        //                     name={Platform.OS === "ios" ? `ios-arrow-forward` : "md-arrow-forward"}
-        //                     size={30}
-        //                     color="white"
-        //                     />
-        //                 }
-        //               </>
-        //                 )}
-        //             // Do not show days of other months in month page. Default = false
-        //             hideExtraDays={false}
-        //             // If hideArrows=false and hideExtraDays=false do not switch month when tapping on greyed out
-        //             // day from another month that is visible in calendar page. Default = false
-        //             disableMonthChange={true}
-        //             // If firstDay=1 week starts from Monday. Note that dayNames and dayNamesShort should still start from Sunday.
-        //             firstDay={1}
-        //             // Hide day names. Default = false
-        //             hideDayNames={false}
-        //             // Show week numbers to the left. Default = false
-        //             // showWeekNumbers={true}
-        //             // Handler which gets executed when press arrow icon left. It receive a callback can go back month
-        //             onPressArrowLeft={substractMonth => substractMonth()}
-        //             // Handler which gets executed when press arrow icon left. It receive a callback can go next month
-        //             onPressArrowRight={addMonth => addMonth()}
-        //             theme={{
-        //                 calendarBackground: 'transparent',
-        //                 textSectionTitleColor: 'white',
-        //                 dayTextColor: 'white',
-        //                 todayTextColor: 'lightgray',
-        //                 textMonthFontSize: 30,
-        //                 textDayFontSize: 18,
-        //                 monthTextColor: 'white',
-        //                 selectedDayBackgroundColor: 'darkblue',
-        //                 arrowColor: 'white',
-        //                 // textDisabledColor: 'red',
-        //                 // 'stylesheet.calendar.header': {
-        //                 //   week: {
-        //                 //     marginTop: 5,
-        //                 //     flexDirection: 'row',
-        //                 //     justifyContent: 'space-between'
-        //                 //   }
-        //                 // }
-        //               }}
-        //             />
-                 
-        //         </>
-              
-        //     </ScrollView>
-        //   </View>
     
         );
     }
@@ -226,6 +171,8 @@ const styles = StyleSheet.create({
     },
     eventListing: {
         backgroundColor: 'white',
+        flex: 1, 
+        flexDirection: 'row',
         color: 'black',
         paddingLeft: 10,
         paddingRight: 10,
