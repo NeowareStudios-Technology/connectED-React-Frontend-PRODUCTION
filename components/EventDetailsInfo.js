@@ -21,7 +21,7 @@ class EventDetailsInfo extends React.Component {
 
   render() {
     let item = this.props.event;
-    let privacyLabel = item.privacy === "o" ? "Open" : "Private";
+    let privacyLabel = item.privacy === "o" ? "Public" : "Private";
     return (
       <>
         <View style={{ flex: 1 }}>
@@ -34,6 +34,9 @@ class EventDetailsInfo extends React.Component {
               }}
             >
               {item.e_title}
+            </Text>
+            <Text style={{fontWeight: "bold", color: "#2f95dc"}}>
+            {privacyLabel}
             </Text>
             <Text
               style={{
@@ -51,12 +54,12 @@ class EventDetailsInfo extends React.Component {
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text style={this.styles.subtitle}>Opportunity Status:</Text>
+              <Text style={this.styles.subtitle}>Required Skills:</Text>
               <Text style={{ fontSize: 16 }}>
-                {privacyLabel}{" "}
+                
                 {item.req_skills && item.req_skills.length > 0 && (
                   <>
-                    <Text>/ Required Skills: {item.req_skills.join(" ")}</Text>
+                    <Text>{item.req_skills.join(" ")}</Text>
                   </>
                 )}
               </Text>

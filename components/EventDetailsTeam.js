@@ -38,7 +38,7 @@ class EventDetailsTeam extends React.Component {
         {item.attendees ? 
         <View>
           {item.privacy === "p" ?
-          <Text style={this.styles.subtitle}>Confirmed Attendees:</Text>
+          <Text style={this.styles.subtitle}>Confirmed attendees:</Text>
           :
           <Text style={this.styles.subtitle}>Attendees:</Text>
           }
