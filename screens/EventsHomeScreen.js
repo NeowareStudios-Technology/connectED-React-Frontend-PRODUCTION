@@ -286,6 +286,7 @@ class EventsHomeScreen extends React.Component {
         onPress={() => {
           this.openItem(item, index);
         }}
+        activeOpacity={1}
       >
         <EventListCard event={item}/>
       </TouchableOpacity>
