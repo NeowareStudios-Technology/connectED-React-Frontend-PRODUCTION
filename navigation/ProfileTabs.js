@@ -78,7 +78,7 @@ TeamsStack.navigationOptions = {
 
 export default createBottomTabNavigator({
   EventsHomeStack,
-  ProfileHomeStack,
   CalendarStack,
-  TeamsStack
+  TeamsStack,
+  ProfileHomeStack
 });

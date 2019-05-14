@@ -10,6 +10,7 @@ class ProfileCreated extends React.Component {
     }
     // sort events in ascending order
     let sortedEvents = this.props.events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+    console.log(sortedEvents)
     return (
       <>
         <View style={styles.container}>
