@@ -220,7 +220,6 @@ export default class TeamsScreen extends Component {
  
 
     render() {
-      console.warn(this.state.currentTeam, "currentTeam")
         return (
             <>
             <View style={styles.container}>
