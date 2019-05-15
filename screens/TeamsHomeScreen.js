@@ -15,6 +15,10 @@ import {
   } from "react-native";
   import styles from "../constants/Styles";
   import { Icon } from "expo";
+  import User from "../components/User";
+
+
+
 
   const DummyData = [
     {
@@ -43,13 +47,126 @@ export default class TeamsScreen extends Component {
         header: null
     };
     constructor(props) {
-        super(props);
-    
-        this.state = {
-          activeItem: null,
-        };
-      }
+      super(props);
+  
+      this.state = {
+        activeItem: null,
+        TopTeamNames: [],
+        SuggestedTeamNames: [],
+      };
+    }
 
+    // loadEvents = () => {
+    //   let sequence = new Sequencer();
+    //   if (this.state.eventsNames.length > 0) {
+    //     this.state.eventsNames.map((eventName, index) => {
+    //       sequence.promise(() => {
+    //         this.loadEvent(eventName, index, () => {
+    //           sequence.next();
+    //         });
+    //       });
+    //     });
+    //   }
+    //   sequence.next();
+    // };
+    fetchTopTeamData = async () => {
+      let token = await User.firebase.getIdToken();
+      if (token) {
+        try {
+          let url =
+            "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/top";
+            
+          fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token
+            }
+          }).then(response => {
+            if (response.ok) {
+              try {
+                let responseData = JSON.parse(response._bodyText);
+                if (responseData) {
+                  // console.warn(responseData)
+                  if (typeof responseData === "object") {
+                    this.setState(
+                      {
+                        TopTeamNames: responseData.top_team_names,
+                        // distances: responseData.distances
+                      },
+                      () => {
+                        // this.loadEvents();
+                        console.warn("need to load topteams")
+                      }
+                    );
+                  } else {
+                    this.setState({ loading: false });
+                  }
+                }
+              } catch (error) { }
+            } else {
+              this.setState({
+                loading: false
+              });
+            }
+          });
+        } catch (error) { }
+      }
+    };
+
+    fetchSuggestedTeamData = async () => {
+      let token = await User.firebase.getIdToken();
+      if (token) {
+        try {
+          let url =
+            "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/suggested";
+            
+          fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token
+            }
+          }).then(response => {
+            if (response.ok) {
+              try {
+                let responseData = JSON.parse(response._bodyText);
+                if (responseData) {
+                  if (typeof responseData === "object") {
+                    this.setState(
+                      {
+                        SuggestedTeamNames: responseData.team_names,
+                        // distances: responseData.distances
+                      },
+                      () => {
+                        // this.loadEvents();
+                        console.warn("need to load suggested teams")
+                      }
+                    );
+                  } else {
+                    this.setState({ loading: false });
+                  }
+                }
+              } catch (error) { }
+            } else {
+              this.setState({
+                loading: false
+              });
+            }
+          });
+        } catch (error) { }
+      }
+    };
+
+
+    async componentDidMount() {
+      let user = await User.isLoggedIn();
+      if (user) {
+        this.fetchTopTeamData();
+        this.fetchSuggestedTeamData();
+    }
+  }
+  
     _keyExtractor = (item, index) => item.id;
 
     openItem = (item, index) => {
@@ -148,12 +265,13 @@ export default class TeamsScreen extends Component {
 
                       </View>
                     </View>
-
-
                     <View style={[styles.eventsContainer,{flex: 10}]}>
-                          <Text style={styles.displayH4}>All Teams</Text>
+
+                  {this.state.TopTeamNames.length > 0 ? 
+                  <View>
+                          <Text style={styles.displayH4}>Top Teams</Text>
                           <FlatList
-                            data={DummyData}
+                            data={this.state.TopTeamNames}
                             // extraData={this.state}
                             keyExtractor={this._keyExtractor}
                             renderItem={({item}) => 
@@ -168,14 +286,42 @@ export default class TeamsScreen extends Component {
                                     borderLeftColor: 'gray',
                                     borderLeftWidth: 2
                                 }}>
-                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.teamName}</Text>
-                                    <Text>{item.memberNames.length } Members</Text>
+                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
                                 </View>
                             </View>
                             </TouchableOpacity>
                                 }
                             />
                     </View>
+                  :null}
+                  {this.state.SuggestedTeamNames.length > 0 ? 
+                    <View>
+                          <Text style={styles.displayH4}>Suggested Teams</Text>
+                          <FlatList
+                            data={this.state.SuggestedTeamNames}
+                            // extraData={this.state}
+                            keyExtractor={this._keyExtractor}
+                            renderItem={({item}) => 
+                            <TouchableOpacity
+                                
+                            >
+                            <View style={styles.teamListing}>
+                                <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
+                                <View style={{
+                                    marginLeft:10,
+                                    paddingLeft:10,
+                                    borderLeftColor: 'gray',
+                                    borderLeftWidth: 2
+                                }}>
+                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
+                                </View>
+                            </View>
+                            </TouchableOpacity>
+                                }
+                            />
+                    </View>
+                  :null}
+                  </View>
 
 
                   </View>
