@@ -50,7 +50,7 @@ export default class TeamsScreen extends Component {
       super(props);
   
       this.state = {
-        activeItem: null,
+        currentTeam: {},
         TopTeamNames: [],
         SuggestedTeamNames: [],
       };
@@ -158,12 +158,52 @@ export default class TeamsScreen extends Component {
       }
     };
 
+    fetchOneTeamData = async (teamName) => {
+      let token = await User.firebase.getIdToken();
+      if (token) {
+        try {
+          let url =
+            `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${teamName}`;
+            
+          fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token
+            }
+          }).then(response => {
+            if (response.ok) {
+              try {
+                let responseData = JSON.parse(response._bodyText);
+                if (responseData) {
+                  if (typeof responseData === "object") {
+                    this.setState(
+                      {
+                        currentTeam: responseData,
+                      }
+                    );
+                  } else {
+                    this.setState({ loading: false });
+                  }
+                }
+              } catch (error) { }
+            } else {
+              this.setState({
+                loading: false
+              });
+            }
+          });
+        } catch (error) { }
+      }
+    };
+
 
     async componentDidMount() {
       let user = await User.isLoggedIn();
       if (user) {
         this.fetchTopTeamData();
         this.fetchSuggestedTeamData();
+        this.fetchOneTeamData("ss");
     }
   }
   
@@ -180,6 +220,7 @@ export default class TeamsScreen extends Component {
  
 
     render() {
+      console.warn(this.state.currentTeam, "currentTeam")
         return (
             <>
             <View style={styles.container}>
