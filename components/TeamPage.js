@@ -17,6 +17,7 @@ import EventDetailsTeam from "./EventDetailsTeam";
 import EventDetailsUpdates from "./EventDetailsUpdates";
 import AppData from "../constants/Data";
 import TeamInfo from "./TeamInfo";
+import TeamRoster from "./TeamRoster";
 
 class TeamPage extends React.Component {
   constructor(props) {
@@ -57,7 +58,7 @@ console.warn(item)
           >
             <ImageBackground
               source={{
-                uri: "data:image/png;base64," + item.e_photo
+                uri: "data:image/png;base64," + item.t_photo
               }}
               style={{
                 width: "100%",
@@ -89,7 +90,7 @@ console.warn(item)
                     />
                   </TouchableOpacity>
                 </View>
-                <View
+                {/* <View
                   style={{
                     flexDirection: "row",
                     flex: 3,
@@ -114,7 +115,7 @@ console.warn(item)
                     {this.props.team.t_name}
                     </Text>
                   </View>
-                </View>
+                </View> */}
               </View>
             </ImageBackground>
           </View>
@@ -135,7 +136,7 @@ console.warn(item)
               )}
               {this.state.activeTab === 1 && (
                 <>
-                  <EventDetailsTeam event={item} />
+                  <TeamRoster team={item} />
                 </>
               )}
               {this.state.activeTab === 2 && (

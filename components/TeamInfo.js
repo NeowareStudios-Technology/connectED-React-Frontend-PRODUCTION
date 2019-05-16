@@ -29,11 +29,11 @@ class TeamInfo extends React.Component {
             <Text
               style={{
                 fontWeight: "bold",
-                fontSize: 20,
+                fontSize: 26,
                 marginBottom: 5
               }}
             >
-              {`${item.t_city}, ${item.t_state}`}
+              {item.t_name}
             </Text>
             <Text style={{fontWeight: "bold", color: "#2f95dc"}}>
             {privacyLabel}
@@ -52,24 +52,6 @@ class TeamInfo extends React.Component {
               <Text style={{ fontSize: 16 }}>
               {`${item.t_city}, ${item.t_state}`}
               </Text>
-            </View>
-            <View style={{ marginBottom: 12 }}>
-              <Text style={this.styles.subtitle}>Tags:</Text>
-              {item.interests && item.interests.length > 0 && (
-                <>
-                  <View>
-                    {item.interests.map((interest, index) => {
-                      return (
-                        <View key={"interest-" + index}>
-                          <Text style={{ fontSize: 16 }}>
-                          { `\u2022  `}{interest}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </>
-              )}
             </View>
           </View>
         </View>

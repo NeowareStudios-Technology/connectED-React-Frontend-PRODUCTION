@@ -319,11 +319,11 @@ export default class TeamsScreen extends Component {
                     </View>
                     <View style={[styles.eventsContainer,{flex: 10}]}>
 
-                  {this.state.TopTeamNames.length > 0 ? 
-                  <View>
-                          <Text style={styles.displayH4}>Top Teams</Text>
+                  {this.state.SuggestedTeamNames.length > 0 ? 
+                    <View>
+                          <Text style={styles.displayH4}>Suggested Teams</Text>
                           <FlatList
-                            data={this.state.TopTeamNames}
+                            data={this.state.SuggestedTeamNames}
                             // extraData={this.state}
                             keyExtractor={this._keyExtractor}
                             renderItem={({item, index}) => 
@@ -331,7 +331,7 @@ export default class TeamsScreen extends Component {
                               onPress={() => {
                                 this.openItem(item, index);
                               }}
-                            activeOpacity={1}
+                              activeOpacity={1}
                             >
                             <View style={styles.teamListing}>
                                 <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
@@ -349,16 +349,19 @@ export default class TeamsScreen extends Component {
                             />
                     </View>
                   :null}
-                  {this.state.SuggestedTeamNames.length > 0 ? 
-                    <View>
-                          <Text style={styles.displayH4}>Suggested Teams</Text>
+                  {this.state.TopTeamNames.length > 0 ? 
+                  <View>
+                          <Text style={styles.displayH4}>Top Teams</Text>
                           <FlatList
-                            data={this.state.SuggestedTeamNames}
+                            data={this.state.TopTeamNames}
                             // extraData={this.state}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
                             <TouchableOpacity
-                                
+                              onPress={() => {
+                                this.openItem(item, index);
+                              }}
+                              activeOpacity={1}
                             >
                             <View style={styles.teamListing}>
                                 <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
