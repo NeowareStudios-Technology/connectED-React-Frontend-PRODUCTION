@@ -16,6 +16,7 @@ import {
   import styles from "../constants/Styles";
   import { Icon } from "expo";
   import User from "../components/User";
+import TeamPage from '../components/TeamPage';
 
 
 
@@ -93,10 +94,6 @@ export default class TeamsScreen extends Component {
                       {
                         TopTeamNames: responseData.top_team_names,
                         // distances: responseData.distances
-                      },
-                      () => {
-                        // this.loadEvents();
-                        console.warn("need to load topteams")
                       }
                     );
                   } else {
@@ -137,10 +134,6 @@ export default class TeamsScreen extends Component {
                       {
                         SuggestedTeamNames: responseData.team_names,
                         // distances: responseData.distances
-                      },
-                      () => {
-                        // this.loadEvents();
-                        console.warn("need to load suggested teams")
                       }
                     );
                   } else {
@@ -203,19 +196,21 @@ export default class TeamsScreen extends Component {
       if (user) {
         this.fetchTopTeamData();
         this.fetchSuggestedTeamData();
-        this.fetchOneTeamData("ss");
     }
   }
   
     _keyExtractor = (item, index) => item.id;
 
     openItem = (item, index) => {
+      console.warn(item)
+        this.fetchOneTeamData(item);
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: item });
     };
     closeItem = item => {
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: null });
+        this.setState({currentTeam: {}})
     };
  
 
@@ -227,6 +222,23 @@ export default class TeamsScreen extends Component {
                 style={styles.container}
                 contentContainerStyle={styles.contentContainer}
               >
+            {this.state.activeItem ? (
+              <>
+                <View style={{ flex: 1 }}>
+                  <TeamPage
+                    event={this.state.activeItem}
+                    team={this.state.currentTeam}
+                    onClose={this.closeItem}
+                    onVolunteer={() => {
+                      this.volunteer();
+                    }}
+                    onDeregister={() => {
+                      this.deregister();
+                    }}
+                  />
+                </View>
+              </>
+            ) : (
                 <View style={{ flex: 1 }}>
                     <View
                       style={{
@@ -314,9 +326,12 @@ export default class TeamsScreen extends Component {
                             data={this.state.TopTeamNames}
                             // extraData={this.state}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
                             <TouchableOpacity
-                                
+                              onPress={() => {
+                                this.openItem(item, index);
+                              }}
+                            activeOpacity={1}
                             >
                             <View style={styles.teamListing}>
                                 <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
@@ -365,6 +380,7 @@ export default class TeamsScreen extends Component {
 
 
                   </View>
+            )}
               </ScrollView>
             </View>
           </>
