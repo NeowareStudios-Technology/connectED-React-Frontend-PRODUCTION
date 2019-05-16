@@ -156,6 +156,7 @@ class EventCreateScreen extends React.Component {
           "It seems like you are not logged in or not authorized to create events."
         ]);
       }
+      console.log("event not created")
     } catch (error) {
       callback([error.message]);
     }
