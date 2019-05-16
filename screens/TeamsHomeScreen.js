@@ -202,7 +202,6 @@ export default class TeamsScreen extends Component {
     _keyExtractor = (item, index) => item.id;
 
     openItem = (item, index) => {
-      console.warn(item)
         this.fetchOneTeamData(item);
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: item });
@@ -321,7 +320,7 @@ export default class TeamsScreen extends Component {
 
                   {this.state.SuggestedTeamNames.length > 0 ? 
                     <View>
-                          <Text style={styles.displayH4}>Suggested Teams</Text>
+                          <Text style={styles.displayH4}>All Teams</Text>
                           <FlatList
                             data={this.state.SuggestedTeamNames}
                             // extraData={this.state}
@@ -349,7 +348,7 @@ export default class TeamsScreen extends Component {
                             />
                     </View>
                   :null}
-                  {this.state.TopTeamNames.length > 0 ? 
+                  {/* {this.state.TopTeamNames.length > 0 ? 
                   <View>
                           <Text style={styles.displayH4}>Top Teams</Text>
                           <FlatList
@@ -378,7 +377,7 @@ export default class TeamsScreen extends Component {
                                 }
                             />
                     </View>
-                  :null}
+                  :null} */}
                   </View>
 
 

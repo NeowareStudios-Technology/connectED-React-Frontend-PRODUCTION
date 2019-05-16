@@ -41,7 +41,6 @@ class TeamPage extends React.Component {
       item.env === "o"
         ? require("../assets/images/environment-outdoor-filled.png")
         : require("../assets/images/environment-outdoor-outline.png");
-console.warn(item)
     return (
       <>
         <View
@@ -241,7 +240,8 @@ console.warn(item)
                     <Button
                       type={this.state.activeTab === 2 ? "solid" : "outline"}
                       onPress={() => {
-                        this.setActiveTab(2);
+                        // this.setActiveTab(2);
+                        console.log("Need to figure this out")
                       }}
                       containerStyle={{
                         alignContent: "center",
@@ -266,6 +266,9 @@ console.warn(item)
                   </View>
                 </View>
                 <View style={{ justifyContent: "flex-end" }}>
+                    <Button title="Join this Team"/>
+                </View>
+                {/* <View style={{ justifyContent: "flex-end" }}>
                   {item.is_registered === "-1" && (
                     <>
                       <Button title="Pending..." />
@@ -287,7 +290,7 @@ console.warn(item)
                       />
                     </>
                   )}
-                </View>
+                </View> */}
               </View>
             </>
           </View>
