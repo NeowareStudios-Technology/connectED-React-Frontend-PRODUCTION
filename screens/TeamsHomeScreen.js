@@ -199,7 +199,7 @@ export default class TeamsScreen extends Component {
     }
   }
   
-    _keyExtractor = (item, index) => item.id;
+    _keyExtractor = (item, index) => index.toString();
 
     openItem = (item, index) => {
         this.fetchOneTeamData(item);
