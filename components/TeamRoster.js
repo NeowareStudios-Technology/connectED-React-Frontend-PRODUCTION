@@ -37,7 +37,7 @@ class TeamRoster extends React.Component {
               <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Lead</Text>
             }
             {item.t_leaders.map((leader, index)=>(
-              <View>
+              <View key={index}>
                 {leader !== "" ?
                 <Text style={this.styles.text} key={index}>{ `\u2022  `}{leader}</Text>
                 :null}
