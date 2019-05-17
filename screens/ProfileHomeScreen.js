@@ -43,6 +43,9 @@ export default class HomeScreen extends React.Component {
       loading: true
     };
   }
+  updateUser = (user) => {
+    this.setState({user: user})
+  }
 
   // loads any events the user created and sorts by date
   loadUserEvent = async (eventName, index, callback) => {
@@ -152,6 +155,9 @@ export default class HomeScreen extends React.Component {
       } catch (error) { }
     }
   };
+  updateUser() {
+    this.loadUser()
+  }
 
   loadEvents = () => {
     // TODO: Don't include duplicate events. only fetch the event once
@@ -220,7 +226,15 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadUser()
+  }
+  // componentDidUpdate(prevState){
+  //   if(prevState.user !== this.props.navigation.getParam('user')) {
+  //     this.loadUser()
+  //   }
+  // }
+  async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
       this.setState(
@@ -234,8 +248,10 @@ export default class HomeScreen extends React.Component {
     }
     return true;
   }
+
   navigateToPage = (page) => {
-    this.props.navigation.navigate(page);
+    this.props.navigation.navigate(page, {loadUser: this.loadUser});
+    // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
     this.setState({ open: false })
   }
 
@@ -254,6 +270,8 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
+    // console.log("this is from getParams", this.props.navigation.getParam("user"))
+    // console.log("this is from state", this.state.user)
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>

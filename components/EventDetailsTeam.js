@@ -49,11 +49,11 @@ class EventDetailsTeam extends React.Component {
         :
         <View>
         <Text style={this.styles.subtitle}>No confirmed attendees yet!</Text>
-        {item.pending_attendees.length === 1 ?
+        {/* {item.pending_attendees.length === 1 ?
         <Text style={this.styles.subtitle}>{item.pending_attendees.length} pending attendee.</Text>
         :
         <Text style={this.styles.subtitle}>{item.pending_attendees.length} pending attendees.</Text>
-        }
+        } */}
         </View>
         
         }

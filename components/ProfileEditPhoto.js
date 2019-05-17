@@ -25,7 +25,9 @@ class ProfileInfo extends React.Component {
           encoding: FileSystem.EncodingTypes.Base64
         });
         if (data) {
+          console.log(data)
           this.setState({ photo: data });
+          this.props.onPhotoSelected(data)
         }
       }
     }
