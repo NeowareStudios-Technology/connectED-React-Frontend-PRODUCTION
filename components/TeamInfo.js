@@ -25,7 +25,8 @@ class TeamInfo extends React.Component {
     return (
       <>
         <View style={{ flex: 1 }}>
-          <View style={{ flex: 4 }}>
+        <ScrollView>
+          <View>
             <Text
               style={{
                 fontWeight: "bold",
@@ -40,7 +41,8 @@ class TeamInfo extends React.Component {
             </Text>
             <Text
               style={{
-                fontSize: 16
+                fontSize: 16,
+                marginBottom: 10
               }}
             >
               {item.t_desc}
@@ -54,6 +56,7 @@ class TeamInfo extends React.Component {
               </Text>
             </View>
           </View>
+          </ScrollView>
         </View>
       </>
     );

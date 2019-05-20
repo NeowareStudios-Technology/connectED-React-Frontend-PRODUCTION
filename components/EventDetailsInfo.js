@@ -25,7 +25,8 @@ class EventDetailsInfo extends React.Component {
     return (
       <>
         <View style={{ flex: 1 }}>
-          <View style={{ flex: 4 }}>
+        <ScrollView>
+          <View>
             <Text
               style={{
                 fontWeight: "bold",
@@ -40,7 +41,8 @@ class EventDetailsInfo extends React.Component {
             </Text>
             <Text
               style={{
-                fontSize: 16
+                fontSize: 16,
+                marginBottom: 10
               }}
             >
               {item.e_desc}
@@ -83,6 +85,7 @@ class EventDetailsInfo extends React.Component {
               )}
             </View>
           </View>
+          </ScrollView>
         </View>
       </>
     );
