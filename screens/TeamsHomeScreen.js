@@ -263,7 +263,7 @@ export default class TeamsScreen extends Component {
                             borderWidth: 0
                           }}
                           onPress={() => {
-                            this.props.navigation.navigate("#");
+                            this.props.navigation.navigate("TeamCreate");
                           }}
                         >
                           <Icon.Ionicons

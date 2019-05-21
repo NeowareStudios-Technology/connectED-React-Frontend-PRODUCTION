@@ -2,6 +2,7 @@ import React from "react";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import ProfileTabs from "./ProfileTabs";
 import EventCreateScreen from "../screens/EventCreateScreen";
+import TeamCreateScreen from "../screens/TeamCreateScreen";
 
 const transitionConfig = () => {
   return {
@@ -32,7 +33,8 @@ export default createAppContainer(
     // You could add another route here for authentication.
     // Read more at https://reactnavigation.org/docs/en/auth-flow.html
     Profile: ProfileTabs,
-    EventCreate: EventCreateScreen
+    EventCreate: EventCreateScreen,
+    TeamCreate: TeamCreateScreen
   },{
     transitionConfig
   })

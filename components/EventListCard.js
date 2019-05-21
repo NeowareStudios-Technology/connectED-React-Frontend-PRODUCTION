@@ -37,10 +37,10 @@ class EventListCard extends React.Component {
           containerStyle={{
             padding: 0,
             paddingHorizontal: 0,
-            borderBottomRightRadius: 10,
-            borderBottomLeftRadius: 10,
-            borderTopRightRadius: 10,
-            borderTopLeftRadius: 10,
+            borderBottomRightRadius: 15,
+            borderBottomLeftRadius: 15,
+            borderTopRightRadius: 15,
+            borderTopLeftRadius: 15,
           }}
         >
           <View style={{ height: screenHeight - 180 }}>
@@ -48,7 +48,9 @@ class EventListCard extends React.Component {
               <View
                 style={{
                   flex: 9,
-                  backgroundColor: "#124b73"
+                  backgroundColor: "#124b73",
+                  borderTopRightRadius: 15,
+                  borderTopLeftRadius: 15
                 }}
               >
                 <ImageBackground
@@ -57,8 +59,9 @@ class EventListCard extends React.Component {
                   }}
                   style={{
                     width: "100%",
-                    height: "100%",
+                    height: "101.5%",
                   }}
+                  imageStyle={{ borderRadius: 15}}
 
                 >
                   <View

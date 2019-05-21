@@ -18,6 +18,7 @@ import EventDetailsUpdates from "./EventDetailsUpdates";
 import AppData from "../constants/Data";
 import TeamInfo from "./TeamInfo";
 import TeamRoster from "./TeamRoster";
+import TeamUpdates from "./TeamUpdates";
 
 class TeamPage extends React.Component {
   constructor(props) {
@@ -89,32 +90,6 @@ class TeamPage extends React.Component {
                     />
                   </TouchableOpacity>
                 </View>
-                {/* <View
-                  style={{
-                    flexDirection: "row",
-                    flex: 3,
-                    paddingTop: 0,
-                    paddingHorizontal: 12
-                  }}
-                >
-                  <View
-                    style={{
-                      flex: 6,
-                      alignContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        fontSize: 20,
-                        paddingVertical: 6,
-                      }}
-                    > 
-                    {this.props.team.t_name}
-                    </Text>
-                  </View>
-                </View> */}
               </View>
             </ImageBackground>
           </View>
@@ -140,7 +115,7 @@ class TeamPage extends React.Component {
               )}
               {this.state.activeTab === 2 && (
                 <>
-                  <EventDetailsUpdates event={item} />
+                  <TeamUpdates team={item} />
                 </>
               )}
             </View>
@@ -240,8 +215,7 @@ class TeamPage extends React.Component {
                     <Button
                       type={this.state.activeTab === 2 ? "solid" : "outline"}
                       onPress={() => {
-                        // this.setActiveTab(2);
-                        console.log("Need to figure this out")
+                        this.setActiveTab(2);
                       }}
                       containerStyle={{
                         alignContent: "center",
