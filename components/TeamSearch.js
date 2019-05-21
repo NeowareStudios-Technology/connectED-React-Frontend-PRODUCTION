@@ -7,9 +7,12 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  FlatList,
+  List,
+  ListItem
 } from "react-native";
-import { Input } from 'react-native-elements';
+import { Input, Button } from 'react-native-elements';
 import { Icon } from "expo";
 
 class TeamSearch extends React.Component {
@@ -48,8 +51,17 @@ class TeamSearch extends React.Component {
   };
 
   render() {
-    const { search } = this.state;
-    console.warn(this.state.data)
+    const { search, data } = this.state;
+    renderItem=()=>{
+      const {data} = this.state
+      for (var i=0; i<data.length; i++){
+        <Button>
+          <Text>{data[i]}</Text>
+        </Button>
+      }
+
+
+    }
     return (
       <View>
         <TouchableOpacity
@@ -72,7 +84,7 @@ class TeamSearch extends React.Component {
           fontSize: 20,
           textAlign: 'center'
         }}>
-          Search Teams by Name{`\n\n`}
+          Search Teams by Team Name{`\n\n`}
         </Text>
         <Input
           placeholder="Search..."
@@ -80,6 +92,42 @@ class TeamSearch extends React.Component {
           // value={search}
           autoCorrect={false}
         />
+        {/* <List containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+  <FlatList          
+    data={this.state.data}          
+    renderItem={({ item }) => ( 
+      <ListItem              
+        roundAvatar              
+        title={`${item}`}  
+        containerStyle={{ borderBottomWidth: 0 }} 
+       />          
+     )}          
+    //  keyExtractor={index => index}  
+                         
+  />            
+</List> */}
+      <View>
+        {data.map((item, index)=>(
+          <Button 
+            onPress={()=>console.warn(item)}
+            key={index}
+            containerStyle={{
+              backgroundColor: "#eee",
+              marginTop: 10,
+
+              marginLeft: 10,
+              marginRight: 10,
+              borderColor: "black",
+              borderWidth: 2,
+              borderRadius: 10
+
+            }}
+            titleStyle={{color: "black"}}
+            type={"clear"}
+            title={item}/>
+        ))}
+      </View>
+      
       </View>
     );
   }
