@@ -320,7 +320,6 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
-    console.warn(this.state.eventNameArray)
     if (this.state.showSearchBar) {
       return (
         <View style={styles.container}>
@@ -366,7 +365,7 @@ class EventsHomeScreen extends React.Component {
                         flexDirection: "row",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginBottom: 12,
+                        marginBottom: 0,
                         marginHorizontal: 15
                       }}
                     >
@@ -423,7 +422,7 @@ class EventsHomeScreen extends React.Component {
                             paddingHorizontal: 10,
                             borderRadius: 90,
                             borderColor: "#000",
-                            borderWidth: 0
+                            borderWidth: 0,
                           }}
                           onPress={() => {
                             console.log('TODO: filter')
@@ -438,11 +437,29 @@ class EventsHomeScreen extends React.Component {
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
-                    <Input
-                      placeholder="Search Events"
-                      onChangeText={text=>this.searchFilterFunction(text)}
-                      autoCorrect={false}
-                    />
+                    <View style={{
+                      flexDirection: 'row',
+                      marginHorizontal: 20,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      backgroundColor: '#eee'
+                    }}>
+                      <Icon.Ionicons
+                        name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                        size={20}
+                        style={{paddingTop: 0}}
+                        
+                      />
+                      <Input
+                        placeholder="Search Events"
+                        inputContainerStyle={{borderBottomWidth: 0}}
+                        onChangeText={text=>this.searchFilterFunction(text)}
+                        autoCorrect={false}
+                      />
+                    </View>
+                    
 
                       {this.state.loading ? (
                         <>

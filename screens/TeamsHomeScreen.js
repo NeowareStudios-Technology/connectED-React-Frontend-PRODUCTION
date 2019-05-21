@@ -223,7 +223,6 @@ export default class TeamsScreen extends Component {
                         flexDirection: "row",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginBottom: 12,
                         marginHorizontal: 15
                       }}
                     >
@@ -278,12 +277,30 @@ export default class TeamsScreen extends Component {
 
                       </View>
                     </View>
-                    <View style={[styles.eventsContainer,{flex: 10}]}>
-                    <Input
-                      placeholder="Search Teams"
-                      onChangeText={text=>this.searchFilterFunction(text)}
-                      autoCorrect={false}
-                    />
+                    <View style={{
+                      flexDirection: 'row',
+                      marginHorizontal: 20,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      backgroundColor: '#eee'
+                    }}>
+                      <Icon.Ionicons
+                        name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                        size={20}
+                        style={{paddingTop: 0}}
+                        
+                      />
+                      <Input
+                        placeholder="Search Teams"
+                        inputContainerStyle={{borderBottomWidth: 0}}
+                        onChangeText={text=>this.searchFilterFunction(text)}
+                        autoCorrect={false}
+                      />
+                    </View>
+                    <View style={{flex: 10, paddingLeft: 30,paddingRight: 30}}>
+                    
                   {this.state.SuggestedTeamNames.length > 0 ? 
                     <View>
                           <Text style={styles.displayH4}></Text>

@@ -43,7 +43,7 @@ class EventListCard extends React.Component {
             borderTopLeftRadius: 15,
           }}
         >
-          <View style={{ height: screenHeight - 180 }}>
+          <View style={{ height: screenHeight - 200 }}>
             <View style={{ flex: 1 }}>
               <View
                 style={{
