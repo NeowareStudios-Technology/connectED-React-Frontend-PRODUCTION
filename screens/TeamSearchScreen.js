@@ -46,12 +46,6 @@ class EventSearch extends React.Component {
             size={30}
           />
         </TouchableOpacity>
-        <Text style={{
-          fontSize: 20,
-          textAlign: 'center'
-        }}>
-          Search Events by Event Name{`\n\n`}
-        </Text>
         <Input
           placeholder="Search..."
           onChangeText={this.updateSearch}

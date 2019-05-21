@@ -17,32 +17,8 @@ import {
   import { Icon } from "expo";
   import User from "../components/User";
 import TeamPage from '../components/TeamPage';
+import TeamSearch from "../components/TeamSearch"
 
-
-
-
-  const DummyData = [
-    {
-        id: '1',
-        teamName: 'Inventors',
-        memberNames: ["Karina", "Lucy", "Joseph", "Einstein"]
-    },
-    {
-        id: '2',
-        teamName: 'WebDev Royalty',
-        memberNames: ["Karina", "Kendra", "Dan", "Mimi", "Amanda"]
-    },
-    {
-        id: '3',
-        teamName: 'Environmentalists',
-        memberNames: ["Kevin", "Jakob", "Sally"]
-    },
-    {
-        id: '4',
-        teamName: 'Retired',
-        memberNames: ["Rosemary", "Daphne", "John", "Piper", "KellyAnn", "Jessica", "Suzy"]
-    },
-  ]
 export default class TeamsScreen extends Component {
     static navigationOptions = {
         header: null
@@ -54,22 +30,11 @@ export default class TeamsScreen extends Component {
         currentTeam: {},
         TopTeamNames: [],
         SuggestedTeamNames: [],
+        showSearchBar: false
+
       };
     }
 
-    // loadEvents = () => {
-    //   let sequence = new Sequencer();
-    //   if (this.state.eventsNames.length > 0) {
-    //     this.state.eventsNames.map((eventName, index) => {
-    //       sequence.promise(() => {
-    //         this.loadEvent(eventName, index, () => {
-    //           sequence.next();
-    //         });
-    //       });
-    //     });
-    //   }
-    //   sequence.next();
-    // };
     fetchTopTeamData = async () => {
       let token = await User.firebase.getIdToken();
       if (token) {
@@ -113,6 +78,7 @@ export default class TeamsScreen extends Component {
 
     fetchSuggestedTeamData = async () => {
       let token = await User.firebase.getIdToken();
+      console.log(token)
       if (token) {
         try {
           let url =
@@ -211,9 +177,27 @@ export default class TeamsScreen extends Component {
         this.setState({ activeItem: null });
         this.setState({currentTeam: {}})
     };
+
+    closeTeamSearch = () => {
+      this.setState({ showSearchBar: false })
+    }
  
 
     render() {
+      if (this.state.showSearchBar) {
+        return (
+          <View style={styles.container}>
+            <ScrollView
+              style={styles.container}
+              contentContainerStyle={styles.contentContainer}
+            >
+              <TeamSearch
+                handleClose={this.closeTeamSearch}
+                data={this.state.SuggestedTeamNames}
+              />
+            </ScrollView></View>
+        )
+      }
         return (
             <>
             <View style={styles.container}>

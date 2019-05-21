@@ -41,7 +41,8 @@ class EventsHomeScreen extends React.Component {
       loading: true,
       eventsNames: [],
       distances: [],
-      events: []
+      events: [],
+      showSearchBar: false
     };
   }
 

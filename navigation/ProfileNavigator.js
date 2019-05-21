@@ -34,7 +34,7 @@ export default createAppContainer(
     // Read more at https://reactnavigation.org/docs/en/auth-flow.html
     Profile: ProfileTabs,
     EventCreate: EventCreateScreen,
-    TeamCreate: TeamCreateScreen
+    TeamCreate: TeamCreateScreen,
   },{
     transitionConfig
   })

@@ -12,7 +12,7 @@ import {
 import { Input } from 'react-native-elements';
 import { Icon } from "expo";
 
-class EventSearch extends React.Component {
+class TeamSearch extends React.Component {
   constructor(props) {
     super(props);
 
@@ -27,7 +27,7 @@ class EventSearch extends React.Component {
 
   render() {
     const { search } = this.state;
-
+    console.warn(this.props.data)
     return (
       <View>
         <TouchableOpacity
@@ -50,7 +50,7 @@ class EventSearch extends React.Component {
           fontSize: 20,
           textAlign: 'center'
         }}>
-          Search Events by Event Name{`\n\n`}
+          Search Teams by Name{`\n\n`}
         </Text>
         <Input
           placeholder="Search..."
@@ -62,4 +62,4 @@ class EventSearch extends React.Component {
   }
 }
 
-export default EventSearch;
+export default TeamSearch;

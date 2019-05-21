@@ -46,7 +46,7 @@ class TeamRoster extends React.Component {
           </View>
         :
           <View>
-            <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Leadddddd</Text>
+            <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Organizer</Text>
             <Text style={this.styles.text} >{ `\u2022  `}{item.t_organizer}{`\n`}</Text>
           </View>
         }
