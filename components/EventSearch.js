@@ -17,14 +17,21 @@ class EventSearch extends React.Component {
     super(props);
 
     this.state = {
-      search: ""
+      search: "",
+      loading: false,      
+      data: [],      
+      error: null,  
     };
+    this.arrayholder = [];
   }
 
   updateSearch = search => {
     this.setState({ search });
   };
-
+  componentDidMount=() => {
+    this.setState({data: this.props.data})
+    this.arrayholder = this.props.data
+  }
   render() {
     const { search } = this.state;
 
@@ -56,6 +63,7 @@ class EventSearch extends React.Component {
           placeholder="Search..."
           onChangeText={this.updateSearch}
           value={search}
+          autoCorrect={false}
         />
       </View>
     );

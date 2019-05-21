@@ -17,17 +17,39 @@ class TeamSearch extends React.Component {
     super(props);
 
     this.state = {
-      search: ""
+      search: "",
+      loading: false,      
+      data: [],      
+      error: null,  
     };
+    this.arrayholder = [];
   }
 
   updateSearch = search => {
     this.setState({ search });
   };
 
+  componentDidMount=() => {
+    this.setState({data: this.props.data})
+    this.arrayholder = this.props.data
+  }
+
+  searchFilterFunction = text => {    
+    console.warn("text", text)
+    const newData = this.arrayholder.filter(item => {      
+      const itemData = `${item.toUpperCase()}`;
+       const textData = text.toUpperCase();
+        
+       return itemData.indexOf(textData) > -1;    
+    });    
+    console.warn("newData", newData)
+
+    this.setState({ data: newData });  
+  };
+
   render() {
     const { search } = this.state;
-    console.warn(this.props.data)
+    console.warn(this.state.data)
     return (
       <View>
         <TouchableOpacity
@@ -54,8 +76,9 @@ class TeamSearch extends React.Component {
         </Text>
         <Input
           placeholder="Search..."
-          onChangeText={this.updateSearch}
-          value={search}
+          onChangeText={text=>this.searchFilterFunction(text)}
+          // value={search}
+          autoCorrect={false}
         />
       </View>
     );
