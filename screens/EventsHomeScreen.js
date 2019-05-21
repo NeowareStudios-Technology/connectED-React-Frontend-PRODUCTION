@@ -13,7 +13,7 @@ import {
   LayoutAnimation,
   Dimensions
 } from "react-native";
-import { Button, Card } from "react-native-elements";
+import { Button, Input } from "react-native-elements";
 import { Icon } from "expo";
 import User from "../components/User";
 import styles from "../constants/Styles";
@@ -42,8 +42,11 @@ class EventsHomeScreen extends React.Component {
       eventsNames: [],
       distances: [],
       events: [],
+      eventNameArray: [],
       showSearchBar: false
     };
+    this.arrayholder = [];
+
   }
 
   loadEvent = async (eventName, index, callback) => {
@@ -71,6 +74,7 @@ class EventsHomeScreen extends React.Component {
                   event.key = "event-" + index;
                   event.distance = this.state.distances[index];
                   events.push(event);
+                  this.arrayholder = events
                   this.setState(
                     {
                       events: events,
@@ -92,6 +96,16 @@ class EventsHomeScreen extends React.Component {
     }
   };
 
+  searchFilterFunction = text => {
+    const newData = this.arrayholder.filter(item => {      
+      const itemData = `${item.e_title.toUpperCase()}`;
+       const textData = text.toUpperCase();
+       return itemData.indexOf(textData) > -1;    
+    });
+
+    this.setState({ events: newData });  
+  };
+
   loadEvents = () => {
     let sequence = new Sequencer();
     if (this.state.eventsNames.length > 0) {
@@ -100,6 +114,7 @@ class EventsHomeScreen extends React.Component {
           this.loadEvent(eventName, index, () => {
             sequence.next();
           });
+          
         });
       });
     }
@@ -124,9 +139,19 @@ class EventsHomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.events === "object") {
+                  const newArray = []
+
+                  for (var i=0; i<responseData.events.length; i++){
+                    const item = responseData.events[i].split('/')
+                    const clean = item[1].split('+').join(' ')
+                    newArray.push(clean)
+                  }
+                  this.arrayholder = responseData.events
+
                   this.setState(
                     {
                       eventsNames: responseData.events,
+                      eventNameArray: newArray,
                       distances: responseData.distances
                     },
                     () => {
@@ -295,6 +320,7 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
+    console.warn(this.state.eventNameArray)
     if (this.state.showSearchBar) {
       return (
         <View style={styles.container}>
@@ -376,7 +402,7 @@ class EventsHomeScreen extends React.Component {
                           alignItems: "center",
                         }}
                       >
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                           style={{
                             paddingHorizontal: 10,
                             borderRadius: 90,
@@ -391,7 +417,7 @@ class EventsHomeScreen extends React.Component {
                             name={Platform.OS === "ios" ? "ios-search" : "md-search"}
                             size={30}
                           />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         <TouchableOpacity
                           style={{
                             paddingHorizontal: 10,
@@ -412,6 +438,12 @@ class EventsHomeScreen extends React.Component {
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
+                    <Input
+                      placeholder="Search Events"
+                      onChangeText={text=>this.searchFilterFunction(text)}
+                      autoCorrect={false}
+                    />
+
                       {this.state.loading ? (
                         <>
                           <View
