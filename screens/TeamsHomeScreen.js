@@ -18,7 +18,6 @@ import {
   import { Icon } from "expo";
   import User from "../components/User";
 import TeamPage from '../components/TeamPage';
-import TeamSearch from "../components/TeamSearch"
 
 export default class TeamsScreen extends Component {
     static navigationOptions = {
