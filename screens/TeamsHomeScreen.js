@@ -13,6 +13,7 @@ import {
     View,
     FlatList
   } from "react-native";
+  import { Input } from "react-native-elements"
   import styles from "../constants/Styles";
   import { Icon } from "expo";
   import User from "../components/User";
@@ -30,9 +31,10 @@ export default class TeamsScreen extends Component {
         currentTeam: {},
         TopTeamNames: [],
         SuggestedTeamNames: [],
-        showSearchBar: false
-
+        showSearchBar: false,
+        data: []
       };
+      this.arrayholder = [];
     }
 
     fetchTopTeamData = async () => {
@@ -102,6 +104,7 @@ export default class TeamsScreen extends Component {
                         // distances: responseData.distances
                       }
                     );
+                    this.arrayholder = responseData.team_names
                   } else {
                     this.setState({ loading: false });
                   }
@@ -164,6 +167,15 @@ export default class TeamsScreen extends Component {
         this.fetchSuggestedTeamData();
     }
   }
+  searchFilterFunction = text => {
+    const newData = this.arrayholder.filter(item => {      
+      const itemData = `${item.toUpperCase()}`;
+       const textData = text.toUpperCase();
+       return itemData.indexOf(textData) > -1;    
+    });
+
+    this.setState({ SuggestedTeamNames: newData });  
+  };
   
     _keyExtractor = (item, index) => index.toString();
 
@@ -171,33 +183,16 @@ export default class TeamsScreen extends Component {
         this.fetchOneTeamData(item);
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: item });
+        this.fetchSuggestedTeamData();
     };
     closeItem = item => {
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: null });
         this.setState({currentTeam: {}})
     };
-
-    closeTeamSearch = () => {
-      this.setState({ showSearchBar: false })
-    }
  
 
     render() {
-      if (this.state.showSearchBar) {
-        return (
-          <View style={styles.container}>
-            <ScrollView
-              style={styles.container}
-              contentContainerStyle={styles.contentContainer}
-            >
-              <TeamSearch
-                handleClose={this.closeTeamSearch}
-                data={this.state.SuggestedTeamNames}
-              />
-            </ScrollView></View>
-        )
-      }
         return (
             <>
             <View style={styles.container}>
@@ -273,22 +268,6 @@ export default class TeamsScreen extends Component {
                             borderWidth: 0
                           }}
                           onPress={() => {
-                            this.setState({ showSearchBar: true })
-                          }}
-                        >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-search" : "md-search"}
-                            size={30}
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={{
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0
-                          }}
-                          onPress={() => {
                             console.log('TODO: filter')
                           }}
                         >
@@ -301,10 +280,14 @@ export default class TeamsScreen extends Component {
                       </View>
                     </View>
                     <View style={[styles.eventsContainer,{flex: 10}]}>
-
+                    <Input
+                      placeholder="Search Teams"
+                      onChangeText={text=>this.searchFilterFunction(text)}
+                      autoCorrect={false}
+                    />
                   {this.state.SuggestedTeamNames.length > 0 ? 
                     <View>
-                          <Text style={styles.displayH4}>All Teams</Text>
+                          <Text style={styles.displayH4}></Text>
                           <FlatList
                             data={this.state.SuggestedTeamNames}
                             // extraData={this.state}
