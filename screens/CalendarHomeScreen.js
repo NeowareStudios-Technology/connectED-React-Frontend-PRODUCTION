@@ -19,31 +19,10 @@ import {
   import User from "../components/User";
   import Sequencer from "../components/Sequencer";
   import uuidv4 from 'uuid/v4';
-  import Colors from "../constants/Colors";
-
-
+  
   let screenHeight = Dimensions.get('window').height;
-
-
   import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import EventDetails from '../components/EventDetails';
-
-  const DummyData = [
-      {
-        id: '1',
-        eventName: 'Beach Cleanup',
-        date: '2019-5-12',
-        time: '10:00am',
-        imageURL: 'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'
-      },
-      {
-        id: '2',
-        eventName: 'Starbucks Run',
-        date: '2019-5-22',
-        time: '7:00am',
-        imageURL: 'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'
-      },
-    ]
 
 export default class MyCalendar extends Component {
     static navigationOptions = {
@@ -54,6 +33,7 @@ export default class MyCalendar extends Component {
 
     this.state = {
         markedDates: [],
+        marked:null,
         activeItem: null,
         user: null,
         events: null,
@@ -418,14 +398,16 @@ export default class MyCalendar extends Component {
             
             let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
             DatesArray.push(newDate)
-            console.warn(DatesArray)
         }
         this.setState({markedDates: DatesArray})
-
+        this.sendDatesToCalendar();
     }
+    sendDatesToCalendar = () => {
+      var obj = this.state.markedDates.reduce((c, v) => Object.assign(c, {[v]: {selected: true}}), {});
+      this.setState({ marked : obj});
+  }
 
     render() {
-        
         let sortedEvents;
         if (!this.state.userEvents) {
             sortedEvents = null
@@ -466,6 +448,7 @@ export default class MyCalendar extends Component {
             ) : (
                 <>
             <View style={{height:screenHeight - 300, backgroundColor: "#3788E0"}}>
+            {this.state.marked ? 
             <CalendarList
                 current={()=>DateNow()}
                 pastScrollRange={24}
@@ -474,9 +457,28 @@ export default class MyCalendar extends Component {
                     backgroundColor: "transparent",
                     paddingTop: 40,
                 }}
-                markedDates={{
-                    '2019-05-12': {selected: true, selectedColor: '#275FBC'},
-                    '2019-05-22': {selected: true, selectedColor: '#275FBC'},
+                markedDates={this.state.marked}
+                theme={{
+                    calendarBackground: 'transparent',
+                    textSectionTitleColor: 'white',
+                    dayTextColor: 'white',
+                    todayTextColor: 'black',
+                    textMonthFontSize: 30,
+                    textMonthFontWeight: "bold",
+                    textDayFontSize: 18,
+                    monthTextColor: 'white',
+                    selectedDayBackgroundColor: 'darkblue',
+                    arrowColor: 'white',
+                }}
+            />
+            :
+            <CalendarList
+                current={()=>DateNow()}
+                pastScrollRange={24}
+                futureScrollRange={24}
+                style={{
+                    backgroundColor: "transparent",
+                    paddingTop: 40,
                 }}
                 theme={{
                     calendarBackground: 'transparent',
@@ -491,6 +493,7 @@ export default class MyCalendar extends Component {
                     arrowColor: 'white',
                 }}
             />
+              }
             </View>
             <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
                 <ButtonGroup
