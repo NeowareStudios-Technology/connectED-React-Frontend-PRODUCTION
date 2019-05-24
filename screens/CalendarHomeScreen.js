@@ -10,7 +10,8 @@ import {
     Text,
     TouchableOpacity,
     View,
-    FlatList
+    FlatList,
+    LayoutAnimation
   } from "react-native";
   import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
   import moment from "moment"
@@ -25,6 +26,7 @@ import {
 
 
   import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import EventDetails from '../components/EventDetails';
 
   const DummyData = [
       {
@@ -52,7 +54,7 @@ export default class MyCalendar extends Component {
 
     this.state = {
         markedDates: [],
-
+        activeItem: null,
         user: null,
         events: null,
         userEvents: null, // events created by user
@@ -103,6 +105,7 @@ export default class MyCalendar extends Component {
                     callback();
                   }
                 );
+                this.getEventDates()
 
               }
             } catch (error) { }
@@ -270,25 +273,116 @@ export default class MyCalendar extends Component {
     return true;
   }
 
+  volunteer = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (!isRegistered) {
+        let token = await User.firebase.getIdToken();
 
-
-
-
-
-    // componentDidMount() {
-    //     this.getEventDates(DummyData)
-    //     // this.getMarkedDates()
-    // }
-
-
-
-    getEventDates(array) {
-        let DatesArray = []
-        for(var i = 0; i < array.length; i++){
-            DatesArray.push(array[i].date)
-            this.setState({markedDates: DatesArray})
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          let putData = {
+            user_action: "both"
+          };
+          try {
+            let bodyData = JSON.stringify(putData);
+            fetch(url, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              },
+              body: bodyData
+            })
+              .then(response => {
+                if (response.ok) {
+                  let events = this.state.events;
+                  let eventIndex = null;
+                  let event = events.find((anEvent, index) => {
+                    if (anEvent === this.state.activeItem) {
+                      eventIndex = index;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (eventIndex) {
+                    events[eventIndex].is_registered = "1";
+                  }
+                  this.setState({
+                    events: events,
+                    activeItem: events[eventIndex]
+                  });
+                }
+              })
+              .catch(error => { });
+          } catch (error) { }
         }
+      }
     }
+  };
+
+  deregister = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (isRegistered) {
+        let token = await User.firebase.getIdToken();
+
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          try {
+            fetch(url, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              }
+            })
+              .then(response => {
+                if (response.ok) {
+                  let events = this.state.events;
+                  let eventIndex = null;
+                  let event = events.find((anEvent, index) => {
+                    if (anEvent === this.state.activeItem) {
+                      eventIndex = index;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (eventIndex) {
+                    events[eventIndex].is_registered = "0";
+                  }
+                  this.setState({
+                    events: events,
+                    activeItem: events[eventIndex]
+                  });
+                }
+              })
+              .catch(error => { });
+          } catch (error) { }
+        }
+      }
+    }
+  };
+
+
+
+   
 
     // getMarkedDates(){
     //     let datesObject={}
@@ -305,21 +399,73 @@ export default class MyCalendar extends Component {
         this.setState({ activeTab })
       }
 
+      openItem = (item, index) => {
+        LayoutAnimation.easeInEaseOut();
+        this.setState({ activeItem: item });
+      };
+    
+      closeItem = item => {
+        LayoutAnimation.easeInEaseOut();
+        this.setState({ activeItem: null });
+      };
+      
+      getEventDates() {
+        let DatesArray = []
+        let myEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+
+        for(var i = 0; i < myEvents.length; i++){
+            let date = myEvents[i].date[0]
+            
+            let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
+            DatesArray.push(newDate)
+            console.warn(DatesArray)
+        }
+        this.setState({markedDates: DatesArray})
+
+    }
+
     render() {
+        
         let sortedEvents;
         if (!this.state.userEvents) {
             sortedEvents = null
           } else {
+            
             sortedEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+            // const markedEventDates={}
+            // for(var i=0; i<sortedEvents.length; i++){
+            //     console.log(sortedEvents[i].date[0])
+            //     const date = sortedEvents[i].date[0]
+            //     markedEventDates[date] = {selected: true, selectedColor: '#275FBC'}
+            // }
+            // console.log(markedEventDates)
           }
-        console.log(sortedEvents)
+        // console.log(sortedEvents)
+        
 
-        const buttons = ["Volunteering", "My Opportunities"];
+        const buttons = [ "My Opportunities", "Volunteering"];
         return (
 
 
             <View style={styles.container}>
-            <View style={{height:screenHeight - 300}}>
+            {this.state.activeItem ? (
+              <>
+                <View style={{ flex: 1 }}>
+                  <EventDetails
+                    event={this.state.activeItem}
+                    onClose={this.closeItem}
+                    onVolunteer={() => {
+                      this.volunteer();
+                    }}
+                    onDeregister={() => {
+                      this.deregister();
+                    }}
+                  />
+                </View>
+              </>
+            ) : (
+                <>
+            <View style={{height:screenHeight - 300, backgroundColor: "#3788E0"}}>
             <CalendarList
                 current={()=>DateNow()}
                 pastScrollRange={24}
@@ -346,22 +492,28 @@ export default class MyCalendar extends Component {
                 }}
             />
             </View>
-            <View style={{ marginTop: 8, flex: 1 }}>
+            <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
                 <ButtonGroup
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
-                  containerStyle={{ height: 42 }}
+                  containerStyle={{ paddingBottom: 0, marginBottom: 0}}
                 />
                 <View style={styles.eventsContainer}>
                   {this.state.activeTab === 0 && (
                       <View style={{flex:1}}>
                         {sortedEvents ? (               
-                    
+                            
                         <FlatList
                             data={sortedEvents}
                             keyExtractor={this._keyExtractor}
                             renderItem={({item}) => 
+                            <TouchableOpacity
+                                onPress={() => {
+                                this.openItem(item);
+                                }}
+                                activeOpacity={1}
+                            >
                                 <View style={styles.eventListing}>
                                     <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}>
                                     <Image style={{flex: 1}} resizeMode='cover' source={{ uri:  "data:image/png;base64," + item.e_photo}}></Image>
@@ -377,6 +529,7 @@ export default class MyCalendar extends Component {
                                         <Text>{item.start[0]}</Text>
                                     </View>
                                 </View>
+                                </TouchableOpacity>
                             }
                         />
                         
@@ -428,6 +581,7 @@ export default class MyCalendar extends Component {
 
                 </View>
               </View>
+            
             {/* <View style={styles.eventsContainer}>
                 <Text style={styles.subtitle}>Volunteering</Text>
                 <ScrollView >
@@ -453,6 +607,8 @@ export default class MyCalendar extends Component {
         
                 </ScrollView>
             </View> */}
+            </>
+            )}
           </View>
     
         );
@@ -461,10 +617,11 @@ export default class MyCalendar extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-      backgroundColor: "#3788E0"
+    //   backgroundColor: "#3788E0"
     },
     eventsContainer: {
         flex: 1,
+        backgroundColor: "#eee",
       paddingLeft: 10,
       paddingRight: 10,
       paddingTop: 10,
