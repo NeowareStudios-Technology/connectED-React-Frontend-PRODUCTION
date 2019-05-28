@@ -128,7 +128,7 @@ class EventEditInfo extends React.Component {
                 : ""
             }
             inputStyle={{
-              fontSize: 24
+              fontSize: 16
             }}
           />
 
@@ -139,7 +139,7 @@ class EventEditInfo extends React.Component {
               this.props.onInputChange("e_desc", value);
             }}
             containerStyle={{ marginBottom: 12 }}
-            placeholder="What will happen?"
+            placeholder="Description"
             multiline={true}
             inputStyle={{ height: 60 }}
             numberOfLines={4}

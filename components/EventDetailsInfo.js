@@ -21,11 +21,12 @@ class EventDetailsInfo extends React.Component {
 
   render() {
     let item = this.props.event;
-    let privacyLabel = item.privacy === "o" ? "Open" : "Private";
+    let privacyLabel = item.privacy === "o" ? "Public" : "Private";
     return (
       <>
         <View style={{ flex: 1 }}>
-          <View style={{ flex: 4 }}>
+        <ScrollView>
+          <View>
             <Text
               style={{
                 fontWeight: "bold",
@@ -35,9 +36,22 @@ class EventDetailsInfo extends React.Component {
             >
               {item.e_title}
             </Text>
+            <Text style={{fontWeight: "bold", color: "#2f95dc"}}>
+            {privacyLabel}
+            </Text>
             <Text
               style={{
-                fontSize: 16
+                fontWeight: "bold",
+                fontSize: 16,
+                marginBottom: 5
+              }}
+            >
+              {moment(item.date[0], "MM/DD/YYYY").format("MMMM Do ") }@{moment(item.start[0],"HH:mm").format("h:mma")}
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                marginBottom: 10
               }}
             >
               {item.e_desc}
@@ -51,12 +65,12 @@ class EventDetailsInfo extends React.Component {
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text style={this.styles.subtitle}>Opportunity Status:</Text>
+              <Text style={this.styles.subtitle}>Required Skills:</Text>
               <Text style={{ fontSize: 16 }}>
-                {privacyLabel}{" "}
+                
                 {item.req_skills && item.req_skills.length > 0 && (
                   <>
-                    <Text>/ Required Skills: {item.req_skills.join(" ")}</Text>
+                    <Text>{item.req_skills.join(" ")}</Text>
                   </>
                 )}
               </Text>
@@ -80,6 +94,7 @@ class EventDetailsInfo extends React.Component {
               )}
             </View>
           </View>
+          </ScrollView>
         </View>
       </>
     );
@@ -92,7 +107,7 @@ class EventDetailsInfo extends React.Component {
     subtitle: {
       fontSize: 20,
       marginBottom: 5,
-      fontWeight: 'bold'
+      fontWeight: 'normal'
     },
     text: {
       fontSize: 16,

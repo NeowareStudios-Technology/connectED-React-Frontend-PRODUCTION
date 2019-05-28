@@ -30,7 +30,9 @@ class EventEditFinishingTouches extends React.Component {
     );
     if (status === "granted") {
       let result = await ImagePicker.launchImageLibraryAsync({
-        aspect: [4, 3]
+        aspect: [4, 3],
+        allowsEditing: true,
+        quality: 0.2
       });
       if (!result.cancelled) {
         let data = await FileSystem.readAsStringAsync(result.uri, {

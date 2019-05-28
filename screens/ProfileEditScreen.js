@@ -73,7 +73,7 @@ export default class ProfileEditScreen extends React.Component {
   };
 
   goBack = () => {
-    this.props.navigation.navigate("ProfileHome");
+    this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
   };
 
   saveUserProfile = async (profileData, callback) => {
@@ -96,6 +96,7 @@ export default class ProfileEditScreen extends React.Component {
             if (response.ok) {
               if (typeof callback === "function") {
                 User.setProfile(profileData);
+                this.props.navigation.getParam("loadUser")
                 callback();
               }
             }
@@ -129,6 +130,7 @@ export default class ProfileEditScreen extends React.Component {
       Object.keys(this.fields).map(field => {
         profileData[field] = this.state[field];
       });
+      console.log(profileData)
       sequence.data = profileData;
       sequence.next();
     });

@@ -32,7 +32,6 @@ const User = {
                 Authorization: "Bearer " + token
               }
             });
-
             if (profileResponse.ok) {
               try {
                 let profile = JSON.parse(profileResponse._bodyText);

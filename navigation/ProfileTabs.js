@@ -12,7 +12,8 @@ import EventsHomeScreen from "../screens/EventsHomeScreen";
 import EventScreen from "../screens/EventScreen";
 import ResetPassword from "../screens/ForgotPasswordScreen";
 import EventCreateScreen from "../screens/EventCreateScreen";
-import CalendarHomeScreen from "../screens/CalendarHomeScreen"
+import CalendarHomeScreen from "../screens/CalendarHomeScreen";
+import TeamsHomeScreen from "../screens/TeamsHomeScreen";
 
 const ProfileHomeStack = createStackNavigator({
   ProfileHome: ProfileHomeScreen,
@@ -60,8 +61,24 @@ CalendarStack.navigationOptions = {
   )
 };
 
+const TeamsStack = createStackNavigator({
+  TeamsHome: TeamsHomeScreen,
+
+});
+
+TeamsStack.navigationOptions = {
+  tabBarLabel: "Teams",
+  tabBarIcon: ({ focused }) => (
+    <TabBarIcon
+      focused={focused}
+      name={Platform.OS === "ios" ? "ios-people" : "md-people"}
+    />
+  )
+};
+
 export default createBottomTabNavigator({
   EventsHomeStack,
-  ProfileHomeStack,
-  CalendarStack
+  CalendarStack,
+  TeamsStack,
+  ProfileHomeStack
 });
