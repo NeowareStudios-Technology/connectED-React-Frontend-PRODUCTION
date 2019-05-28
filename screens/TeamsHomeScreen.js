@@ -252,30 +252,6 @@ export default class TeamsScreen extends Component {
                           <Text style={styles.displayH1}>Teams</Text>
                         </View>
                       </View>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        <TouchableOpacity
-                          style={{
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0
-                          }}
-                          onPress={() => {
-                            console.log('TODO: filter')
-                          }}
-                        >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-options" : "md-options"}
-                            size={30}
-                          />
-                        </TouchableOpacity>
-
-                      </View>
                     </View>
                     <View style={{
                       flexDirection: 'row',
@@ -316,15 +292,7 @@ export default class TeamsScreen extends Component {
                               activeOpacity={1}
                             >
                             <View style={styles.teamListing}>
-                                <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
-                                <View style={{
-                                    marginLeft:10,
-                                    paddingLeft:10,
-                                    borderLeftColor: 'gray',
-                                    borderLeftWidth: 2
-                                }}>
-                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
-                                </View>
+                              <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
                             </View>
                             </TouchableOpacity>
                                 }

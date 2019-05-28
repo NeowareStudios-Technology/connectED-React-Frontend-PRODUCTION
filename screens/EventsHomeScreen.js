@@ -395,46 +395,6 @@ class EventsHomeScreen extends React.Component {
                           <Text style={styles.displayH1}>Events</Text>
                         </View>
                       </View>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        {/* <TouchableOpacity
-                          style={{
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0
-                          }}
-                          onPress={() => {
-                            this.setState({ showSearchBar: true })
-                          }}
-                        >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-search" : "md-search"}
-                            size={30}
-                          />
-                        </TouchableOpacity> */}
-                        <TouchableOpacity
-                          style={{
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0,
-                          }}
-                          onPress={() => {
-                            console.log('TODO: filter')
-                          }}
-                        >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-options" : "md-options"}
-                            size={30}
-                          />
-                        </TouchableOpacity>
-
-                      </View>
                     </View>
                     <View style={{ flex: 10 }}>
                     <View style={{
