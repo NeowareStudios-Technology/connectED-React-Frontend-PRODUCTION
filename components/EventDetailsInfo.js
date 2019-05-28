@@ -41,6 +41,15 @@ class EventDetailsInfo extends React.Component {
             </Text>
             <Text
               style={{
+                fontWeight: "bold",
+                fontSize: 16,
+                marginBottom: 5
+              }}
+            >
+              {moment(item.date[0], "MM/DD/YYYY").format("MMMM Do ") }@{moment(item.start[0],"HH:mm").format("h:mma")}
+            </Text>
+            <Text
+              style={{
                 fontSize: 16,
                 marginBottom: 10
               }}
@@ -98,7 +107,7 @@ class EventDetailsInfo extends React.Component {
     subtitle: {
       fontSize: 20,
       marginBottom: 5,
-      fontWeight: 'bold'
+      fontWeight: 'normal'
     },
     text: {
       fontSize: 16,
