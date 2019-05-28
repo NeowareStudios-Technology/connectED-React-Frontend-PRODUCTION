@@ -543,12 +543,12 @@ export default class HomeScreen extends React.Component {
                           <TouchableOpacity
                             style={styles.menuItemTouchable}
                             onPress={() => {
-                              this.navigateToPage("TermsConditions")
+                              this.navigateToPage("PrivacyPolicy")
                             }}
                           >
                             <View style={styles.menuItemContainer}>
                               <Text style={styles.menuItemLabel}>
-                                Terms and Conditions
+                                Privacy Policy
                               </Text>
                               <Text style={styles.menuItemIconContainer}>
                                 <Icon.Ionicons

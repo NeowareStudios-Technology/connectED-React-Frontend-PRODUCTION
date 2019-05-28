@@ -11,7 +11,7 @@ import ProfileEditScreen from "../screens/ProfileEditScreen";
 import EventsHomeScreen from "../screens/EventsHomeScreen";
 import EventScreen from "../screens/EventScreen";
 import ResetPassword from "../screens/ForgotPasswordScreen";
-import TermsConditions from "../screens/TermsConditionsScreen";
+import PrivacyPolicy from "../screens/PrivacyPolicyScreen";
 import EventCreateScreen from "../screens/EventCreateScreen";
 import CalendarHomeScreen from "../screens/CalendarHomeScreen";
 import TeamsHomeScreen from "../screens/TeamsHomeScreen";
@@ -20,7 +20,7 @@ const ProfileHomeStack = createStackNavigator({
   ProfileHome: ProfileHomeScreen,
   ProfileEdit: ProfileEditScreen,
   ResetPassword: ResetPassword,
-  TermsConditions: TermsConditions,
+  PrivacyPolicy: PrivacyPolicy,
 });
 
 ProfileHomeStack.navigationOptions = {
