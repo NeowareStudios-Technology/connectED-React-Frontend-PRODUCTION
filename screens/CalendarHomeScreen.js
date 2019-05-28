@@ -38,7 +38,7 @@ export default class MyCalendar extends Component {
         user: null,
         events: null,
         userEvents: null, // events created by user
-        pastEvents: null, // past events the user has volunteered for
+        upcomingEvents: null, // past events the user has volunteered for
         activeTab: 0,
         loading: true
     };
@@ -120,18 +120,18 @@ export default class MyCalendar extends Component {
               // check if date is in past
               let now = moment()
               let eventDate = moment(responseData.date, "MM/DD/YYYY")
-              if (responseData && now.isAfter(eventDate, 'day')) {
-                let pastEvents = []
+              if (responseData && now.isBefore(eventDate, 'day')) {
+                let upcomingEvents = []
                 // keep state immutable by using slice to return new array
-                if (this.state.pastEvents) {
-                  pastEvents = this.state.pastEvents.slice();
+                if (this.state.upcomingEvents) {
+                  upcomingEvents = this.state.upcomingEvents.slice();
                 }
                 let event = responseData;
                 event.key = "past-event-" + uuidv4();
-                pastEvents.push(event);
+                upcomingEvents.push(event);
                 this.setState(
                   {
-                    pastEvents: pastEvents,
+                    upcomingEvents: upcomingEvents,
                     loading: false
                   },
                   () => {
@@ -141,8 +141,8 @@ export default class MyCalendar extends Component {
 
               } else {
                 // event not in the past
-                if (!this.state.pastEvents) {
-                  this.setState({ pastEvents: [] },
+                if (!this.state.upcomingEvents) {
+                  this.setState({ upcomingEvents: [] },
                     () => {
                       callback();
                     })
@@ -166,6 +166,7 @@ export default class MyCalendar extends Component {
     // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
+    console.warn(this.state.events.registered_events)
     let userEvents = this.state.events.created_events
     if (registeredEvents && registeredEvents.length > 0) {
       registeredEvents.map((eventName, index) => {
@@ -177,7 +178,7 @@ export default class MyCalendar extends Component {
         });
       });
     } else {
-      this.setState({ pastEvents: [] })
+      this.setState({ upcomingEvents: [] })
     }
     if (userEvents && userEvents.length > 0) {
       userEvents.map((eventName, index) => {
@@ -408,6 +409,7 @@ export default class MyCalendar extends Component {
   }
 
     render() {
+      console.warn(this.state.upcomingEvents)
         let sortedEvents;
         if (!this.state.userEvents) {
             sortedEvents = null
@@ -551,7 +553,7 @@ export default class MyCalendar extends Component {
                     {sortedEvents ? (
                         
                         <FlatList
-                            data={this.state.userEvents}
+                            data={this.state.upcomingEvents}
                             keyExtractor={this._keyExtractor}
                             renderItem={({item}) => 
                                 <View style={styles.eventListing}>
