@@ -16,8 +16,11 @@ import EventDetailsInfo from "./EventDetailsInfo";
 import EventDetailsTeam from "./EventDetailsTeam";
 import EventDetailsUpdates from "./EventDetailsUpdates";
 import AppData from "../constants/Data";
+import TeamInfo from "./TeamInfo";
+import TeamRoster from "./TeamRoster";
+import TeamUpdates from "./TeamUpdates";
 
-class EventDetails extends React.Component {
+class TeamPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,14 +35,13 @@ class EventDetails extends React.Component {
   };
 
   render() {
-    let item = this.props.event;
+    let item = this.props.team;
     let privacyLabel = item.privacy === "o" ? "Open" : "Private";
     let itemDate = moment(item.date, "MM/DD/YYYY");
     let environmentImage =
       item.env === "o"
         ? require("../assets/images/environment-outdoor-filled.png")
         : require("../assets/images/environment-outdoor-outline.png");
-
     return (
       <>
         <View
@@ -56,7 +58,7 @@ class EventDetails extends React.Component {
           >
             <ImageBackground
               source={{
-                uri: "data:image/png;base64," + item.e_photo
+                uri: "data:image/png;base64," + item.t_photo
               }}
               style={{
                 width: "100%",
@@ -88,52 +90,6 @@ class EventDetails extends React.Component {
                     />
                   </TouchableOpacity>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    flex: 3,
-                    paddingTop: 0,
-                    paddingHorizontal: 12
-                  }}
-                >
-                  {/* <View
-                    style={{
-                      flex: 6,
-                      alignContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        color: "#000000",
-                        fontSize: 20,
-                        paddingVertical: 6,
-                      }}
-                    > 
-                    titleaskjd;coaisjd;oaijsdo;ciajdos;cj;asoicdjaios;djc
-                    </Text>
-                  </View> */}
-                  <View style={{ flex: 2 }} />
-                  <View
-                    style={{
-                      flex: 2,
-                      alignContent: "center",
-                      backgroundColor: "#ffffff"
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        color: "#000000",
-                        fontSize: 18,
-                        paddingVertical: 6,
-                        textAlign: "center"
-                      }}
-                    >
-                      {itemDate.format("MMM") + " " + itemDate.date()}
-                    </Text>
-                  </View>
-                </View>
               </View>
             </ImageBackground>
           </View>
@@ -149,17 +105,17 @@ class EventDetails extends React.Component {
             <View style={{ flex: 20 }}>
               {this.state.activeTab === 0 && (
                 <>
-                  <EventDetailsInfo event={item} />
+                  <TeamInfo team={item} />
                 </>
               )}
               {this.state.activeTab === 1 && (
                 <>
-                  <EventDetailsTeam event={item} />
+                  <TeamRoster team={item} />
                 </>
               )}
               {this.state.activeTab === 2 && (
                 <>
-                  <EventDetailsUpdates event={item} />
+                  <TeamUpdates team={item} />
                 </>
               )}
             </View>
@@ -284,6 +240,9 @@ class EventDetails extends React.Component {
                   </View>
                 </View>
                 <View style={{ justifyContent: "flex-end" }}>
+                    <Button title="Join this Team"/>
+                </View>
+                {/* <View style={{ justifyContent: "flex-end" }}>
                   {item.is_registered === "-1" && (
                     <>
                       <Button title="Pending..." />
@@ -305,7 +264,7 @@ class EventDetails extends React.Component {
                       />
                     </>
                   )}
-                </View>
+                </View> */}
               </View>
             </>
           </View>
@@ -315,4 +274,4 @@ class EventDetails extends React.Component {
   }
 }
 
-export default EventDetails;
+export default TeamPage;

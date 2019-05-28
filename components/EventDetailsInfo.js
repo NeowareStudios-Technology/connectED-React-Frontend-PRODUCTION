@@ -21,24 +21,37 @@ class EventDetailsInfo extends React.Component {
 
   render() {
     let item = this.props.event;
-    let privacyLabel = item.privacy === "o" ? "Open" : "Private";
+    let privacyLabel = item.privacy === "o" ? "Public" : "Private";
     return (
       <>
         <View style={{ flex: 1 }}>
-          <View style={{ flex: 4 }}>
+        <ScrollView>
+          <View>
             <Text
               style={{
                 fontWeight: "bold",
-                fontSize: 18,
-                marginBottom: 6
+                fontSize: 26,
+                marginBottom: 5
               }}
             >
               {item.e_title}
             </Text>
+            <Text style={{fontWeight: "bold", color: "#2f95dc"}}>
+            {privacyLabel}
+            </Text>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 16,
+                marginBottom: 5
+              }}
+            >
+              {moment(item.date[0], "MM/DD/YYYY").format("MMMM Do ") }@{moment(item.start[0],"HH:mm").format("h:mma")}
+            </Text>
             <Text
               style={{
                 fontSize: 16,
-                marginBottom: 6
+                marginBottom: 10
               }}
             >
               {item.e_desc}
@@ -46,32 +59,32 @@ class EventDetailsInfo extends React.Component {
           </View>
           <View style={{ flex: 10 }}>
             <View style={{ marginBottom: 12 }}>
-              <Text>Location:</Text>
-              <Text style={{ fontWeight: "bold" }}>
+              <Text style={this.styles.subtitle}>Location:</Text>
+              <Text style={{ fontSize: 16 }}>
                 {item.street} {item.city}, {item.state} {item.zip_code}
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text>Opportunity Status:</Text>
-              <Text style={{ fontWeight: "bold" }}>
-                {privacyLabel}{" "}
+              <Text style={this.styles.subtitle}>Required Skills:</Text>
+              <Text style={{ fontSize: 16 }}>
+                
                 {item.req_skills && item.req_skills.length > 0 && (
                   <>
-                    <Text>/ Required Skills: {item.req_skills.join(" ")}</Text>
+                    <Text>{item.req_skills.join(" ")}</Text>
                   </>
                 )}
               </Text>
             </View>
             <View style={{ marginBottom: 12 }}>
-              <Text>Tags:</Text>
+              <Text style={this.styles.subtitle}>Tags:</Text>
               {item.interests && item.interests.length > 0 && (
                 <>
                   <View>
                     {item.interests.map((interest, index) => {
                       return (
                         <View key={"interest-" + index}>
-                          <Text style={{ fontWeight: "bold" }}>
-                            - {interest}
+                          <Text style={{ fontSize: 16 }}>
+                          { `\u2022  `}{interest}
                           </Text>
                         </View>
                       );
@@ -81,9 +94,25 @@ class EventDetailsInfo extends React.Component {
               )}
             </View>
           </View>
+          </ScrollView>
         </View>
       </>
     );
+  }
+  styles={
+    title: {
+      fontSize: 26,
+      marginBottom: 5
+    },
+    subtitle: {
+      fontSize: 20,
+      marginBottom: 5,
+      fontWeight: 'normal'
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 24
+    }
   }
 }
 

@@ -55,7 +55,7 @@ export default class HomeScreen extends React.Component {
             </View>
             <View style={styles.getStartedContainer}>
               <Text style={styles.getStartedHeading}>
-                THE{"\n"}NEW{"\n"}PHILANTROPY
+                THE{"\n"}NEW{"\n"}PHILANTHROPY
               </Text>
               <Text style={styles.getStartedText}>
                 Volunteer easier than ever, build your local community by

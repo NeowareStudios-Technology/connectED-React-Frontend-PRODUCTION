@@ -19,8 +19,11 @@ import EventEditFinishingTouches from "../components/EventEditFinishingTouches";
 import styles from "../constants/Styles";
 import Sequencer from "../components/Sequencer";
 import User from "../components/User";
+import TeamEditInfo from "../components/TeamEditInfo";
+import TeamEditLeaders from "../components/TeamEditLeaders";
+import TeamEditFinishingTouches from "../components/TeamEditFinishingTouches";
 
-class EventCreateScreen extends React.Component {
+class TeamCreateScreen extends React.Component {
   static navigationOptions = {
     header: null
   };
@@ -28,31 +31,26 @@ class EventCreateScreen extends React.Component {
     super(props);
 
     this.fields = [
-      "capacity",
-      "city",
-      "date",
-      "day",
-      "e_desc",
-      "e_photo",
-      "e_title",
-      "education",
-      "end",
-      "env",
-      "interests",
-      "privacy",
-      "qr",
-      "req_skills",
-      "start",
-      "state",
-      "street",
-      "zip_code"
+      "funds_raised",
+      "is_registered",
+      "t_city",
+      "t_desc",
+      "t_hours",
+      "t_leaders",
+      "t_members",
+      "t_member_num",
+      "t_name",
+      "t_organizer",
+      "t_orig_name",
+      "t_pending_member_num",
+      "t_privacy",
+      "t_state",
+      "t_photo"
     ];
 
     this.steps = [
-      { name: "Info" },
-      { name: "Location" },
-      { name: "Leaders And Tags" },
-      { name: "Privacy And Skills" },
+      { name: "Info And Location" },
+      { name: "Leaders And Privacy" },
       { name: "Finishing Touches" }
     ];
 
@@ -94,7 +92,7 @@ class EventCreateScreen extends React.Component {
 
     sequence.promise(() => {
       if (sequence.data) {
-        this.saveEventData(sequence.data, errors => {
+        this.saveTeamData(sequence.data, errors => {
           if (typeof errors !== "undefined") {
             sequence.errors = errors;
           }
@@ -102,7 +100,7 @@ class EventCreateScreen extends React.Component {
         });
       } else {
         sequence.errors = [
-          "We could not create an event with the data provided.  Please restart the App and try again."
+          "We could not create your team with the data provided.  Please restart the App and try again."
         ];
         sequence.next();
       }
@@ -120,13 +118,15 @@ class EventCreateScreen extends React.Component {
     sequence.next();
   };
 
-  saveEventData = async (data, callback) => {
+  saveTeamData = async (data, callback) => {
+    console.log("in save team")
+    console.warn("in save team")
     try {
       let token = await User.firebase.getIdToken();
       if (token) {
         let bodyData = JSON.stringify(data);
         let url =
-          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events";
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams";
         fetch(url, {
           method: "POST",
           headers: {
@@ -136,13 +136,13 @@ class EventCreateScreen extends React.Component {
           body: bodyData
         })
           .then(response => {
-            console.log("Response from save profile", response);
+            console.log("Response from save team data", response);
             if (response.ok) {
               try {
                 let responseData = JSON.parse(response._bodyText);
                 if (responseData) {
                 }
-                this.props.navigation.navigate("EventsHome");
+                this.props.navigation.navigate("TeamsHome");
               } catch (error) {
                 callback([error.message]);
               }
@@ -156,7 +156,7 @@ class EventCreateScreen extends React.Component {
           "It seems like you are not logged in or not authorized to create events."
         ]);
       }
-      console.log("event not created")
+      console.log("Team not created")
     } catch (error) {
       callback([error.message]);
     }
@@ -273,7 +273,7 @@ class EventCreateScreen extends React.Component {
 
   goBack = () => {
     if (this.state.activeStep === 0) {
-      this.props.navigation.navigate("EventsHome");
+      this.props.navigation.navigate("TeamsHome");
     } else {
       let newStep = this.state.activeStep - 1;
       this.setState({ activeStep: newStep });
@@ -315,7 +315,7 @@ class EventCreateScreen extends React.Component {
                         marginBottom: 8
                       }}
                     >
-                      Please wait. We are creating your event...
+                      Please wait. We are creating your team...
                     </Text>
                   </View>
                 </View>
@@ -374,7 +374,7 @@ class EventCreateScreen extends React.Component {
                         {this.state.activeStep === 0 && (
                           <>
                             <View style={{ marginTop: 0 }}>
-                              <EventEditInfo
+                              <TeamEditInfo
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
@@ -387,12 +387,14 @@ class EventCreateScreen extends React.Component {
                         {this.state.activeStep === 1 && (
                           <>
                             <View style={{ marginTop: -6 }}>
-                              <EventEditLocation
+                              <TeamEditLeaders
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
                                   this.setState({ activeStetpModel: model });
                                 }}
+                                onModalOpen={this.onModalOpen}
+                                onModalClose={this.onModalClose}
                               />
                             </View>
                           </>
@@ -400,37 +402,7 @@ class EventCreateScreen extends React.Component {
                         {this.state.activeStep === 2 && (
                           <>
                             <View style={{ marginTop: -6 }}>
-                              <EventEditLeadersAndTags
-                                {...this.state}
-                                onInputChange={this.onInputChange}
-                                onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
-                                }}
-                                onModalOpen={this.onModalOpen}
-                                onModalClose={this.onModalClose}
-                              />
-                            </View>
-                          </>
-                        )}
-                        {this.state.activeStep === 3 && (
-                          <>
-                            <View style={{ marginTop: -6 }}>
-                              <EventEditPrivacyAndSkills
-                                {...this.state}
-                                onInputChange={this.onInputChange}
-                                onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
-                                }}
-                                onModalOpen={this.onModalOpen}
-                                onModalClose={this.onModalClose}
-                              />
-                            </View>
-                          </>
-                        )}
-                        {this.state.activeStep === 4 && (
-                          <>
-                            <View style={{ marginTop: -6 }}>
-                              <EventEditFinishingTouches
+                              <TeamEditFinishingTouches
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
@@ -473,4 +445,4 @@ class EventCreateScreen extends React.Component {
   }
 }
 
-export default EventCreateScreen;
+export default TeamCreateScreen;

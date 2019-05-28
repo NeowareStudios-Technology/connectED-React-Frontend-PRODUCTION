@@ -7,12 +7,16 @@ import {
   Platform,
   Image,
   ImageBackground,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
 import moment from "moment";
 import AppData from "../constants/Data";
+// let {height, width} = Dimensions.get('window');
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
 
 class EventListCard extends React.Component {
   constructor(props) {
@@ -32,15 +36,21 @@ class EventListCard extends React.Component {
         <Card
           containerStyle={{
             padding: 0,
-            paddingHorizontal: 0
+            paddingHorizontal: 0,
+            borderBottomRightRadius: 15,
+            borderBottomLeftRadius: 15,
+            borderTopRightRadius: 15,
+            borderTopLeftRadius: 15,
           }}
         >
-          <View style={{ height: 360 }}>
+          <View style={{ height: screenHeight - 200 }}>
             <View style={{ flex: 1 }}>
               <View
                 style={{
                   flex: 9,
-                  backgroundColor: "#124b73"
+                  backgroundColor: "#124b73",
+                  borderTopRightRadius: 15,
+                  borderTopLeftRadius: 15
                 }}
               >
                 <ImageBackground
@@ -49,8 +59,10 @@ class EventListCard extends React.Component {
                   }}
                   style={{
                     width: "100%",
-                    height: "100%"
+                    height: "101.5%",
                   }}
+                  imageStyle={{ borderRadius: 15}}
+
                 >
                   <View
                     style={{
@@ -83,7 +95,11 @@ class EventListCard extends React.Component {
                             fontSize: 21,
                             paddingRight: 12,
                             paddingTop: 12,
-                            textAlign: "right"
+                            textAlign: "right",
+                            textShadowOffset: { width: 0.5, height: 0.5 },
+                            textShadowRadius: 2,
+                            textShadowColor: '#000',
+
                           }}
                         >
                           {moment(item.start[0], "hh:mm").format("h:mm a")}
@@ -180,10 +196,10 @@ class EventListCard extends React.Component {
                     </View>
                   </>
                 ) : (
-                  <>
-                    <ActivityIndicator size="small" />
-                  </>
-                )}
+                    <>
+                      <ActivityIndicator size="small" />
+                    </>
+                  )}
               </View>
             </View>
           </View>

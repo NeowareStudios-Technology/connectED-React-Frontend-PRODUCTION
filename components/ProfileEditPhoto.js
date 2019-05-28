@@ -1,5 +1,5 @@
 import React from "react";
-import { WebBrowser, Icon, ImagePicker, Permissions, FileSystem } from "expo";
+import { WebBrowser, Icon, ImagePicker, Permissions, FileSystem, Constants, DocumentPicker } from "expo";
 import { Text, StyleSheet, View } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
 
@@ -12,20 +12,27 @@ class ProfileInfo extends React.Component {
     };
   }
 
+
+
   setPhoto = async () => {
     const { status, permissions } = await Permissions.askAsync(
       Permissions.CAMERA_ROLL
     );
     if (status === "granted") {
       let result = await ImagePicker.launchImageLibraryAsync({
-        aspect: [4, 3]
+        aspect: [4, 3],
+        allowsEditing: true,
+        quality: 0.2
       });
+      console.log("THIS IS THE RESULT",result)
       if (!result.cancelled) {
         let data = await FileSystem.readAsStringAsync(result.uri, {
           encoding: FileSystem.EncodingTypes.Base64
         });
         if (data) {
+          // console.log(data)
           this.setState({ photo: data });
+          this.props.onPhotoSelected(data)
         }
       }
     }

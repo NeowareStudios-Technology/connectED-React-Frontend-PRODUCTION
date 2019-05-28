@@ -28,7 +28,26 @@ const styles = StyleSheet.create({
     color: "red",
     marginTop: 6,
     paddingHorizontal:6
-  }
+  },
+  teamListing: {
+    backgroundColor: '#fafafa',
+    flex: 1, 
+    flexDirection: 'row',
+    color: 'black',
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
+    marginBottom: 10,
+    borderColor: 'lightgray',
+    borderWidth: 1,
+    borderRadius: 10,
+},
+eventsContainer: {
+  paddingLeft: 30,
+  paddingRight: 30,
+  paddingTop: 15,
+},
 });
 
 export default styles;

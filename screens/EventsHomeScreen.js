@@ -10,9 +10,10 @@ import {
   Text,
   View,
   Platform,
-  LayoutAnimation
+  LayoutAnimation,
+  Dimensions
 } from "react-native";
-import { Button, Card } from "react-native-elements";
+import { Button, Input } from "react-native-elements";
 import { Icon } from "expo";
 import User from "../components/User";
 import styles from "../constants/Styles";
@@ -20,7 +21,12 @@ import Carousel from "react-native-snap-carousel";
 import EventListCard from "../components/EventListCard";
 import EventDetails from "../components/EventDetails";
 import Sequencer from "../components/Sequencer";
+import EventSearch from "../components/EventSearch";
 import moment from "moment";
+
+let screenWidth = Dimensions.get('window').width;
+let screenHeight = Dimensions.get('window').height;
+
 class EventsHomeScreen extends React.Component {
   static navigationOptions = {
     header: null
@@ -35,13 +41,16 @@ class EventsHomeScreen extends React.Component {
       loading: true,
       eventsNames: [],
       distances: [],
-      events: []
+      events: [],
+      eventNameArray: [],
+      showSearchBar: false
     };
+    this.arrayholder = [];
+
   }
 
   loadEvent = async (eventName, index, callback) => {
     let token = await User.firebase.getIdToken();
-
     if (token) {
       try {
         let url =
@@ -59,11 +68,13 @@ class EventsHomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.e_title === "string") {
-                  let events = this.state.events;
+                  // keep state immutable by using slice to return new array
+                  let events = this.state.events.slice();
                   let event = responseData;
                   event.key = "event-" + index;
                   event.distance = this.state.distances[index];
                   events.push(event);
+                  this.arrayholder = events
                   this.setState(
                     {
                       events: events,
@@ -75,32 +86,43 @@ class EventsHomeScreen extends React.Component {
                   );
                 }
               }
-            } catch (error) {}
+            } catch (error) { }
+          }
+          else {
+            callback();
           }
         });
-      } catch (error) {}
+      } catch (error) { }
     }
+  };
+
+  searchFilterFunction = text => {
+    const newData = this.arrayholder.filter(item => {      
+      const itemData = `${item.e_title.toUpperCase()}`;
+       const textData = text.toUpperCase();
+       return itemData.indexOf(textData) > -1;    
+    });
+
+    this.setState({ events: newData });  
   };
 
   loadEvents = () => {
     let sequence = new Sequencer();
-
     if (this.state.eventsNames.length > 0) {
       this.state.eventsNames.map((eventName, index) => {
         sequence.promise(() => {
           this.loadEvent(eventName, index, () => {
             sequence.next();
           });
+          
         });
       });
     }
-
     sequence.next();
   };
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
-
     if (token) {
       try {
         let url =
@@ -117,9 +139,19 @@ class EventsHomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 if (typeof responseData.events === "object") {
+                  const newArray = []
+
+                  for (var i=0; i<responseData.events.length; i++){
+                    const item = responseData.events[i].split('/')
+                    const clean = item[1].split('+').join(' ')
+                    newArray.push(clean)
+                  }
+                  this.arrayholder = responseData.events
+
                   this.setState(
                     {
                       eventsNames: responseData.events,
+                      eventNameArray: newArray,
                       distances: responseData.distances
                     },
                     () => {
@@ -130,14 +162,14 @@ class EventsHomeScreen extends React.Component {
                   this.setState({ loading: false });
                 }
               }
-            } catch (error) {}
+            } catch (error) { }
           } else {
             this.setState({
               loading: false
             });
           }
         });
-      } catch (error) {}
+      } catch (error) { }
     }
   };
 
@@ -190,8 +222,8 @@ class EventsHomeScreen extends React.Component {
                   });
                 }
               })
-              .catch(error => {});
-          } catch (error) {}
+              .catch(error => { });
+          } catch (error) { }
         }
       }
     }
@@ -241,8 +273,8 @@ class EventsHomeScreen extends React.Component {
                   });
                 }
               })
-              .catch(error => {});
-          } catch (error) {}
+              .catch(error => { });
+          } catch (error) { }
         }
       }
     }
@@ -258,6 +290,10 @@ class EventsHomeScreen extends React.Component {
     this.setState({ activeItem: null });
   };
 
+  closeEventSearch = () => {
+    this.setState({ showSearchBar: false })
+  }
+
   async componentDidMount() {
     let user = await User.isLoggedIn();
     if (user) {
@@ -269,20 +305,35 @@ class EventsHomeScreen extends React.Component {
     <View
       style={{
         marginHorizontal: -20,
-        paddingHorizontal: 2
+        paddingHorizontal: 2,
       }}
     >
       <TouchableOpacity
         onPress={() => {
           this.openItem(item, index);
         }}
+        activeOpacity={1}
       >
-        <EventListCard event={item} />
+        <EventListCard event={item}/>
       </TouchableOpacity>
     </View>
   );
 
   render() {
+    if (this.state.showSearchBar) {
+      return (
+        <View style={styles.container}>
+          <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+          >
+            <EventSearch
+              handleClose={this.closeEventSearch}
+              data={this.state.events}
+            />
+          </ScrollView></View>
+      )
+    }
     return (
       <>
         <View style={styles.container}>
@@ -306,103 +357,173 @@ class EventsHomeScreen extends React.Component {
                 </View>
               </>
             ) : (
-              <>
-                <View style={{ flex: 1 }}>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginBottom: 12
-                    }}
-                  >
-                    <View>
-                      <TouchableOpacity
+                <>
+                  <View style={{ flex: 1 }}>
+                    <View
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 0,
+                        marginHorizontal: 15
+                      }}
+                    >
+                      <View
                         style={{
-                          paddingHorizontal: 10,
-                          borderRadius: 90,
-                          borderColor: "#000",
-                          borderWidth: 0
-                        }}
-                        onPress={() => {
-                          this.props.navigation.navigate("EventCreate");
+                          flexDirection: "row",
+                          alignItems: "center",
                         }}
                       >
-                        <Icon.Ionicons
-                          name={Platform.OS === "ios" ? "ios-add" : "md-add"}
-                          size={38}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View>
-                      <Text style={styles.displayH1}>Events</Text>
-                    </View>
-                  </View>
-                  <View style={{ flex: 10 }}>
-                    {this.state.loading ? (
-                      <>
-                        <View
+                        <TouchableOpacity
                           style={{
-                            justifyContent: "center",
-                            alignContent: "center"
+                            paddingHorizontal: 10,
+                            borderRadius: 90,
+                            borderColor: "#000",
+                            borderWidth: 0
+                          }}
+                          onPress={() => {
+                            this.props.navigation.navigate("EventCreate");
                           }}
                         >
-                          <ActivityIndicator
-                            size="large"
-                            style={{ marginTop: 120 }}
+                          <Icon.Ionicons
+                            name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
+                            size={30}
                           />
+                        </TouchableOpacity>
+                        <View>
+                          <Text style={styles.displayH1}>Events</Text>
                         </View>
-                      </>
-                    ) : (
-                      <>
-                        {this.state.events.length > 0 ? (
-                          <>
-                            <Carousel
-                              layout="default"
-                              ref={c => {
-                                this._carousel = c;
-                              }}
-                              data={this.state.events}
-                              extraData={this.state}
-                              renderItem={this._renderItem}
-                              firstItem={this.state.carouselFirstItem}
-                              itemWidth={230}
-                              sliderWidth={300}
-                              windowSize={280}
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* <TouchableOpacity
+                          style={{
+                            paddingHorizontal: 10,
+                            borderRadius: 90,
+                            borderColor: "#000",
+                            borderWidth: 0
+                          }}
+                          onPress={() => {
+                            this.setState({ showSearchBar: true })
+                          }}
+                        >
+                          <Icon.Ionicons
+                            name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                            size={30}
+                          />
+                        </TouchableOpacity> */}
+                        <TouchableOpacity
+                          style={{
+                            paddingHorizontal: 10,
+                            borderRadius: 90,
+                            borderColor: "#000",
+                            borderWidth: 0,
+                          }}
+                          onPress={() => {
+                            console.log('TODO: filter')
+                          }}
+                        >
+                          <Icon.Ionicons
+                            name={Platform.OS === "ios" ? "ios-options" : "md-options"}
+                            size={30}
+                          />
+                        </TouchableOpacity>
+
+                      </View>
+                    </View>
+                    <View style={{ flex: 10 }}>
+                    <View style={{
+                      flexDirection: 'row',
+                      marginHorizontal: 20,
+                      paddingHorizontal: 10,
+                      borderRadius: 10,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      backgroundColor: '#eee'
+                    }}>
+                      <Icon.Ionicons
+                        name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                        size={20}
+                        style={{paddingTop: 0}}
+                        
+                      />
+                      <Input
+                        placeholder="Search Events"
+                        inputContainerStyle={{borderBottomWidth: 0}}
+                        onChangeText={text=>this.searchFilterFunction(text)}
+                        autoCorrect={false}
+                      />
+                    </View>
+                    
+
+                      {this.state.loading ? (
+                        <>
+                          <View
+                            style={{
+                              justifyContent: "center",
+                              alignContent: "center"
+                            }}
+                          >
+                            <ActivityIndicator
+                              size="large"
+                              style={{ marginTop: 120 }}
                             />
-                          </>
-                        ) : (
+                          </View>
+                        </>
+                      ) : (
                           <>
-                            <View
-                              style={{
-                                marginTop: 12,
-                                paddingHorizontal: 24,
-                                justifyContent: "center",
-                                alignItems: "center"
-                              }}
-                            >
-                              <Text
-                                style={{ fontSize: 18, textAlign: "center" }}
-                              >
-                                There are no active events at this moment.
+                            {this.state.events.length > 0 ? (
+                              <>
+                                <Carousel
+                                  layout="default"
+                                  ref={c => {
+                                    this._carousel = c;
+                                  }}
+                                  data={this.state.events}
+                                  extraData={this.state}
+                                  renderItem={this._renderItem}
+                                  firstItem={this.state.carouselFirstItem}
+                                  itemWidth={screenWidth - 50 * 2}
+                                  sliderWidth={screenWidth}
+                                  windowSize={280}
+                                />
+                              </>
+                            ) : (
+                                <>
+                                  <View
+                                    style={{
+                                      marginTop: 12,
+                                      paddingHorizontal: 24,
+                                      justifyContent: "center",
+                                      alignItems: "center"
+                                    }}
+                                  >
+                                    <Text
+                                      style={{ fontSize: 18, textAlign: "center" }}
+                                    >
+                                      There are no active events at this moment.
                               </Text>
-                              <Button
-                                style={{ marginTop: 12 }}
-                                title="Create An Event"
-                                onPress={() => {
-                                  this.props.navigation.navigate("EventCreate");
-                                }}
-                              />
-                            </View>
+                                    <Button
+                                      style={{ marginTop: 12 }}
+                                      title="Create An Event"
+                                      onPress={() => {
+                                        this.props.navigation.navigate("EventCreate");
+                                      }}
+                                    />
+                                  </View>
+                                </>
+                              )}
                           </>
                         )}
-                      </>
-                    )}
+                    </View>
                   </View>
-                </View>
-              </>
-            )}
+                </>
+              )}
           </ScrollView>
         </View>
       </>

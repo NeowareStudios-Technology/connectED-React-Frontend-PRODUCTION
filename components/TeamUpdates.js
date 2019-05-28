@@ -15,13 +15,13 @@ import moment from "moment";
 import User from "./User";
 import AppData from "../constants/Data";
 
-class EventDetailsUpdates extends React.Component {
+class TeamUpdates extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       updates: [],
-      loading: true
+      loading: false
     };
   }
 
@@ -78,11 +78,11 @@ class EventDetailsUpdates extends React.Component {
   };
 
   componentDidMount() {
-    this.fetchData();
+    // this.fetchData();
   }
 
   render() {
-    let item = this.props.event;
+    let item = this.props.team;
     let privacyLabel = item.privacy === "o" ? "Open" : "Private";
     return (
       <>
@@ -130,9 +130,9 @@ class EventDetailsUpdates extends React.Component {
               ) : (
                 <>
                   <View>
-                    <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                    <Text style={this.styles.title}>{this.props.team.t_name}</Text>
                     <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
-                    <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
+                    <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.team.t_organizer}</Text>
                   </View>
                 </>
               )}
@@ -161,4 +161,4 @@ class EventDetailsUpdates extends React.Component {
   }
 }
 
-export default EventDetailsUpdates;
+export default TeamUpdates;
