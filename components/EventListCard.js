@@ -25,6 +25,13 @@ class EventListCard extends React.Component {
 
   render() {
     let item = this.props.event;
+    let EventPlaceholder = require("../assets/images/EventPlaceholder.png");
+    let EventBackgroundImage;
+    if (item.e_photo){
+      EventBackgroundImage = {uri: "data:image/png;base64," + item.e_photo}
+    } else {
+      EventBackgroundImage = EventPlaceholder
+    }
     let itemDate = moment(item.date, "MM/DD/YYYY");
     let environmentImage =
       item.env === "o"
@@ -54,9 +61,7 @@ class EventListCard extends React.Component {
                 }}
               >
                 <ImageBackground
-                  source={{
-                    uri: "data:image/png;base64," + item.e_photo
-                  }}
+                  source={EventBackgroundImage}
                   style={{
                     width: "100%",
                     height: "101.5%",
