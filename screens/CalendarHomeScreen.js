@@ -557,7 +557,9 @@ export default class MyCalendar extends Component {
                             keyExtractor={this._keyExtractor}
                             renderItem={({item}) => 
                                 <View style={styles.eventListing}>
-                                    <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
+                                    <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}>
+                                    <Image style={{flex: 1}} resizeMode='cover' source={{ uri:  "data:image/png;base64," + item.e_photo}}></Image>
+                                    </View>
                                     <View style={{
                                         marginLeft:10,
                                         paddingLeft:10,
@@ -565,8 +567,8 @@ export default class MyCalendar extends Component {
                                         borderLeftWidth: 2
                                     }}>
                                         <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.e_title}</Text>
-                                        {/* <Text>{item.date}</Text>
-                                        <Text>{item.time}</Text> */}
+                                        <Text>{item.date}</Text>
+                                        <Text>{item.time}</Text>
                                     </View>
                                 </View>
                             }
