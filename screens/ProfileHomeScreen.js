@@ -537,7 +537,33 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                        </View>
+                        
+                      </View>
+                      <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("TermsConditions")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Terms and Conditions
+                              </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                          </View>
                       </View>
                       {/* <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
