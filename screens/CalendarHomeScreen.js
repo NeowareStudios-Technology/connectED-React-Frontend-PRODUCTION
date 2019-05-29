@@ -16,6 +16,7 @@ import {
   import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
   import moment from "moment"
   import { Icon } from "expo";
+  import EventListCard from '../components/EventListCard';
   import User from "../components/User";
   import Sequencer from "../components/Sequencer";
   import uuidv4 from 'uuid/v4';
@@ -502,7 +503,32 @@ export default class MyCalendar extends Component {
                   buttons={buttons}
                   containerStyle={{ paddingBottom: 0, marginBottom: 0}}
                 />
+                {/*********************************************
+                  Attempt to match calendar mockup from Slack channel.
+                **********************************************/}
                 <View style={styles.eventsContainer}>
+                      {/* One event card */}
+                      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: "#fff", marginBottom: 5, borderRadius: 10, justifyContent: 'space-evenly', maxHeight: 70 }}>
+                        {/* TODO's: add <img> set to left & space-around */}
+                        <Image
+                          style={{ width: 50, height: 50, borderRadius: 10, marginTop: 10, marginLeft: 15, marginRight: 15 }}
+                          source={{ uri: 'http://www.placepuppy.net/50/50' }}
+                          // source={{ uri: 'https://via.placeholder.com/50' }}
+                        />
+                        {/* add '|' styled */}
+                        <View style={{ borderLeftWidth: 2, borderLeftColor: '#777', height: '70%', marginTop: 12, marginRight: 25 }}></View>
+                        {/* add Event Title & Date in a column */}
+                        <View style={{ flex: 1, flexDirection: 'column' }}>
+                          <Text style={{ flex: 1, color: '#999', height: 90, marginTop: 5, fontSize: 20, color: '#111' }}>Tech & Talk</Text>
+                          <Text style={{ flex: 1, color: '#999', height: 90, fontSize: 20, fontWeight: 'bold', color: '#111', marginBottom: 10 }}>April 2nd</Text>
+                        </View>
+                      </View>
+
+                      {/* One event card */}
+                      <View style={{ backgroundColor: "#fff", borderRadius: 10 }}></View>
+                      {/* <EventListCard props={this.props}></EventListCard> NOT WORKING Throws TypeError*/}
+
+
                   {this.state.activeTab === 0 && (
                       <View style={{flex:1}}>
                         {sortedEvents ? (               

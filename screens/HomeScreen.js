@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Animated,
   Image,
   ImageBackground,
   Platform,
@@ -18,12 +19,21 @@ export default class HomeScreen extends React.Component {
     super(props);
 
     this.state = {
-      processing: false
+      processing: false,
+      fadeValue: new Animated.Value(0)
     };
   }
   static navigationOptions = {
     header: null
   };
+
+  _start = () => {
+    Animated.timing(this.state.fadeValue, {
+      toValue: 1,
+      duration: 3000
+    }).start();
+  };
+
 
   getStarted = async () => {
     this.setState({ processing: true }, async () => {
@@ -49,6 +59,7 @@ export default class HomeScreen extends React.Component {
           >
             <View style={styles.welcomeContainer}>
               <Image
+                onPress={() => this._start()}
                 source={require("../assets/images/logo.png")}
                 style={styles.logo}
               />
