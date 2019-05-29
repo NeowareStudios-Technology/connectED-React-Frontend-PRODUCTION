@@ -20,6 +20,7 @@ import {
   import User from "../components/User";
   import Sequencer from "../components/Sequencer";
   import uuidv4 from 'uuid/v4';
+  import Carousel, { Pagination } from 'react-native-snap-carousel';
   
   let screenHeight = Dimensions.get('window').height;
   import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
@@ -41,7 +42,17 @@ export default class MyCalendar extends Component {
         userEvents: null, // events created by user
         pastEvents: null, // past events the user has volunteered for
         activeTab: 0,
-        loading: true
+        loading: true,
+        entries: [
+          {
+            title: 'Tech & Talk',
+            date: 'April 2nd'
+          },
+          {
+            title: 'Walkathon 2019',
+            date: 'April 8th'
+          }
+        ]
     };
     this.updateTab = this.updateTab.bind(this)
     }
@@ -408,6 +419,40 @@ export default class MyCalendar extends Component {
       this.setState({ marked : obj});
   }
 
+
+  /*********************************************************************
+   *  START react-native-snap-carousel
+   * 
+   ***********************************************************************/
+  _renderItem({ item, index }) {
+    return <MySlideComponent data={item} />
+  }
+
+  get pagination() {
+    const { entries, activeSlide } = this.state;
+    return (
+      <Pagination
+        dotsLength={entries.length}
+        activeDotIndex={activeSlide}
+        containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
+        dotStyle={{
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+          marginHorizontal: 8,
+          backgroundColor: 'rgba(255, 255, 255, 0.92)'
+        }}
+        inactiveDotStyle={{
+          // Define styles for inactive dots here
+        }}
+        inactiveDotOpacity={0.4}
+        inactiveDotScale={0.6}
+      />
+    );
+  }
+  /* END react-native - snap - carousel
+   *********************************************************************** */
+
     render() {
         let sortedEvents;
         if (!this.state.userEvents) {
@@ -425,6 +470,10 @@ export default class MyCalendar extends Component {
           }
         // console.log(sortedEvents)
         
+        /******************************************
+        * For loop to create two event list cards for the carousel
+        * Then they are added in the return() method in  `{eventCards}`
+        */
         let eventCards = [];
         for (let i=0;i<2;i++){
           eventCards.push(
@@ -525,6 +574,18 @@ export default class MyCalendar extends Component {
                 **********************************************/}
                 <View style={styles.eventsContainer}>
                   {eventCards}
+                  <View>
+                    {/* <Carousel
+                      windowSize={screenHeight}
+                      data={this.state.entries}
+                      renderItem={this._renderItem}
+                      onSnapToItem={(index) => this.setState({ activeSlide: index })}
+                      sliderWidth={300}
+                      itemWidth={300}
+                    /> */}
+                    {this.pagination}
+                  </View>
+
                       {/* First event card */}
                       {/* <View style={styles.eventContainer}>
                         <Image
