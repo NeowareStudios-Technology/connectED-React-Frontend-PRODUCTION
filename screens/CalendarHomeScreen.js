@@ -425,6 +425,23 @@ export default class MyCalendar extends Component {
           }
         // console.log(sortedEvents)
         
+        let eventCards = [];
+        for (let i=0;i<2;i++){
+          eventCards.push(
+            <View key={i} style={styles.eventContainer}>
+                <Image
+                  style={styles.image}
+                  source={{ uri: 'http://www.placepuppy.net/50/50' }}
+                // source={{ uri: 'https://via.placeholder.com/50' }}
+                />
+                <View style={styles.eventListCard}></View>
+                <View style={{ flex: 1, flexDirection: 'column' }}>
+                  <Text style={styles.eventTitle}>Tech & Talk</Text>
+                  <Text style={styles.eventDate}>April 2nd</Text>
+                </View>
+              </View>
+          )
+        }
 
         const buttons = [ "My Opportunities", "Volunteering"];
         return (
@@ -507,25 +524,34 @@ export default class MyCalendar extends Component {
                   Attempt to match calendar mockup from Slack channel.
                 **********************************************/}
                 <View style={styles.eventsContainer}>
-                      {/* One event card */}
-                      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: "#fff", marginBottom: 5, borderRadius: 10, justifyContent: 'space-evenly', maxHeight: 70 }}>
-                        {/* TODO's: add <img> set to left & space-around */}
+                  {eventCards}
+                      {/* First event card */}
+                      {/* <View style={styles.eventContainer}>
                         <Image
-                          style={{ width: 50, height: 50, borderRadius: 10, marginTop: 10, marginLeft: 15, marginRight: 15 }}
+                          style={styles.image}
                           source={{ uri: 'http://www.placepuppy.net/50/50' }}
                           // source={{ uri: 'https://via.placeholder.com/50' }}
                         />
-                        {/* add '|' styled */}
-                        <View style={{ borderLeftWidth: 2, borderLeftColor: '#777', height: '70%', marginTop: 12, marginRight: 25 }}></View>
-                        {/* add Event Title & Date in a column */}
+                        <View style={styles.eventListCard}></View>
                         <View style={{ flex: 1, flexDirection: 'column' }}>
-                          <Text style={{ flex: 1, color: '#999', height: 90, marginTop: 5, fontSize: 20, color: '#111' }}>Tech & Talk</Text>
-                          <Text style={{ flex: 1, color: '#999', height: 90, fontSize: 20, fontWeight: 'bold', color: '#111', marginBottom: 10 }}>April 2nd</Text>
+                          <Text style={styles.eventTitle}>Tech & Talk</Text>
+                          <Text style={styles.eventDate}>April 2nd</Text>
                         </View>
-                      </View>
+                      </View> */}
 
-                      {/* One event card */}
-                      <View style={{ backgroundColor: "#fff", borderRadius: 10 }}></View>
+                      {/* Second event card */}
+                      {/* TODO's: add second event list card, add a carousel to display > 2 event list cards, icons. */}
+                      {/* <View style={{ marginTop: 35, backgroundColor: "#fff", borderRadius: 10 }}>
+                        <Image
+                          style={styles.image}
+                          source={{ uri: 'http://www.arnold.fun/50/50' }}
+                        />
+                        <View style={styles.eventListCard}></View>
+                        <View style={{ flex: 1, flexDirection: 'column' }}>
+                          <Text style={styles.eventTitle}>Walkathon 2019</Text>
+                          <Text style={styles.eventDate}>April 2nd</Text>
+                        </View>
+                      </View> */}
                       {/* <EventListCard props={this.props}></EventListCard> NOT WORKING Throws TypeError*/}
 
 
@@ -686,6 +712,47 @@ const styles = StyleSheet.create({
         borderColor: 'white',
         borderWidth: 2,
         borderRadius: 5,
+    },
+    eventContainer: {
+      flex: 1, 
+      flexDirection: 'row', 
+      backgroundColor: "#fff", 
+      marginBottom: 5, 
+      borderRadius: 10, 
+      justifyContent: 'space-evenly', 
+      maxHeight: 70
+    },
+    image: {
+      width: 50, 
+      height: 50, 
+      borderRadius: 10, 
+      marginTop: 10, 
+      marginLeft: 15, 
+      marginRight: 15
+    },
+    eventListCard: {
+      borderLeftWidth: 2, 
+      borderLeftColor: '#777', 
+      height: '70%', 
+      marginTop: 12, 
+      marginRight: 25
+    },
+    eventTitle: {
+      flex: 1, 
+      color: '#999', 
+      height: 90, 
+      marginTop: 5, 
+      fontSize: 20, 
+      color: '#111' 
+    },
+    eventDate: {
+      flex: 1, 
+      color: '#999', 
+      height: 90, 
+      fontSize: 20, 
+      fontWeight: 'bold', 
+      color: '#111', 
+      marginBottom: 10 
     }
   });
   
