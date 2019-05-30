@@ -10,20 +10,23 @@ import {
     Text,
     TouchableOpacity,
     View,
+    SafeAreaView,
     FlatList,
-    LayoutAnimation
+    LayoutAnimation,
+    TouchableHighlight
   } from "react-native";
-  import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
-  import moment from "moment"
-  import { Icon } from "expo";
-  import EventListCard from '../components/EventListCard';
-  import User from "../components/User";
-  import Sequencer from "../components/Sequencer";
-  import uuidv4 from 'uuid/v4';
-  import Carousel, { Pagination } from 'react-native-snap-carousel';
-  
-  let screenHeight = Dimensions.get('window').height;
-  import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
+import moment from "moment"
+import { Icon } from "expo";
+import EventListCard from '../components/EventListCard';
+import User from "../components/User";
+import Sequencer from "../components/Sequencer";
+import uuidv4 from 'uuid/v4';
+
+import Carousel, { Pagination } from 'react-native-snap-carousel';
+
+let screenHeight = Dimensions.get('window').height;
+import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import EventDetails from '../components/EventDetails';
 
 export default class MyCalendar extends Component {
@@ -43,17 +46,17 @@ export default class MyCalendar extends Component {
         pastEvents: null, // past events the user has volunteered for
         activeTab: 0,
         loading: true,
-        entries: [
-          {
-            title: 'Tech & Talk',
-            date: 'April 2nd'
-          },
-          {
-            title: 'Walkathon 2019',
-            date: 'April 8th'
-          }
+        activeIndex:0,
+        carouselItems: [
+          { title: "Tech & Talk", date: "April 2nd" },
+          { title: "Walkathon 2019", date: "April 8th" },
+          { title: "Logger Competition", date: "May 2nd" },
+          { title: "Stuff n Stuff", date: "June 2nd" },
+          { title: "Wild Event", date: "July 2nd" },
+          { title: "500K Fun Run", date: "August 15th"}
         ]
     };
+
     this.updateTab = this.updateTab.bind(this)
     }
 
@@ -424,15 +427,25 @@ export default class MyCalendar extends Component {
    *  START react-native-snap-carousel
    * 
    ***********************************************************************/
-  _renderItem({ item, index }) {
-    return <MySlideComponent data={item} />
+  _renderItem({item,index}){
+    return (
+        <View style={styles.eventContainer}> 
+          <Image  
+            style={styles.image}
+            source={{ uri: 'http://www.placepuppy.net/50/50' }}
+          />
+          {/* <Image source={{ uri: 'http://www.arnold.fun/50/50' }} /> */}
+          <Text style={styles.eventTitle} >{item.title}</Text>
+          <Text style={styles.eventDate} >{item.date}</Text>
+        </View>
+    )
   }
 
   get pagination() {
-    const { entries, activeSlide } = this.state;
+    const { carouselItems, activeSlide } = this.state;
     return (
       <Pagination
-        dotsLength={entries.length}
+        dotsLength={carouselItems.length}
         activeDotIndex={activeSlide}
         containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
         dotStyle={{
@@ -458,7 +471,7 @@ export default class MyCalendar extends Component {
         if (!this.state.userEvents) {
             sortedEvents = null
           } else {
-            
+          
             sortedEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
             // const markedEventDates={}
             // for(var i=0; i<sortedEvents.length; i++){
@@ -485,8 +498,8 @@ export default class MyCalendar extends Component {
                 />
                 <View style={styles.eventListCard}></View>
                 <View style={{ flex: 1, flexDirection: 'column' }}>
-                  <Text style={styles.eventTitle}>Tech & Talk</Text>
-                  <Text style={styles.eventDate}>April 2nd</Text>
+                  <Text style={styles.eventTitle}>{this.state.carouselItems[i][0]}</Text>
+                  <Text style={styles.eventDate}>{this.state.carouselItems[i][1]}</Text>
                 </View>
               </View>
           )
@@ -569,52 +582,23 @@ export default class MyCalendar extends Component {
                   buttons={buttons}
                   containerStyle={{ paddingBottom: 0, marginBottom: 0}}
                 />
-                {/*********************************************
-                  Attempt to match calendar mockup from Slack channel.
-                **********************************************/}
+
+ {/*********************************************
+   START of Attempt to match calendar mockup from Slack channel.
+  **********************************************/}
                 <View style={styles.eventsContainer}>
-                  {eventCards}
-                  <View>
-                    {/* <Carousel
-                      windowSize={screenHeight}
-                      data={this.state.entries}
-                      renderItem={this._renderItem}
-                      onSnapToItem={(index) => this.setState({ activeSlide: index })}
-                      sliderWidth={300}
-                      itemWidth={300}
-                    /> */}
-                    {this.pagination}
-                  </View>
-
-                      {/* First event card */}
-                      {/* <View style={styles.eventContainer}>
-                        <Image
-                          style={styles.image}
-                          source={{ uri: 'http://www.placepuppy.net/50/50' }}
-                          // source={{ uri: 'https://via.placeholder.com/50' }}
-                        />
-                        <View style={styles.eventListCard}></View>
-                        <View style={{ flex: 1, flexDirection: 'column' }}>
-                          <Text style={styles.eventTitle}>Tech & Talk</Text>
-                          <Text style={styles.eventDate}>April 2nd</Text>
-                        </View>
-                      </View> */}
-
-                      {/* Second event card */}
-                      {/* TODO's: add second event list card, add a carousel to display > 2 event list cards, icons. */}
-                      {/* <View style={{ marginTop: 35, backgroundColor: "#fff", borderRadius: 10 }}>
-                        <Image
-                          style={styles.image}
-                          source={{ uri: 'http://www.arnold.fun/50/50' }}
-                        />
-                        <View style={styles.eventListCard}></View>
-                        <View style={{ flex: 1, flexDirection: 'column' }}>
-                          <Text style={styles.eventTitle}>Walkathon 2019</Text>
-                          <Text style={styles.eventDate}>April 2nd</Text>
-                        </View>
-                      </View> */}
-                      {/* <EventListCard props={this.props}></EventListCard> NOT WORKING Throws TypeError*/}
-
+                  {/* {eventCards} */}
+                  <Carousel
+                    ref={ref => this.carousel = ref}
+                    data={this.state.carouselItems}
+                    sliderWidth={250}
+                    itemWidth={250}
+                    renderItem={this._renderItem}
+                    onSnapToItem = { index => this.setState({activeIndex:index}) }
+                  />
+ {/*********************************************
+   END of attempt to match calendar mockup from Slack channel.
+  **********************************************/}
 
                   {this.state.activeTab === 0 && (
                       <View style={{flex:1}}>
