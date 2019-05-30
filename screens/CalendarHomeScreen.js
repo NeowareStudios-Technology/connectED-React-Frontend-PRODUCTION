@@ -166,7 +166,6 @@ export default class MyCalendar extends Component {
     // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
-    console.warn(this.state.events.registered_events)
     let userEvents = this.state.events.created_events
     if (registeredEvents && registeredEvents.length > 0) {
       registeredEvents.map((eventName, index) => {
@@ -361,20 +360,7 @@ export default class MyCalendar extends Component {
     }
   };
 
-
-
-   
-
-    // getMarkedDates(){
-    //     let datesObject={}
-    //     for(var i=0; i<this.state.markedDates.length; i++){
-    //         this.state.markedDates[i] = {selected: true, selectedColor: '#275FBC'}
-    //         console.warn(this.state.markedDates[i], 'state')
-    //     }
-    //     console.warn(datesObject, 'datesobject')
-    //     // '2019-05-16': {selected: true, selectedColor: '#275FBC'},
-    // }
-    _keyExtractor = (item, index) => item.id;
+  _keyExtractor = (item, index) => index.toString();
 
     updateTab = (activeTab) => {
         this.setState({ activeTab })
@@ -400,6 +386,14 @@ export default class MyCalendar extends Component {
             let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
             DatesArray.push(newDate)
         }
+        let myUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+
+        for(var i = 0; i < myUpcomingEvents.length; i++){
+            let date = myUpcomingEvents[i].date[0]
+            
+            let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
+            DatesArray.push(newDate)
+        }
         this.setState({markedDates: DatesArray})
         this.sendDatesToCalendar();
     }
@@ -409,27 +403,21 @@ export default class MyCalendar extends Component {
   }
 
     render() {
-      console.warn(this.state.upcomingEvents)
         let sortedEvents;
         if (!this.state.userEvents) {
             sortedEvents = null
           } else {
-            
             sortedEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
-            // const markedEventDates={}
-            // for(var i=0; i<sortedEvents.length; i++){
-            //     console.log(sortedEvents[i].date[0])
-            //     const date = sortedEvents[i].date[0]
-            //     markedEventDates[date] = {selected: true, selectedColor: '#275FBC'}
-            // }
-            // console.log(markedEventDates)
           }
-        // console.log(sortedEvents)
+          let sortedUpcomingEvents;
+        if (!this.state.upcomingEvents) {
+            sortedUpcomingEvents = null
+          } else {
+            sortedUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+          }
         
-
         const buttons = [ "My Opportunities", "Volunteering"];
         return (
-
 
             <View style={styles.container}>
             {this.state.activeItem ? (
@@ -512,10 +500,10 @@ export default class MyCalendar extends Component {
                         <FlatList
                             data={sortedEvents}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
                             <TouchableOpacity
                                 onPress={() => {
-                                this.openItem(item);
+                                this.openItem(item, index);
                                 }}
                                 activeOpacity={1}
                             >
@@ -550,12 +538,18 @@ export default class MyCalendar extends Component {
                   )}
                   {this.state.activeTab === 1 && (
                     <>
-                    {sortedEvents ? (
+                    {sortedUpcomingEvents ? (
                         
                         <FlatList
-                            data={this.state.upcomingEvents}
+                            data={sortedUpcomingEvents}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
+                            <TouchableOpacity
+                                onPress={() => {
+                                this.openItem(item, index);
+                                }}
+                                activeOpacity={1}
+                            >
                                 <View style={styles.eventListing}>
                                     <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}>
                                     <Image style={{flex: 1}} resizeMode='cover' source={{ uri:  "data:image/png;base64," + item.e_photo}}></Image>
@@ -567,10 +561,12 @@ export default class MyCalendar extends Component {
                                         borderLeftWidth: 2
                                     }}>
                                         <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.e_title}</Text>
-                                        <Text>{item.date}</Text>
-                                        <Text>{item.time}</Text>
+                                        <Text>{moment(item.date, "MM/DD/YYYY").format("MMM Do")}</Text>
+                                        <Text>{item.start[0]}</Text>
                                     </View>
                                 </View>
+                            </TouchableOpacity>
+
                             }
                         />
                     
