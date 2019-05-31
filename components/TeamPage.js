@@ -37,6 +37,7 @@ class TeamPage extends React.Component {
   render() {
     let item = this.props.team;  
     return (
+      
       <>
         <View
           style={{
@@ -253,7 +254,7 @@ class TeamPage extends React.Component {
                   {item.is_registered === "1" && (
                     <>
                       <Button
-                        onPress={this.props.onDeregister}
+                        onPress={this.props.onLeave}
                         title="Leave this Team"
                       />
                     </>

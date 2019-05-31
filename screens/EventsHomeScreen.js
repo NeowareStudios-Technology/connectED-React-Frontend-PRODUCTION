@@ -320,6 +320,7 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
+    console.log(this.state.activeItem)
     if (this.state.showSearchBar) {
       return (
         <View style={styles.container}>

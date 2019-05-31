@@ -77,7 +77,7 @@ export default class TeamsScreen extends Component {
                       }
                       this.setState({
                         SuggestedTeamNames: teams,
-                        activeItem: teams[teamIndex]
+                        activeItem: this.state.currentTeam.t_orig_name
                       });
                     }
                   })
@@ -89,6 +89,56 @@ export default class TeamsScreen extends Component {
       } else{
         alert("sorry, something went wrong")
       }
+    }
+
+    leaveTeam = async () => {
+      if (this.state.currentTeam) {
+        let isRegistered = false;
+        if (
+          typeof this.state.currentTeam.t_members !== "undefined" &&
+          this.state.currentTeam.t_members !== "0"
+        ) {
+          isRegistered = true;
+        }
+        if (isRegistered) {
+          let token = await User.firebase.getIdToken();
+  
+          if (token) {
+            let teamOrigName = this.state.currentTeam.t_orig_name;
+            let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${teamOrigName}/registration`;
+          try {
+              fetch(url, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token
+                }
+              })
+                .then(response => {
+                  if (response.ok) {
+                    let teams = this.state.SuggestedTeamNames;
+                    let teamIndex = null;
+                    let team = teams.find((aTeam, index) => {
+                      if (aTeam === this.state.currentTeam) {
+                        teamIndex = index;
+                        return true;
+                      }
+                      return false;
+                    });
+                    if (teamIndex) {
+                      teams[teamIndex].is_registered = "0";
+                    }                    
+                    this.setState({
+                      SuggestedTeamNames: teams,
+                      activeItem: this.state.currentTeam.t_orig_name
+                    });
+                  }
+                })
+                .catch(error => { });
+            } catch (error) { }
+          }
+        }
+      } else {console.warn("couldn't deregister")}
     }
 
     fetchTopTeamData = async () => {
@@ -242,12 +292,11 @@ export default class TeamsScreen extends Component {
     closeItem = item => {
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: null });
-        this.setState({currentTeam: {}})
+        // this.setState({currentTeam: {}})
     };
  
 
     render() {
-      console.log(this.state.currentTeam)
         return (
             <>
             <View style={styles.container}>
@@ -265,8 +314,8 @@ export default class TeamsScreen extends Component {
                     onJoin={() => {
                       this.joinTeam();
                     }}
-                    onDeregister={() => {
-                      this.deregister();
+                    onLeave={() => {
+                      this.leaveTeam();
                     }}
                   />
                 </View>
