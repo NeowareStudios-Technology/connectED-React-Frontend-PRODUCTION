@@ -26,6 +26,8 @@ import uuidv4 from 'uuid/v4';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 let screenHeight = Dimensions.get('window').height;
+let screenWidth = Dimensions.get('window').width;
+
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import EventDetails from '../components/EventDetails';
 
@@ -48,12 +50,12 @@ export default class MyCalendar extends Component {
         loading: true,
         activeIndex:0,
         carouselItems: [
-          { title: "Tech & Talk", date: "April 2nd" },
-          { title: "Walkathon 2019", date: "April 8th" },
-          { title: "Logger Competition", date: "May 2nd" },
-          { title: "Stuff n Stuff", date: "June 2nd" },
-          { title: "Wild Event", date: "July 2nd" },
-          { title: "500K Fun Run", date: "August 15th"}
+         [ { title: "Tech & Talk", date: "April 2nd", url: "http://www.arnold.fun/50/50" },
+           { title: "Walkathon 2019", date: "April 8th", url: "http://www.placepuppy.net/50/50" } ],
+          [ { title: "Ultimate Logging Competition", date: "May 2nd", url: "https://placebear.com/50/50" },
+          { title: "Stuff n Stuff", date: "June 2nd", url: "http://placekitten.com/50/50" } ],
+          [ { title: "Wild Event", date: "July 2nd", url: "http://www.arnold.fun/50/50" },
+          { title: "500K Fun Run", date: "August 15th", url: "http://www.placepuppy.net/50/50" } ]
         ]
     };
 
@@ -427,17 +429,50 @@ export default class MyCalendar extends Component {
    *  START react-native-snap-carousel
    * 
    ***********************************************************************/
+        // eventsCarousel.map((curr, idx) => {
+        //   return [ curr, curr[idx+1] ];
+        // });
   _renderItem({item,index}){
+
+    console.log('++++++++++++++++', item, index);
+    
+  //  let arr = this.state.carouselItems;
+    // let hold = [];
+    // let second = [];
+  
+    //   if (index % 2 === 0) {
+    //     hold.push(item)
+    //   } else {
+    //     second.push(item)
+    //   }
+    //   console.log([hold, second]);
+
     return (
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <View style={styles.eventContainer}>
+            <Image  
+              style={styles.image}
+              source={{ uri: item[0].url }}
+            />
+            <View style={styles.eventListCard}></View>
+            <View style={{ flex: 1, flexDirection: 'column' }}>
+              <Text style={styles.eventTitle} >{item[0].title}</Text>
+              <Text style={styles.eventDate} >{item[0].date}</Text>
+            </View>
+        </View>
+          
         <View style={styles.eventContainer}> 
           <Image  
             style={styles.image}
-            source={{ uri: 'http://www.placepuppy.net/50/50' }}
+            source={{ uri: item[1].url }}
           />
-          {/* <Image source={{ uri: 'http://www.arnold.fun/50/50' }} /> */}
-          <Text style={styles.eventTitle} >{item.title}</Text>
-          <Text style={styles.eventDate} >{item.date}</Text>
+          <View style={styles.eventListCard}></View>
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+            <Text style={styles.eventTitle} >{item[1].title}</Text>
+            <Text style={styles.eventDate} >{item[1].date}</Text>
+          </View>
         </View>
+      </View>
     )
   }
 
@@ -487,25 +522,25 @@ export default class MyCalendar extends Component {
         * For loop to create two event list cards for the carousel
         * Then they are added in the return() method in  `{eventCards}`
         */
-        let eventCards = [];
-        for (let i=0;i<2;i++){
-          eventCards.push(
-            <View key={i} style={styles.eventContainer}>
-                <Image
-                  style={styles.image}
-                  source={{ uri: 'http://www.placepuppy.net/50/50' }}
-                // source={{ uri: 'https://via.placeholder.com/50' }}
-                />
-                <View style={styles.eventListCard}></View>
-                <View style={{ flex: 1, flexDirection: 'column' }}>
-                  <Text style={styles.eventTitle}>{this.state.carouselItems[i][0]}</Text>
-                  <Text style={styles.eventDate}>{this.state.carouselItems[i][1]}</Text>
-                </View>
-              </View>
-          )
-        }
+        // let eventCards = [];
+        // for (let i=0;i<2;i++){
+        //   eventCards.push(
+        //     <View key={i} style={styles.eventContainer}>
+        //         <Image
+        //           style={styles.image}
+        //           source={{ uri: 'http://www.placepuppy.net/50/50' }}
+        //         // source={{ uri: 'https://via.placeholder.com/50' }}
+        //         />
+        //         <View style={styles.eventListCard}></View>
+        //         <View style={{ flex: 1, flexDirection: 'column' }}>
+        //           <Text style={styles.eventTitle}>{this.state.carouselItems[i][0]}</Text>
+        //           <Text style={styles.eventDate}>{this.state.carouselItems[i][1]}</Text>
+        //         </View>
+        //       </View>
+        //   )
+        // }
 
-        const buttons = [ "My Opportunities", "Volunteering"];
+        const buttons = [ "Volunteering", "My Opportunities"];
         return (
 
 
@@ -586,16 +621,30 @@ export default class MyCalendar extends Component {
  {/*********************************************
    START of Attempt to match calendar mockup from Slack channel.
   **********************************************/}
-                <View style={styles.eventsContainer}>
+                <View style={styles.carouselContainer}>
                   {/* {eventCards} */}
                   <Carousel
+                    style={styles.carousel}
                     ref={ref => this.carousel = ref}
                     data={this.state.carouselItems}
-                    sliderWidth={250}
-                    itemWidth={250}
+                    sliderWidth={350}
+                    itemWidth={310}
+                    renderItem={this._renderItem}
                     renderItem={this._renderItem}
                     onSnapToItem = { index => this.setState({activeIndex:index}) }
+                    contentContainerCustomStyle={{ flexGrow: 0, overflow: 'hidden', height: 50 * (this.state.carouselItems.length)}}
+                    numColumns={2}
                   />
+                  {/* <Carousel
+                    style={styles.carousel}
+                    ref={ref => this.carousel = ref}
+                    data={this.state.carouselItems}
+                    sliderWidth={350}
+                    itemWidth={310}
+                    renderItem={this._renderItem}
+                    onSnapToItem={index => this.setState({ activeIndex: index })}
+                    contentContainerCustomStyle={{ flexGrow: 0, overflow: 'hidden', height: 50 * (this.state.carouselItems.length) }}
+                  /> */}
  {/*********************************************
    END of attempt to match calendar mockup from Slack channel.
   **********************************************/}
@@ -714,17 +763,19 @@ export default class MyCalendar extends Component {
         );
     }
 }
+
+let cardWidth = (screenWidth * .8);
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-    //   backgroundColor: "#3788E0"
+      flex: 1,
+      backgroundColor: "#3788E0"
     },
     eventsContainer: {
-        flex: 1,
-        backgroundColor: "#eee",
+      flex: 1,
+      backgroundColor: "#eee",
       paddingLeft: 10,
       paddingRight: 10,
-      paddingTop: 10,
+      paddingTop: 10
     },
     contentContainer: {
       paddingTop: 12
@@ -758,14 +809,28 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: 5,
     },
+    carouselContainer: {
+      flex: 1,
+      backgroundColor: "#eee",
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingTop: 10,
+      width: screenWidth,
+    },
     eventContainer: {
-      flex: 1, 
+      flex: 1,
+      flexWrap: 'wrap',
       flexDirection: 'row', 
       backgroundColor: "#fff", 
       marginBottom: 5, 
       borderRadius: 10, 
       justifyContent: 'space-evenly', 
-      maxHeight: 70
+      maxHeight: 70,
+      maxWidth: screenWidth,
+      alignSelf: 'stretch'
+    },
+    eventContainerChild: {
+      flexBasis: '70%'
     },
     image: {
       width: 50, 
@@ -776,6 +841,7 @@ const styles = StyleSheet.create({
       marginRight: 15
     },
     eventListCard: {
+      // styles for the visual dividing line
       borderLeftWidth: 2, 
       borderLeftColor: '#777', 
       height: '70%', 
@@ -786,15 +852,15 @@ const styles = StyleSheet.create({
       flex: 1, 
       color: '#999', 
       height: 90, 
-      marginTop: 5, 
-      fontSize: 20, 
+      marginTop: 12, 
+      fontSize: 17,
       color: '#111' 
     },
     eventDate: {
       flex: 1, 
       color: '#999', 
       height: 90, 
-      fontSize: 20, 
+      fontSize: 17, 
       fontWeight: 'bold', 
       color: '#111', 
       marginBottom: 10 
