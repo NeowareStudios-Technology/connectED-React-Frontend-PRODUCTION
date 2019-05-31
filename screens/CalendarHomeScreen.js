@@ -429,26 +429,9 @@ export default class MyCalendar extends Component {
    *  START react-native-snap-carousel
    * 
    ***********************************************************************/
-        // eventsCarousel.map((curr, idx) => {
-        //   return [ curr, curr[idx+1] ];
-        // });
   _renderItem({item,index}){
-
-    console.log('++++++++++++++++', item, index);
-    
-  //  let arr = this.state.carouselItems;
-    // let hold = [];
-    // let second = [];
-  
-    //   if (index % 2 === 0) {
-    //     hold.push(item)
-    //   } else {
-    //     second.push(item)
-    //   }
-    //   console.log([hold, second]);
-
     return (
-      <View style={{ flex: 1, flexDirection: 'row' }}>
+      <View style={{ flex: 1, flexDirection: 'column' }}>
         <View style={styles.eventContainer}>
             <Image  
               style={styles.image}
