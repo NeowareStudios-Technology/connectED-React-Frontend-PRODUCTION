@@ -412,7 +412,7 @@ export default class HomeScreen extends React.Component {
                   {this.state.activeTab === 2 && (
                     <>
                       {this.state.userEvents ? (
-                        <ProfileCreated events={this.state.userEvents} />
+                        <ProfileCreated events={this.state.userEvents} navigation={this.props.navigation}/>
                       ) : (
                           <ActivityIndicator
                             style={{ marginBottom: 16 }}

@@ -299,11 +299,11 @@ export default class TeamsScreen extends Component {
     render() {
         return (
             <>
-            <View style={styles.container}>
-              <ScrollView
+            <View style={{flex:1, paddingTop: 30}}>
+              {/* <ScrollView
                 style={styles.container}
                 contentContainerStyle={styles.contentContainer}
-              >
+              > */}
             {this.state.activeItem ? (
               <>
                 <View style={{ flex: 1 }}>
@@ -380,11 +380,10 @@ export default class TeamsScreen extends Component {
                         autoCorrect={false}
                       />
                     </View>
-                    <View style={{flex: 10, paddingLeft: 30,paddingRight: 30}}>
+                    <View style={{flex: 10, paddingLeft: 30,paddingRight: 30, backgroundColor: "transparent"}}>
                     
                   {this.state.SuggestedTeamNames.length > 0 ? 
-                    <View>
-                          <Text style={styles.displayH4}></Text>
+                    <View style={{flex:1}}>
                           <FlatList
                             data={this.state.SuggestedTeamNames}
                             // extraData={this.state}
@@ -439,7 +438,7 @@ export default class TeamsScreen extends Component {
 
                   </View>
             )}
-              </ScrollView>
+              {/* </ScrollView> */}
             </View>
           </>
     

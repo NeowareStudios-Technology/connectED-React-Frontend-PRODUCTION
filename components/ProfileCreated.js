@@ -1,14 +1,26 @@
 import React from "react";
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image } from "react-native";
+import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, LayoutAnimation } from "react-native";
 import { ListItem } from 'react-native-elements';
 import moment from 'moment';
 
 class ProfileCreated extends React.Component {
-  render() {
-    if (!this.props.events) {
-      return null
+  constructor(props) {
+    super(props);
+
+    this.state = {
+        activeItem: null,
+        loading: true
+    };
     }
+
+
     _keyExtractor = (item, index) => index.toString();
+
+    render() {
+      if (!this.props.events) {
+        return null
+    }
+
 
     // sort events in ascending order
     let sortedEvents = this.props.events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
@@ -21,9 +33,10 @@ class ProfileCreated extends React.Component {
                 keyExtractor={this._keyExtractor}
                 renderItem={({item, index}) => 
                 <TouchableOpacity
-                    // onPress={() => {
+                    onPress={() => {
                     // this.openItem(item, index);
-                    // }}
+                      this.props.navigation.navigate("AdminEventDetails", {item: item})
+                    }}
                     activeOpacity={1}
                 >
                     <View style={styles.eventListing}>
