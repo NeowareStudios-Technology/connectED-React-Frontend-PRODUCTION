@@ -7,10 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
-  Image
+  Image,
+  ImageEditor
 } from "react-native";
 import { Input, Card, Button, Avatar } from "react-native-elements";
-import { Icon, ImagePicker, Permissions, FileSystem } from "expo";
+import { Icon, ImagePicker, Permissions, FileSystem, ImageManipulator } from "expo";
 import styles from "../constants/Styles";
 const validator = require("validator");
 
@@ -24,32 +25,38 @@ class EventEditFinishingTouches extends React.Component {
     };
   }
 
+  componentDidMount() {
+    if (this.props.onLoadModel) {
+      this.props.onLoadModel(this.model);
+    }
+  }
+
   setPhoto = async () => {
     const { status, permissions } = await Permissions.askAsync(
       Permissions.CAMERA_ROLL
     );
     if (status === "granted") {
       let result = await ImagePicker.launchImageLibraryAsync({
-        aspect: [4, 3],
-        allowsEditing: true,
-        quality: 0.2
+        aspect: [1, 1],
+        allowsEditing: true
       });
-      if (!result.cancelled) {
-        let data = await FileSystem.readAsStringAsync(result.uri, {
-          encoding: FileSystem.EncodingTypes.Base64
-        });
-        if (data) {
-          this.props.onInputChange("e_photo",data);
-        }
+      console.log(result)
+      if (result.cancelled) {
+        console.log("Image select cancelled")
+        return;
+      }
+
+      let resizedBase64 = await ImageManipulator.manipulateAsync(
+        result.uri,
+        [{ resize: { width: 400, height: 400 } }],
+        { base64: true, format: 'png', compress: 0.2}
+        )
+
+      if (resizedBase64) {
+        this.props.onInputChange("e_photo", resizedBase64.base64);
       }
     }
   };
-
-  componentDidMount() {
-    if (this.props.onLoadModel) {
-      this.props.onLoadModel(this.model);
-    }
-  }
 
   render() {
     return (
@@ -202,13 +209,13 @@ class EventEditFinishingTouches extends React.Component {
                   />
                 </>
               ) : (
-                <Avatar
-                  size={110}
-                  icon={{ name: "face" }}
-                  showEditButton
-                  onEditPress={this.setPhoto}
-                />
-              )}
+                  <Avatar
+                    size={110}
+                    icon={{ name: "face" }}
+                    showEditButton
+                    onEditPress={this.setPhoto}
+                  />
+                )}
             </View>
           </View>
         </View>
@@ -220,7 +227,7 @@ class EventEditFinishingTouches extends React.Component {
 function SkillsInput(props) {
   let errorMessage =
     typeof props.errors[props.name] !== "undefined" &&
-    props.errors[props.name].length > 0
+      props.errors[props.name].length > 0
       ? props.errors[props.name][0]
       : "";
   let value = typeof props[props.name] !== "undefined" ? props[props.name] : "";

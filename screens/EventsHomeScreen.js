@@ -97,13 +97,13 @@ class EventsHomeScreen extends React.Component {
   };
 
   searchFilterFunction = text => {
-    const newData = this.arrayholder.filter(item => {      
+    const newData = this.arrayholder.filter(item => {
       const itemData = `${item.e_title.toUpperCase()}`;
-       const textData = text.toUpperCase();
-       return itemData.indexOf(textData) > -1;    
+      const textData = text.toUpperCase();
+      return itemData.indexOf(textData) > -1;
     });
 
-    this.setState({ events: newData });  
+    this.setState({ events: newData });
   };
 
   loadEvents = () => {
@@ -114,7 +114,7 @@ class EventsHomeScreen extends React.Component {
           this.loadEvent(eventName, index, () => {
             sequence.next();
           });
-          
+
         });
       });
     }
@@ -137,11 +137,12 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
+              console.log('prefill results', responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   const newArray = []
 
-                  for (var i=0; i<responseData.events.length; i++){
+                  for (var i = 0; i < responseData.events.length; i++) {
                     const item = responseData.events[i].split('/')
                     const clean = item[1].split('+').join(' ')
                     newArray.push(clean)
@@ -314,13 +315,13 @@ class EventsHomeScreen extends React.Component {
         }}
         activeOpacity={1}
       >
-        <EventListCard event={item}/>
+        <EventListCard event={item} />
       </TouchableOpacity>
     </View>
   );
 
   render() {
-    console.log(this.state.activeItem)
+    if (this.state.activeItem) console.log(this.state.activeItem)
     if (this.state.showSearchBar) {
       return (
         <View style={styles.container}>
@@ -398,29 +399,29 @@ class EventsHomeScreen extends React.Component {
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
-                    <View style={{
-                      flexDirection: 'row',
-                      marginHorizontal: 20,
-                      paddingHorizontal: 10,
-                      borderRadius: 10,
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      backgroundColor: '#eee'
-                    }}>
-                      <Icon.Ionicons
-                        name={Platform.OS === "ios" ? "ios-search" : "md-search"}
-                        size={20}
-                        style={{paddingTop: 0}}
-                        
-                      />
-                      <Input
-                        placeholder="Search Events"
-                        inputContainerStyle={{borderBottomWidth: 0}}
-                        onChangeText={text=>this.searchFilterFunction(text)}
-                        autoCorrect={false}
-                      />
-                    </View>
-                    
+                      <View style={{
+                        flexDirection: 'row',
+                        marginHorizontal: 20,
+                        paddingHorizontal: 10,
+                        borderRadius: 10,
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        backgroundColor: '#eee'
+                      }}>
+                        <Icon.Ionicons
+                          name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+                          size={20}
+                          style={{ paddingTop: 0 }}
+
+                        />
+                        <Input
+                          placeholder="Search Events"
+                          inputContainerStyle={{ borderBottomWidth: 0 }}
+                          onChangeText={text => this.searchFilterFunction(text)}
+                          autoCorrect={false}
+                        />
+                      </View>
+
 
                       {this.state.loading ? (
                         <>

@@ -51,6 +51,7 @@ export default class MyCalendar extends Component {
 
   // loads any events the user created and sorts by date
   loadUserEvent = async (eventName, index, callback) => {
+    console.log('event name', eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
