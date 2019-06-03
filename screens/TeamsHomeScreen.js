@@ -31,9 +31,114 @@ export default class TeamsScreen extends Component {
         TopTeamNames: [],
         SuggestedTeamNames: [],
         showSearchBar: false,
-        data: []
+        data: [],
+        activeItem: null,
       };
       this.arrayholder = [];
+    }
+
+    joinTeam = async () => {
+      if (this.state.activeItem){
+        let isRegistered = false;
+        if (
+          typeof this.state.activeItem.is_registered !== "undefined" &&
+          this.state.activeItem.is_registered !== "0"
+          ){
+            isRegistered = true;
+          }
+
+          if (!isRegistered) {
+            let token = await User.firebase.getIdToken();
+    
+            if (token) {
+              let teamOrigName = this.state.currentTeam.t_orig_name;
+              let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${teamOrigName}/registration`;
+              try {
+                fetch(url, {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token
+                  },
+                })
+                  .then(response => {
+                    if (response.ok) {
+                      let teams = this.state.SuggestedTeamNames;
+                      let teamIndex = null;
+                      let team = teams.find((aTeam, index) => {
+                        if (aTeam === this.state.currentTeam) {
+                          teamIndex = index;
+                          return true;
+                        }
+                        return false;
+                      });
+                      if (teamIndex) {
+                        teams[teamIndex].is_registered = "1";
+                      }
+                      this.setState({
+                        SuggestedTeamNames: teams,
+                        activeItem: this.state.currentTeam.t_orig_name
+                      });
+                    }
+                  })
+                  .catch(error => { });
+              } catch (error) { }
+            }
+          }
+
+      } else{
+        alert("sorry, something went wrong")
+      }
+    }
+
+    leaveTeam = async () => {
+      if (this.state.currentTeam) {
+        let isRegistered = false;
+        if (
+          typeof this.state.currentTeam.t_members !== "undefined" &&
+          this.state.currentTeam.t_members !== "0"
+        ) {
+          isRegistered = true;
+        }
+        if (isRegistered) {
+          let token = await User.firebase.getIdToken();
+  
+          if (token) {
+            let teamOrigName = this.state.currentTeam.t_orig_name;
+            let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${teamOrigName}/registration`;
+          try {
+              fetch(url, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token
+                }
+              })
+                .then(response => {
+                  if (response.ok) {
+                    let teams = this.state.SuggestedTeamNames;
+                    let teamIndex = null;
+                    let team = teams.find((aTeam, index) => {
+                      if (aTeam === this.state.currentTeam) {
+                        teamIndex = index;
+                        return true;
+                      }
+                      return false;
+                    });
+                    if (teamIndex) {
+                      teams[teamIndex].is_registered = "0";
+                    }                    
+                    this.setState({
+                      SuggestedTeamNames: teams,
+                      activeItem: this.state.currentTeam.t_orig_name
+                    });
+                  }
+                })
+                .catch(error => { });
+            } catch (error) { }
+          }
+        }
+      } else {console.warn("couldn't deregister")}
     }
 
     fetchTopTeamData = async () => {
@@ -187,18 +292,18 @@ export default class TeamsScreen extends Component {
     closeItem = item => {
         LayoutAnimation.easeInEaseOut();
         this.setState({ activeItem: null });
-        this.setState({currentTeam: {}})
+        // this.setState({currentTeam: {}})
     };
  
 
     render() {
         return (
             <>
-            <View style={styles.container}>
-              <ScrollView
+            <View style={{flex:1, paddingTop: 30}}>
+              {/* <ScrollView
                 style={styles.container}
                 contentContainerStyle={styles.contentContainer}
-              >
+              > */}
             {this.state.activeItem ? (
               <>
                 <View style={{ flex: 1 }}>
@@ -206,11 +311,11 @@ export default class TeamsScreen extends Component {
                     event={this.state.activeItem}
                     team={this.state.currentTeam}
                     onClose={this.closeItem}
-                    onVolunteer={() => {
-                      this.volunteer();
+                    onJoin={() => {
+                      this.joinTeam();
                     }}
-                    onDeregister={() => {
-                      this.deregister();
+                    onLeave={() => {
+                      this.leaveTeam();
                     }}
                   />
                 </View>
@@ -252,30 +357,6 @@ export default class TeamsScreen extends Component {
                           <Text style={styles.displayH1}>Teams</Text>
                         </View>
                       </View>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        <TouchableOpacity
-                          style={{
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0
-                          }}
-                          onPress={() => {
-                            console.log('TODO: filter')
-                          }}
-                        >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-options" : "md-options"}
-                            size={30}
-                          />
-                        </TouchableOpacity>
-
-                      </View>
                     </View>
                     <View style={{
                       flexDirection: 'row',
@@ -299,11 +380,10 @@ export default class TeamsScreen extends Component {
                         autoCorrect={false}
                       />
                     </View>
-                    <View style={{flex: 10, paddingLeft: 30,paddingRight: 30}}>
+                    <View style={{flex: 10, paddingLeft: 30,paddingRight: 30, backgroundColor: "transparent"}}>
                     
                   {this.state.SuggestedTeamNames.length > 0 ? 
-                    <View>
-                          <Text style={styles.displayH4}></Text>
+                    <View style={{flex:1}}>
                           <FlatList
                             data={this.state.SuggestedTeamNames}
                             // extraData={this.state}
@@ -316,15 +396,7 @@ export default class TeamsScreen extends Component {
                               activeOpacity={1}
                             >
                             <View style={styles.teamListing}>
-                                <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
-                                <View style={{
-                                    marginLeft:10,
-                                    paddingLeft:10,
-                                    borderLeftColor: 'gray',
-                                    borderLeftWidth: 2
-                                }}>
-                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
-                                </View>
+                              <Text style={{fontWeight: 'bold', fontSize: 20}}>{item}</Text>
                             </View>
                             </TouchableOpacity>
                                 }
@@ -366,7 +438,7 @@ export default class TeamsScreen extends Component {
 
                   </View>
             )}
-              </ScrollView>
+              {/* </ScrollView> */}
             </View>
           </>
     

@@ -276,7 +276,7 @@ export default class HomeScreen extends React.Component {
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>
-        <ScrollView
+        <View
           style={styles.container}
           contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
         >
@@ -383,14 +383,13 @@ export default class HomeScreen extends React.Component {
                   </Text>
                 </View>
               </View>
-              <View style={{ marginTop: 8 }}>
+              <View style={{ marginTop: 8, flex:1 }}>
                 <ButtonGroup
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                <View>
                   {this.state.activeTab === 0 && (
                     <>
                       <ProfileInfo user={this.state.user} />
@@ -413,7 +412,7 @@ export default class HomeScreen extends React.Component {
                   {this.state.activeTab === 2 && (
                     <>
                       {this.state.userEvents ? (
-                        <ProfileCreated events={this.state.userEvents} />
+                        <ProfileCreated events={this.state.userEvents} navigation={this.props.navigation}/>
                       ) : (
                           <ActivityIndicator
                             style={{ marginBottom: 16 }}
@@ -424,8 +423,6 @@ export default class HomeScreen extends React.Component {
 
                     </>
                   )}
-
-                </View>
               </View>
               {this.state.open && (
                 <View
@@ -537,7 +534,33 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                        </View>
+                        
+                      </View>
+                      <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("PrivacyPolicy")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Privacy Policy
+                              </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                          </View>
                       </View>
                       {/* <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
@@ -702,7 +725,7 @@ export default class HomeScreen extends React.Component {
                 <ActivityIndicator size="large" color="#0d0d0d" />
               </>
             )}
-        </ScrollView>
+        </View>
       </View>
     );
   }
@@ -711,7 +734,7 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "transparent",
+    backgroundColor: "#eee",
   },
 
   contentContainer: {

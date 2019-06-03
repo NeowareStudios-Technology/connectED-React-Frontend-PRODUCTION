@@ -119,8 +119,6 @@ class TeamCreateScreen extends React.Component {
   };
 
   saveTeamData = async (data, callback) => {
-    console.log("in save team")
-    console.warn("in save team")
     try {
       let token = await User.firebase.getIdToken();
       if (token) {

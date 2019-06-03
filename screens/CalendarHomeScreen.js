@@ -38,7 +38,7 @@ export default class MyCalendar extends Component {
         user: null,
         events: null,
         userEvents: null, // events created by user
-        pastEvents: null, // past events the user has volunteered for
+        upcomingEvents: null, // past events the user has volunteered for
         activeTab: 0,
         loading: true
     };
@@ -120,18 +120,18 @@ export default class MyCalendar extends Component {
               // check if date is in past
               let now = moment()
               let eventDate = moment(responseData.date, "MM/DD/YYYY")
-              if (responseData && now.isAfter(eventDate, 'day')) {
-                let pastEvents = []
+              if (responseData && now.isBefore(eventDate, 'day')) {
+                let upcomingEvents = []
                 // keep state immutable by using slice to return new array
-                if (this.state.pastEvents) {
-                  pastEvents = this.state.pastEvents.slice();
+                if (this.state.upcomingEvents) {
+                  upcomingEvents = this.state.upcomingEvents.slice();
                 }
                 let event = responseData;
                 event.key = "past-event-" + uuidv4();
-                pastEvents.push(event);
+                upcomingEvents.push(event);
                 this.setState(
                   {
-                    pastEvents: pastEvents,
+                    upcomingEvents: upcomingEvents,
                     loading: false
                   },
                   () => {
@@ -141,8 +141,8 @@ export default class MyCalendar extends Component {
 
               } else {
                 // event not in the past
-                if (!this.state.pastEvents) {
-                  this.setState({ pastEvents: [] },
+                if (!this.state.upcomingEvents) {
+                  this.setState({ upcomingEvents: [] },
                     () => {
                       callback();
                     })
@@ -177,7 +177,7 @@ export default class MyCalendar extends Component {
         });
       });
     } else {
-      this.setState({ pastEvents: [] })
+      this.setState({ upcomingEvents: [] })
     }
     if (userEvents && userEvents.length > 0) {
       userEvents.map((eventName, index) => {
@@ -360,20 +360,7 @@ export default class MyCalendar extends Component {
     }
   };
 
-
-
-   
-
-    // getMarkedDates(){
-    //     let datesObject={}
-    //     for(var i=0; i<this.state.markedDates.length; i++){
-    //         this.state.markedDates[i] = {selected: true, selectedColor: '#275FBC'}
-    //         console.warn(this.state.markedDates[i], 'state')
-    //     }
-    //     console.warn(datesObject, 'datesobject')
-    //     // '2019-05-16': {selected: true, selectedColor: '#275FBC'},
-    // }
-    _keyExtractor = (item, index) => item.id;
+  _keyExtractor = (item, index) => index.toString();
 
     updateTab = (activeTab) => {
         this.setState({ activeTab })
@@ -399,6 +386,14 @@ export default class MyCalendar extends Component {
             let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
             DatesArray.push(newDate)
         }
+        let myUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+
+        for(var i = 0; i < myUpcomingEvents.length; i++){
+            let date = myUpcomingEvents[i].date[0]
+            
+            let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD"); 
+            DatesArray.push(newDate)
+        }
         this.setState({markedDates: DatesArray})
         this.sendDatesToCalendar();
     }
@@ -412,22 +407,17 @@ export default class MyCalendar extends Component {
         if (!this.state.userEvents) {
             sortedEvents = null
           } else {
-            
             sortedEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
-            // const markedEventDates={}
-            // for(var i=0; i<sortedEvents.length; i++){
-            //     console.log(sortedEvents[i].date[0])
-            //     const date = sortedEvents[i].date[0]
-            //     markedEventDates[date] = {selected: true, selectedColor: '#275FBC'}
-            // }
-            // console.log(markedEventDates)
           }
-        // console.log(sortedEvents)
+          let sortedUpcomingEvents;
+        if (!this.state.upcomingEvents) {
+            sortedUpcomingEvents = null
+          } else {
+            sortedUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+          }
         
-
         const buttons = [ "My Opportunities", "Volunteering"];
         return (
-
 
             <View style={styles.container}>
             {this.state.activeItem ? (
@@ -510,10 +500,10 @@ export default class MyCalendar extends Component {
                         <FlatList
                             data={sortedEvents}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
                             <TouchableOpacity
                                 onPress={() => {
-                                this.openItem(item);
+                                this.openItem(item, index);
                                 }}
                                 activeOpacity={1}
                             >
@@ -548,14 +538,22 @@ export default class MyCalendar extends Component {
                   )}
                   {this.state.activeTab === 1 && (
                     <>
-                    {sortedEvents ? (
+                    {sortedUpcomingEvents ? (
                         
                         <FlatList
-                            data={this.state.userEvents}
+                            data={sortedUpcomingEvents}
                             keyExtractor={this._keyExtractor}
-                            renderItem={({item}) => 
+                            renderItem={({item, index}) => 
+                            <TouchableOpacity
+                                onPress={() => {
+                                this.openItem(item, index);
+                                }}
+                                activeOpacity={1}
+                            >
                                 <View style={styles.eventListing}>
-                                    <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
+                                    <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}>
+                                    <Image style={{flex: 1}} resizeMode='cover' source={{ uri:  "data:image/png;base64," + item.e_photo}}></Image>
+                                    </View>
                                     <View style={{
                                         marginLeft:10,
                                         paddingLeft:10,
@@ -563,10 +561,12 @@ export default class MyCalendar extends Component {
                                         borderLeftWidth: 2
                                     }}>
                                         <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.e_title}</Text>
-                                        {/* <Text>{item.date}</Text>
-                                        <Text>{item.time}</Text> */}
+                                        <Text>{moment(item.date, "MM/DD/YYYY").format("MMM Do")}</Text>
+                                        <Text>{item.start[0]}</Text>
                                     </View>
                                 </View>
+                            </TouchableOpacity>
+
                             }
                         />
                     

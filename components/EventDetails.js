@@ -116,7 +116,7 @@ class EventDetails extends React.Component {
                   <View style={{ flex: 2 }} />
                   <View
                     style={{
-                      flex: 2,
+                      flex: 1,
                       alignContent: "center",
                       backgroundColor: "#ffffff"
                     }}

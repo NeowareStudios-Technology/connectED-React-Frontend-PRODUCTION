@@ -35,14 +35,9 @@ class TeamPage extends React.Component {
   };
 
   render() {
-    let item = this.props.team;
-    let privacyLabel = item.privacy === "o" ? "Open" : "Private";
-    let itemDate = moment(item.date, "MM/DD/YYYY");
-    let environmentImage =
-      item.env === "o"
-        ? require("../assets/images/environment-outdoor-filled.png")
-        : require("../assets/images/environment-outdoor-outline.png");
+    let item = this.props.team;  
     return (
+      
       <>
         <View
           style={{
@@ -239,10 +234,10 @@ class TeamPage extends React.Component {
                     />
                   </View>
                 </View>
-                <View style={{ justifyContent: "flex-end" }}>
-                    <Button title="Join this Team"/>
-                </View>
                 {/* <View style={{ justifyContent: "flex-end" }}>
+                    <Button title="Join this Team"/>
+                </View> */}
+                <View style={{ justifyContent: "flex-end" }}>
                   {item.is_registered === "-1" && (
                     <>
                       <Button title="Pending..." />
@@ -251,20 +246,20 @@ class TeamPage extends React.Component {
                   {item.is_registered === "0" && (
                     <>
                       <Button
-                        onPress={this.props.onVolunteer}
-                        title="Volunteer"
+                        onPress={this.props.onJoin}
+                        title="Join This Team"
                       />
                     </>
                   )}
                   {item.is_registered === "1" && (
                     <>
                       <Button
-                        onPress={this.props.onDeregister}
-                        title="Deregister"
+                        onPress={this.props.onLeave}
+                        title="Leave this Team"
                       />
                     </>
                   )}
-                </View> */}
+                </View>
               </View>
             </>
           </View>
