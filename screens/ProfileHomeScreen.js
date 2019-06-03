@@ -392,7 +392,7 @@ export default class HomeScreen extends React.Component {
                 />
                   {this.state.activeTab === 0 && (
                     <>
-                      <ProfileInfo user={this.state.user} />
+                      <ProfileInfo navigation={this.props.navigation} user={this.state.user} />
                     </>
                   )}
                   {this.state.activeTab === 1 && (
