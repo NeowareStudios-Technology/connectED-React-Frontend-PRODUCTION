@@ -28,7 +28,7 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 let screenHeight = Dimensions.get('window').height;
 let screenWidth = Dimensions.get('window').width;
 
-import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import {Calendar, CalendarList, Agenda, LocaleConfig} from 'react-native-calendars';
 import EventDetails from '../components/EventDetails';
 
 export default class MyCalendar extends Component {
@@ -52,12 +52,29 @@ export default class MyCalendar extends Component {
         carouselItems: [
          [ { title: "Tech & Talk", date: "April 2nd", url: "http://www.arnold.fun/50/50" },
            { title: "Walkathon 2019", date: "April 8th", url: "http://www.placepuppy.net/50/50" } ],
-          [ { title: "Ultimate Logging Competition", date: "May 2nd", url: "https://placebear.com/50/50" },
-          { title: "Stuff n Stuff", date: "June 2nd", url: "http://placekitten.com/50/50" } ],
-          [ { title: "Wild Event", date: "July 2nd", url: "http://www.arnold.fun/50/50" },
-          { title: "500K Fun Run", date: "August 15th", url: "http://www.placepuppy.net/50/50" } ]
+        [ { title: "Ultimate Logging Competition", date: "May 2nd", url: "https://placebear.com/50/50" },
+        { title: "Stuff n Stuff", date: "June 2nd", url: "http://placekitten.com/50/50" } ],
+        [ { title: "Wild Event", date: "July 2nd", url: "http://www.arnold.fun/50/50" },
+        { title: "500K Fun Run", date: "August 15th", url: "http://www.placepuppy.net/50/50" } ],
+        [{ title: "Tree Planting", date: "October 2nd", url: "https://placebear.com/50/50" },
+          { title: "Cool Activity", date: "June 2nd", url: "http://placekitten.com/50/50" }],
+        [{ title: "Block Chain Hackathon", date: "December 2nd", url: "https://placebear.com/50/50" },
+          { title: "Linux Festival", date: "June 12th", url: "http://placekitten.com/50/50" }],
+        [{ title: "React Workshop", date: "May 4th", url: "https://placebear.com/50/50" },
+          { title: "Ingress Gathering", date: "June 23rd", url: "http://placekitten.com/50/50" }],
         ]
     };
+
+    // Need the entire ojbect in order to replace the days of the week w/ the dayNamesShort array.
+    LocaleConfig.locales['en'] = {
+      monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+      monthNamesShort: ['Jan.', 'Feb.', 'Mar', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+      dayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      dayNamesShort:
+      ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+    };
+    LocaleConfig.defaultLocale = 'en';
+
 
     this.updateTab = this.updateTab.bind(this)
     }
@@ -465,16 +482,23 @@ export default class MyCalendar extends Component {
       <Pagination
         dotsLength={carouselItems.length}
         activeDotIndex={activeSlide}
-        containerStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
+        //TODO: ^--Fix, is marked required but its values is undefined
+        containerStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.0)', paddingVertical: 15 }}
         dotStyle={{
           width: 10,
           height: 10,
           borderRadius: 5,
-          marginHorizontal: 8,
-          backgroundColor: 'rgba(255, 255, 255, 0.92)'
+          marginHorizontal: 2,
+          backgroundColor: 'rgba(255, 255, 255, 0.92)'  // 'rgba(0, 0, 0, 0.25)'
         }}
         inactiveDotStyle={{
           // Define styles for inactive dots here
+          // width: 10,
+          // height: 10,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderRadius: 5,
+          borderColor: 'rgba(255, 255, 255, 0.92)'
         }}
         inactiveDotOpacity={0.4}
         inactiveDotScale={0.6}
@@ -501,31 +525,8 @@ export default class MyCalendar extends Component {
           }
         // console.log(sortedEvents)
         
-        /******************************************
-        * For loop to create two event list cards for the carousel
-        * Then they are added in the return() method in  `{eventCards}`
-        */
-        // let eventCards = [];
-        // for (let i=0;i<2;i++){
-        //   eventCards.push(
-        //     <View key={i} style={styles.eventContainer}>
-        //         <Image
-        //           style={styles.image}
-        //           source={{ uri: 'http://www.placepuppy.net/50/50' }}
-        //         // source={{ uri: 'https://via.placeholder.com/50' }}
-        //         />
-        //         <View style={styles.eventListCard}></View>
-        //         <View style={{ flex: 1, flexDirection: 'column' }}>
-        //           <Text style={styles.eventTitle}>{this.state.carouselItems[i][0]}</Text>
-        //           <Text style={styles.eventDate}>{this.state.carouselItems[i][1]}</Text>
-        //         </View>
-        //       </View>
-        //   )
-        // }
-
         const buttons = [ "Volunteering", "My Opportunities"];
         return (
-
 
             <View style={styles.container}>
             {this.state.activeItem ? (
@@ -580,8 +581,8 @@ export default class MyCalendar extends Component {
                 }}
                 theme={{
                     calendarBackground: 'transparent',
-                    textSectionTitleColor: 'white',
-                    dayTextColor: 'white',
+                    textSectionTitleColor: '#CDCEC5', //white
+                    dayTextColor: '#CDCEC5', //white
                     todayTextColor: 'black',
                     textMonthFontSize: 30,
                     textMonthFontWeight: "bold",
@@ -590,22 +591,75 @@ export default class MyCalendar extends Component {
                     selectedDayBackgroundColor: 'darkblue',
                     arrowColor: 'white',
                 }}
+                markingType={'custom'}
+                // markedDates are to visually match the mock-up
+                markedDates={{
+                  '2019-06-02': {
+                    selected: true,
+                    customStyles: {
+                      container: {
+                        backgroundColor: 'white'
+                      },
+                      text: {
+                        color: '#3788E0'
+                      },
+                    },
+                  },
+                  '2019-06-03' : {
+                    customStyles: {
+                      text: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                      },
+                    },
+                  },
+                  '2019-06-14': {
+                    customStyles: {
+                      text: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                      },
+                    },
+                  },
+                  '2019-06-16': {
+                    customStyles: {
+                      text: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                      },
+                    },
+                  },
+                  '2019-06-29': {
+                    customStyles: {
+                      text: {
+                        color: 'white',
+                        fontWeight: 'bold'
+                      },
+                    },
+                  }
+                }}
             />
               }
             </View>
-            <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
+                  <View style={{ marginTop: 0, flex: 1, backgroundColor: '#3788E0' }}> 
+            {/* Is the background of the bottom half of screen background */}
                 <ButtonGroup
+              //    style={styles.buttonGroups}
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
-                  containerStyle={{ paddingBottom: 0, marginBottom: 0}}
+                  containerStyle={{ 
+                    paddingBottom: 0, 
+                    marginBottom: 0, 
+                    backgroundColor: '#3788E0',
+                    borderColor: 'transparent'
+                  }}
                 />
 
  {/*********************************************
    START of Attempt to match calendar mockup from Slack channel.
   **********************************************/}
                 <View style={styles.carouselContainer}>
-                  {/* {eventCards} */}
                   <Carousel
                     style={styles.carousel}
                     ref={ref => this.carousel = ref}
@@ -617,17 +671,9 @@ export default class MyCalendar extends Component {
                     onSnapToItem = { index => this.setState({activeIndex:index}) }
                     contentContainerCustomStyle={{ flexGrow: 0, overflow: 'hidden', height: 50 * (this.state.carouselItems.length)}}
                     numColumns={2}
+                    onSnapToItem={(index) => this.setState({ activeSlide: index })}
                   />
-                  {/* <Carousel
-                    style={styles.carousel}
-                    ref={ref => this.carousel = ref}
-                    data={this.state.carouselItems}
-                    sliderWidth={350}
-                    itemWidth={310}
-                    renderItem={this._renderItem}
-                    onSnapToItem={index => this.setState({ activeIndex: index })}
-                    contentContainerCustomStyle={{ flexGrow: 0, overflow: 'hidden', height: 50 * (this.state.carouselItems.length) }}
-                  /> */}
+                  {this.pagination}
  {/*********************************************
    END of attempt to match calendar mockup from Slack channel.
   **********************************************/}
@@ -710,7 +756,6 @@ export default class MyCalendar extends Component {
 
                     </>
                   )}
-
                 </View>
               </View>
             
@@ -794,7 +839,7 @@ const styles = StyleSheet.create({
     },
     carouselContainer: {
       flex: 1,
-      backgroundColor: "#eee",
+      backgroundColor: 'transparent',  //"#eee",
       paddingLeft: 10,
       paddingRight: 10,
       paddingTop: 10,
@@ -847,6 +892,12 @@ const styles = StyleSheet.create({
       fontWeight: 'bold', 
       color: '#111', 
       marginBottom: 10 
+    },
+    buttonGroups: {
+      paddingBottom: 0,
+      marginBottom: 0,
+      backgroundColor: '#3788E0',
+      borderColor: 'transparent'
     }
   });
   
