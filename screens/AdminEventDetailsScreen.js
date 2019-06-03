@@ -1,10 +1,39 @@
 import React, { Component } from 'react';
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, LayoutAnimation, Button } from "react-native";
+import User from "../components/User";
 
 export default class AdminEventDetails extends Component {
+    
+    acceptOrDenyEventAttendee = async (organizer, title, status) =>{
+        let token = await User.firebase.getIdToken();
+        if (token) {
+        let url =
+        `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizer}/${title}/${status}`;
+        // status should either be "approve" or "deny"
+        fetch(url, {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+            }
+        })
+            .then(response => {
+
+                // console.warn(response)
+
+            if (response.ok) {
+                alert("Thank you for resolving pending requests!")
+            }
+            })
+            .catch(error => {
+            console.warn("Error", error);
+            });
+        }
+    }
+
     render() {
         const { item } = this.props.navigation.state.params
-        console.warn(this.props.navigation.state.params.item)
+        // console.warn(this.props.navigation.state.params.item)
         return (
             <View>
                 {item ? 
@@ -36,7 +65,7 @@ export default class AdminEventDetails extends Component {
                             <View key={index} style={{flexDirection: "row"}}>
                                 <Text>{a}</Text>
                                 <Button
-                                    onPress={()=>alert(`TODO: accept ${a} to Event`)}
+                                    onPress={()=>this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
                                     title="Accept"
                                     color="green"
                                     accessibilityLabel="Accept volunteer to this Event"
