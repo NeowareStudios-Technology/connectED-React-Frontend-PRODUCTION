@@ -8,15 +8,13 @@ export default class AdminEventDetails extends Component {
         console.warn(this.props.navigation.state.params)
     }
 
-    getTeamData(TeamName) {
 
-    }
     
     acceptOrDenyEventAttendee = async (organizer, title, status) =>{
         let token = await User.firebase.getIdToken();
         if (token) {
         let url =
-        `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizer}/${title}/${status}`;
+        `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${title}/${status}`;
         // status should either be "approve" or "deny"
         fetch(url, {
             method: "PUT",
@@ -30,7 +28,7 @@ export default class AdminEventDetails extends Component {
                 // console.warn(response)
 
             if (response.ok) {
-                alert("Thank you for resolving pending requests!")
+                alert("Success!")
             }
             })
             .catch(error => {
@@ -40,10 +38,51 @@ export default class AdminEventDetails extends Component {
     }
 
     render() {
+        let item = this.props.navigation.state.params
         return (
-            <View>
-                <Text>This is the Team Details Screen</Text>
-            </View>
+            <View style={styles.container}>
+                    <Text style={styles.title}>{item.t_name}</Text>
+                    <Text style={styles.header}>General Info</Text>
+                    <Text style={styles.sub}>{item.t_city}, {item.t_state}</Text>
+                    <Text>{item.t_desc}</Text>
+                    <Text style={styles.header}>Team Roster Info</Text>
+                    <Text style={styles.sub}>Registered: {item.t_member_num}</Text>
+                    <Text style={styles.sub}>Pending: {item.t_pending_member_num}</Text>
+                    {item.t_member_num > 0 ?
+                    <View>
+                        <Text style={styles.header}>Current Members</Text>
+                        {item.t_members.map((a, index)=>(
+                            <View key={index} style={{flexDirection: "row"}}>
+                                <Text>{a}</Text>
+                            </View>
+
+                        ))}
+
+                    </View>
+                    :null}
+                    {item.t_pending_member_num > 0 ? 
+                    <View>
+                        <Text style={styles.header}>Pending Members</Text>
+                        {item.t_pending_members.map((a, index)=>(
+                            <View key={index} style={{flexDirection: "row"}}>
+                                <Text style={styles.sub}>{a}</Text>
+                                <Button
+                                    onPress={()=>this.acceptOrDenyEventAttendee(item.t_organizer, item.t_orig_name, "approve")}
+                                    title="Accept"
+                                    color="green"
+                                    accessibilityLabel="Accept Member to this Team"
+                                />
+                                <Button
+                                    onPress={()=>this.acceptOrDenyEventAttendee(item.t_organizer, item.t_orig_name, "deny")}
+                                    title="Deny"
+                                    color="red"
+                                    accessibilityLabel="Deny Member to this Team"
+                                />
+                            </View>
+                        ))}
+                    </View>
+                :null}
+                </View>
         );
     }
 }

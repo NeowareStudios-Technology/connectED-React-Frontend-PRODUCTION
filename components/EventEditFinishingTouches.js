@@ -40,7 +40,7 @@ class EventEditFinishingTouches extends React.Component {
         });
         if (data) {
           this.props.onInputChange("e_photo",data);
-        }
+        } 
       }
     }
   };

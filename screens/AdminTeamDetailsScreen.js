@@ -10,7 +10,8 @@ export default class AdminTeamDetails extends Component {
         this.state = {
           userCreated: [],
           userRegistered: [],
-          userPending: []
+          userPending: [],
+          activeItem: {}
         };
       }
     componentDidMount() {
@@ -18,7 +19,43 @@ export default class AdminTeamDetails extends Component {
     }
     _keyExtractor = (item, index) => index.toString();
 
-
+    fetchOneTeamData = async (teamName) => {
+        let token = await User.firebase.getIdToken();
+        if (token) {
+          try {
+            let team = teamName.split(' ').join('+')
+            console.warn(team)
+            let url =
+              `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${team}`;
+              
+            fetch(url, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              }
+            }).then(response => {
+              if (response.ok) {
+                  console.warn(response)
+                try {
+                  let responseData = JSON.parse(response._bodyText);
+                  if (responseData) {
+                    if (typeof responseData === "object") {
+                        this.props.navigation.navigate("AdminOpenTeamDetails", responseData)
+                    } else {
+                      this.setState({ loading: false });
+                    }
+                  }
+                } catch (error) { }
+              } else {
+                this.setState({
+                  loading: false
+                });
+              }
+            });
+          } catch (error) { }
+        }
+      };
     
   // loads any events the user created and sorts by date
   loadCreatedTeams = async (eventName, index, callback) => {
@@ -80,7 +117,7 @@ export default class AdminTeamDetails extends Component {
                     renderItem={({item, index}) => 
                     <TouchableOpacity
                         onPress={() => {
-                            this.props.navigation.navigate("AdminOpenTeamDetails", item)
+                            this.fetchOneTeamData(item)
                         }}
                         activeOpacity={1}
                     >
