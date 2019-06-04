@@ -13,11 +13,12 @@ class EventListItems extends React.PureComponent {
     }
     // sort events in descending order
     let sortedEvents = this.props.events.slice().sort((a, b) => new Date(b.date[0]) - new Date(a.date[0]));
+    console.log(sortedEvents)
     return (
       <View>
         {sortedEvents.map((item, index) => (
           <ListItem
-            key={index}
+            key={item.key}
             leftAvatar={{ source: { uri: "data:image/png;base64," + item.e_photo }, rounded: false }}
             title={item.e_title}
             subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
