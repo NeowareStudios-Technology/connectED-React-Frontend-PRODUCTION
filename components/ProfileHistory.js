@@ -5,6 +5,8 @@ import moment from 'moment';
 
 
 class ProfileHistory extends React.Component {
+  _keyExtractor = (item, index) => index.toString();
+
   render() {
     if (!this.props.events) {
       return null
@@ -17,16 +19,14 @@ class ProfileHistory extends React.Component {
           <View style={styles.section}>
             <Text style={styles.sectionHeader}>Your past participation:</Text>
             <View>
-              {sortedEvents.map((event) => (
-                <>
-                  <ListItem
-                    key={event.key}
-                    leftAvatar={{ source: { uri: "data:image/png;base64," + event.e_photo }, rounded: false }}
-                    title={event.e_title}
-                    subtitle={moment(event.date, "MM/DD/YYYY").format("MMM Do")}
-                    contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
-                  />
-                </>
+              {sortedEvents.map((event, i) => (
+                <ListItem
+                  key={i}
+                  leftAvatar={{ source: { uri: "data:image/png;base64," + event.e_photo }, rounded: false }}
+                  title={event.e_title}
+                  subtitle={moment(event.date, "MM/DD/YYYY").format("MMM Do")}
+                  contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
+                />
               ))
               }
             </View>

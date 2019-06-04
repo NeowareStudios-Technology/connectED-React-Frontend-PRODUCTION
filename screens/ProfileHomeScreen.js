@@ -10,7 +10,8 @@ import {
   TouchableOpacity,
   View,
   LayoutAnimation,
-  Dimensions
+  Dimensions,
+  Picker
 } from "react-native";
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
@@ -18,10 +19,10 @@ import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
 import ProfileHistory from "../components/ProfileHistory";
 import ProfileCreated from "../components/ProfileCreated";
+import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
 import moment from 'moment';
-import uuidv4 from 'uuid/v4';
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -37,14 +38,16 @@ export default class HomeScreen extends React.Component {
     this.state = {
       user: null,
       events: null,
-      userEvents: null, // events created by user
+      createdEvents: null, // events created by user
       pastEvents: null, // past events the user has volunteered for
+      currentEvents: null,
+      futureEvents: null,
       activeTab: 0,
       loading: true
     };
   }
   updateUser = (user) => {
-    this.setState({user: user})
+    this.setState({ user: user })
   }
 
   // loads any events the user created and sorts by date
@@ -66,17 +69,16 @@ export default class HomeScreen extends React.Component {
             try {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
-                let userEvents = []
+                let createdEvents = []
                 // keep state immutable by using slice to return new array
-                if (this.state.userEvents) {
-                  userEvents = this.state.userEvents.slice();
+                if (this.state.createdEvents) {
+                  createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
-                event.key = "user-event-" + uuidv4();
-                userEvents.push(event);
+                createdEvents.push(event);
                 this.setState(
                   {
-                    userEvents: userEvents,
+                    createdEvents: createdEvents,
                     loading: false
                   },
                   () => {
@@ -123,7 +125,6 @@ export default class HomeScreen extends React.Component {
                   pastEvents = this.state.pastEvents.slice();
                 }
                 let event = responseData;
-                event.key = "past-event-" + uuidv4();
                 pastEvents.push(event);
                 this.setState(
                   {
@@ -155,15 +156,17 @@ export default class HomeScreen extends React.Component {
       } catch (error) { }
     }
   };
+
   updateUser() {
     this.loadUser()
   }
 
+  // Takes the array of user opportunities and loads and sorts each event
   loadEvents = () => {
     // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
-    let userEvents = this.state.events.created_events
+    let createdEvents = this.state.events.created_events
     if (registeredEvents && registeredEvents.length > 0) {
       registeredEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
@@ -176,8 +179,8 @@ export default class HomeScreen extends React.Component {
     } else {
       this.setState({ pastEvents: [] })
     }
-    if (userEvents && userEvents.length > 0) {
-      userEvents.map((eventName, index) => {
+    if (createdEvents && createdEvents.length > 0) {
+      createdEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
         sequence.promise(() => {
           this.loadUserEvent(eventName, index, () => {
@@ -186,13 +189,25 @@ export default class HomeScreen extends React.Component {
         });
       });
     } else {
-      this.setState({ userEvents: [] })
+      this.setState({ createdEvents: [] })
     }
     sequence.next();
   };
 
+  sortEvents = () => {
+    let {events} = this.state;
+    let createdEvents, currentEvents, pastEvents, futureEvents, regEvents = []
+    if(events.created_events){
+      createdEvents = events.created_events
+    }
+    if(events.registeredEvents){
+      regEvents = events.registeredEvents
+    }
+
+  }
+
   loadUserOpportunities = async () => {
-    let userEvents = [];
+    let createdEvents = [];
     let token = await User.firebase.getIdToken();
     console.log("Profile token", token)
     if (token) {
@@ -212,7 +227,9 @@ export default class HomeScreen extends React.Component {
             try {
               let events = JSON.parse(response._bodyText);
               if (typeof events === "object") {
-                this.setState({ events: events }, () => this.loadEvents())
+                this.setState({ events: events },
+                  () => this.loadEvents()
+                )
               } else {
                 this.setState({ loading: false });
               }
@@ -230,11 +247,7 @@ export default class HomeScreen extends React.Component {
   componentDidMount() {
     this.loadUser()
   }
-  // componentDidUpdate(prevState){
-  //   if(prevState.user !== this.props.navigation.getParam('user')) {
-  //     this.loadUser()
-  //   }
-  // }
+
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
@@ -251,7 +264,7 @@ export default class HomeScreen extends React.Component {
   }
 
   navigateToPage = (page) => {
-    this.props.navigation.navigate(page, {loadUser: this.loadUser});
+    this.props.navigation.navigate(page, { loadUser: this.loadUser });
     // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
     this.setState({ open: false })
   }
@@ -271,8 +284,6 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    // console.log("this is from getParams", this.props.navigation.getParam("user"))
-    // console.log("this is from state", this.state.user)
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>
@@ -383,46 +394,92 @@ export default class HomeScreen extends React.Component {
                   </Text>
                 </View>
               </View>
-              <View style={{ marginTop: 8, flex:1 }}>
+              <View style={{ marginTop: 8, flex: 1 }}>
                 <ButtonGroup
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                  {this.state.activeTab === 0 && (
-                    <>
-                      <ProfileInfo user={this.state.user} />
-                    </>
-                  )}
-                  {this.state.activeTab === 1 && (
-                    <>
-                      {this.state.pastEvents ? (
-                        <ProfileHistory events={this.state.pastEvents} />
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
+                {this.state.activeTab === 0 && (
+                  <>
+                    <ProfileInfo user={this.state.user} />
+                  </>
+                )}
+                {this.state.activeTab === 1 && (
+                  <>
+                    {this.state.events ? (
+                      <>
+                        <View style={styles.dropdownContainer}>
+                          <View style={styles.dropdownSection}>
+                            <View style={styles.dropdownSectionHeader}>
+                              <Text style={styles.dropdownSectionHeaderText}>Current Events</Text>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-down"
+                                    : "md-arrow-dropdown"
+                                }
+                                size={26}
+                              />
+                            </View>
+                          </View>
 
-                    </>
-                  )}
-                  {this.state.activeTab === 2 && (
-                    <>
-                      {this.state.userEvents ? (
-                        <ProfileCreated events={this.state.userEvents} navigation={this.props.navigation}/>
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
+                          <View style={styles.dropdownSection}>
+                            <View style={styles.dropdownSectionHeader}>
+                              <Text style={styles.dropdownSectionHeaderText}>Upcoming Events</Text>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-down"
+                                    : "md-arrow-dropdown"
+                                }
+                                size={26}
+                              />
+                            </View>
+                          </View>
 
-                    </>
-                  )}
+                          <View style={styles.dropdownSection}>
+                            <View style={styles.dropdownSectionHeader}>
+                              <Text style={styles.dropdownSectionHeaderText}>Past Participation</Text>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-down"
+                                    : "md-arrow-dropdown"
+                                }
+                                size={26}
+                              />
+                            </View>
+                          </View>
+
+                        </View>
+                        {/* <ProfileHistory events={this.state.pastEvents} /> */}
+                      </>
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+
+                  </>
+                )}
+                {this.state.activeTab === 2 && (
+                  <>
+                    {this.state.createdEvents ? (
+                      <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+
+                  </>
+                )}
               </View>
               {this.state.open && (
                 <View
@@ -534,9 +591,9 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                        
-                      </View>
-                      <View style={styles.menuItemWrapper}>
+
+                        </View>
+                        <View style={styles.menuItemWrapper}>
                           <TouchableOpacity
                             style={styles.menuItemTouchable}
                             onPress={() => {
@@ -560,7 +617,7 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                          </View>
+                        </View>
                       </View>
                       {/* <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
@@ -764,5 +821,21 @@ const styles = StyleSheet.create({
   },
   menuItemContainer: { flexDirection: "row" },
   menuItemLabel: { flex: 3 },
-  menuItemIconContainer: { flex: 1 }
+  menuItemIconContainer: { flex: 1 },
+  dropdownContainer: {
+    marginTop: 6,
+    paddingHorizontal: 12
+  },
+  dropdownSection: {
+    marginBottom: 12
+  },
+  dropdownSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dropdownSectionHeaderText: {
+    fontSize: 16,
+    color: "#b0b0b0",
+    marginBottom: 6
+  }
 });
