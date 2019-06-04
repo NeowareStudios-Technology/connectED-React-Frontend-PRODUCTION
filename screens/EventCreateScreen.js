@@ -125,6 +125,7 @@ class EventCreateScreen extends React.Component {
       let token = await User.firebase.getIdToken();
       if (token) {
         let bodyData = JSON.stringify(data);
+        console.log(bodyData)
         let url =
           "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events";
         fetch(url, {
@@ -146,6 +147,10 @@ class EventCreateScreen extends React.Component {
               } catch (error) {
                 callback([error.message]);
               }
+            }
+            else {
+              // submit without photo
+              console.log('TODO: Submit without photo')
             }
           })
           .catch(error => {

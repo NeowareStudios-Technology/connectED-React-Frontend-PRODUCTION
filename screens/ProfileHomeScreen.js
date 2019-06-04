@@ -194,7 +194,7 @@ export default class HomeScreen extends React.Component {
   loadUserOpportunities = async () => {
     let userEvents = [];
     let token = await User.firebase.getIdToken();
-    console.log("token", token)
+    console.log("Profile token", token)
     if (token) {
       try {
         let url =
