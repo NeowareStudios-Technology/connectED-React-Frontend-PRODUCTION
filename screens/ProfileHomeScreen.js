@@ -23,6 +23,7 @@ import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
 import moment from 'moment';
+import Accordion from 'react-native-collapsible/Accordion';
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -43,7 +44,8 @@ export default class HomeScreen extends React.Component {
       currentEvents: null,
       futureEvents: null,
       activeTab: 0,
-      loading: true
+      loading: true,
+      activeSections: [] // array for dropdown/accordion
     };
   }
   updateUser = (user) => {
@@ -195,12 +197,12 @@ export default class HomeScreen extends React.Component {
   };
 
   sortEvents = () => {
-    let {events} = this.state;
+    let { events } = this.state;
     let createdEvents, currentEvents, pastEvents, futureEvents, regEvents = []
-    if(events.created_events){
+    if (events.created_events) {
       createdEvents = events.created_events
     }
-    if(events.registeredEvents){
+    if (events.registeredEvents) {
       regEvents = events.registeredEvents
     }
 
@@ -226,6 +228,7 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
+              console.log("PROFILE events:", events)
               if (typeof events === "object") {
                 this.setState({ events: events },
                   () => this.loadEvents()
@@ -244,23 +247,18 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.loadUser()
-  }
-
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
-      this.setState(
-        {
-          user: user
-        },
-        () => {
-          this.loadUserOpportunities();
-        }
-      );
+      this.setState({ user: user }, () => {
+        this.loadUserOpportunities();
+      });
     }
     return true;
+  }
+
+  componentDidMount() {
+    this.loadUser()
   }
 
   navigateToPage = (page) => {
@@ -281,6 +279,128 @@ export default class HomeScreen extends React.Component {
 
   updateTab = (activeTab) => {
     this.setState({ activeTab })
+  }
+
+  // ********************
+  // Accordion Functions
+  //  *******************
+
+  // _renderSectionTitle = section => {
+  //   return (
+  //     <View style={styles.content}>
+  //       <Text>{section.content}</Text>
+  //     </View>
+  //   );
+  // };
+
+  _renderHeader = section => {
+    return (
+      <View style={styles.dropdownSectionHeader}>
+        <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
+        <Icon.Ionicons
+          name={
+            Platform.OS === "ios"
+              ? "ios-arrow-down"
+              : "md-arrow-dropdown"
+          }
+          size={26}
+        />
+      </View>
+    );
+  };
+
+  _renderContent = section => {
+    let events;
+    if(section.title === 'Current Events'){
+      events = this.state.currentEvents
+    }
+    else if(section.title === 'Upcoming Events'){
+      events = this.state.futureEvents
+    }
+    else{
+      events = this.state.pastEvents
+    }
+    return (
+      <EventListItems events={events} />
+    );
+  };
+
+  _updateSections = activeSections => {
+    this.setState({ activeSections });
+  };
+  renderAccordion = () => {
+    let sections = [
+      {
+        title: 'Current Events',
+        // items: this.state.pastEvents
+      }, {
+        title: 'Upcoming Events',
+        // items: this.state.pastEvents
+      }, {
+        title: 'Past Events',
+        // items: this.state.pastEvents
+      }
+    ]
+    return (
+      <View style={styles.dropdownContainer}>
+        <Accordion
+          sections={sections}
+          activeSections={this.state.activeSections}
+          renderSectionTitle={this._renderSectionTitle}
+          renderHeader={this._renderHeader}
+          renderContent={this._renderContent}
+          onChange={this._updateSections}
+        />
+
+      </View>
+    )
+    // return (
+    //   <View style={styles.dropdownContainer}>
+    //     <View style={styles.dropdownSection}>
+    //       <TouchableOpacity>
+    //         <View style={styles.dropdownSectionHeader}>
+    //           <Text style={styles.dropdownSectionHeaderText}>Current Events</Text>
+    //           <Icon.Ionicons
+    //             name={
+    //               Platform.OS === "ios"
+    //                 ? "ios-arrow-down"
+    //                 : "md-arrow-dropdown"
+    //             }
+    //             size={26}
+    //           />
+    //         </View>
+    //       </TouchableOpacity>
+    //     </View>
+
+    //     <View style={styles.dropdownSection}>
+    //       <View style={styles.dropdownSectionHeader}>
+    //         <Text style={styles.dropdownSectionHeaderText}>Upcoming Events</Text>
+    //         <Icon.Ionicons
+    //           name={
+    //             Platform.OS === "ios"
+    //               ? "ios-arrow-down"
+    //               : "md-arrow-dropdown"
+    //           }
+    //           size={26}
+    //         />
+    //       </View>
+    //     </View>
+
+    //     <View style={styles.dropdownSection}>
+    //       <View style={styles.dropdownSectionHeader}>
+    //         <Text style={styles.dropdownSectionHeaderText}>Past Participation</Text>
+    //         <Icon.Ionicons
+    //           name={
+    //             Platform.OS === "ios"
+    //               ? "ios-arrow-down"
+    //               : "md-arrow-dropdown"
+    //           }
+    //           size={26}
+    //         />
+    //       </View>
+    //     </View>
+    //   </View>
+    // )
   }
 
   render() {
@@ -402,68 +522,17 @@ export default class HomeScreen extends React.Component {
                   containerStyle={{ height: 42 }}
                 />
                 {this.state.activeTab === 0 && (
-                  <>
-                    <ProfileInfo user={this.state.user} />
-                  </>
+                  <ProfileInfo user={this.state.user} />
                 )}
                 {this.state.activeTab === 1 && (
                   <>
-                    {this.state.events ? (
-                      <>
-                        <View style={styles.dropdownContainer}>
-                          <View style={styles.dropdownSection}>
-                            <View style={styles.dropdownSectionHeader}>
-                              <Text style={styles.dropdownSectionHeaderText}>Current Events</Text>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-down"
-                                    : "md-arrow-dropdown"
-                                }
-                                size={26}
-                              />
-                            </View>
-                          </View>
-
-                          <View style={styles.dropdownSection}>
-                            <View style={styles.dropdownSectionHeader}>
-                              <Text style={styles.dropdownSectionHeaderText}>Upcoming Events</Text>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-down"
-                                    : "md-arrow-dropdown"
-                                }
-                                size={26}
-                              />
-                            </View>
-                          </View>
-
-                          <View style={styles.dropdownSection}>
-                            <View style={styles.dropdownSectionHeader}>
-                              <Text style={styles.dropdownSectionHeaderText}>Past Participation</Text>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-down"
-                                    : "md-arrow-dropdown"
-                                }
-                                size={26}
-                              />
-                            </View>
-                          </View>
-
-                        </View>
-                        {/* <ProfileHistory events={this.state.pastEvents} /> */}
-                      </>
-                    ) : (
-                        <ActivityIndicator
-                          style={{ marginBottom: 16 }}
-                          size="small"
-                          color="#0d0d0d"
-                        />
-                      )}
-
+                    {this.state.events ? (this.renderAccordion()) : (
+                      <ActivityIndicator
+                        style={{ marginBottom: 16 }}
+                        size="small"
+                        color="#0d0d0d"
+                      />
+                    )}
                   </>
                 )}
                 {this.state.activeTab === 2 && (
