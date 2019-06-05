@@ -23,6 +23,8 @@ import { Icon } from "expo";
 import Colors from "../constants/Colors";
 import moment from 'moment';
 import Accordion from 'react-native-collapsible/Accordion';
+import EventDetails from "../components/EventDetails";
+import AdminEventDetails from "../components/AdminEventDetails";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -44,7 +46,10 @@ export default class HomeScreen extends React.Component {
       futureEvents: null,
       activeTab: 0,
       loading: true,
-      activeSections: [] // array for dropdown/accordion
+      activeSections: [], // array for dropdown/accordion
+      activeItem: null,
+      adminEventDetailVisible: false,
+      eventDetailVisible: false
     };
   }
   updateUser = (user) => {
@@ -53,7 +58,7 @@ export default class HomeScreen extends React.Component {
 
   // loads any events the user created and sorts by date
   loadCreatedEvent = async (eventName, index, callback) => {
-    console.log("LOAD CREATED EVENT - " + eventName)
+    // console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -137,7 +142,7 @@ export default class HomeScreen extends React.Component {
   };
 
   loadRegEvent = async (eventName, index, callback) => {
-    console.log("LOAD REG EVENT - " + eventName)
+    // console.log("LOAD REG EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -302,10 +307,117 @@ export default class HomeScreen extends React.Component {
   updateTab = (activeTab) => {
     this.setState({ activeTab })
   }
+  volunteer = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (!isRegistered) {
+        let token = await User.firebase.getIdToken();
+
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          let putData = {
+            user_action: "both"
+          };
+          try {
+            let bodyData = JSON.stringify(putData);
+            fetch(url, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              },
+              body: bodyData
+            })
+              .then(response => {
+                if (response.ok) {
+                  let events = this.state.events;
+                  let eventIndex = null;
+                  let event = events.find((anEvent, index) => {
+                    if (anEvent === this.state.activeItem) {
+                      eventIndex = index;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (eventIndex) {
+                    events[eventIndex].is_registered = "1";
+                  }
+                  this.setState({
+                    events: events,
+                    activeItem: events[eventIndex]
+                  });
+                }
+              })
+              .catch(error => { });
+          } catch (error) { }
+        }
+      }
+    }
+  };
+
+  deregister = async () => {
+    if (this.state.activeItem) {
+      let isRegistered = false;
+      if (
+        typeof this.state.activeItem.is_registered !== "undefined" &&
+        this.state.activeItem.is_registered !== "0"
+      ) {
+        isRegistered = true;
+      }
+      if (isRegistered) {
+        let token = await User.firebase.getIdToken();
+
+        if (token) {
+          let organizerEmail = this.state.activeItem.e_organizer;
+          let eventOrigName = this.state.activeItem.e_orig_title;
+          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+          try {
+            fetch(url, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+              }
+            })
+              .then(response => {
+                if (response.ok) {
+                  // TODO: remove event from event list so history re-renders
+                  this.hideDetails()
+                }
+              })
+              .catch(error => { });
+          } catch (error) { }
+        }
+      }
+    }
+  };
+  showEventDetails = (event) => {
+    console.log("SHOW EVENT DETAILS", event.e_title)
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ eventDetailVisible: true, activeItem: event })
+  }
+  showAdminEventDetails = (event) => {
+    console.log("SHOW EVENT DETAILS", event)
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ adminEventDetailVisible: true, activeItem: event })
+  }
+  hideDetails = () => {
+    console.log('hide details')
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
+  };
 
   // ********************
   // Accordion Functions
-  //  *******************
+  // ********************
   _renderHeader = section => {
     return (
       <View style={styles.dropdownSectionHeader}>
@@ -336,7 +448,7 @@ export default class HomeScreen extends React.Component {
       sort = "desc"
     }
     return (
-      <EventListItems events={events} sort={sort} />
+      <EventListItems events={events} sort={sort} overlay={this.showEventDetails} />
     );
   };
   _updateSections = activeSections => {
@@ -367,8 +479,38 @@ export default class HomeScreen extends React.Component {
     )
   }
 
+  renderEventDetails = () => {
+    return (
+      <View style={{ flex: 1 }}>
+        <EventDetails
+          event={this.state.activeItem}
+          onClose={this.hideDetails}
+          onVolunteer={() => {
+            this.volunteer();
+          }}
+          onDeregister={() => {
+            this.deregister();
+          }}
+        />
+      </View>
+
+    )
+  }
+
+  renderAdminEventDetails = () => {
+    return (
+      <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+    )
+  }
+
   render() {
     const buttons = ["Info", "History", "Created"];
+    if (this.state.eventDetailVisible) {
+      return (this.renderEventDetails())
+    }
+    if (this.state.adminEventDetailVisible) {
+      return (this.renderAdminEventDetails())
+    }
     return (
       <View style={styles.container}>
         <View
@@ -503,19 +645,12 @@ export default class HomeScreen extends React.Component {
                 )}
                 {this.state.activeTab === 2 && (
                   <>
-                  {this.state.createdEvents ? (
-                        <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation}/>
-                      ) : (
-                    // {!this.state.loading ? (
-                    //   <>
-                    //     {
-                    //       this.state.createdEvents &&
-                    //       <View style={styles.dropdownContainer}>
-                    //         <EventListItems events={this.state.createdEvents} />
-                    //       </View>
-                    //     }
-                    //   </>
-                    // ) : (
+                    {this.state.createdEvents ? (
+                      <View style={styles.dropdownContainer}>
+                        <EventListItems events={this.state.createdEvents} sort={"desc"} overlay={this.showAdminEventDetails} />
+                      </View>
+                      // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
+                    ) : (
                         <ActivityIndicator
                           style={{ marginBottom: 16 }}
                           size="small"

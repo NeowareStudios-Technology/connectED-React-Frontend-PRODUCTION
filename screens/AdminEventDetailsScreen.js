@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, LayoutAnimation, Button } from "react-native";
 import User from "../components/User";
 
-export default class AdminEventDetails extends Component {
+export default class AdminEventDetailsScreen extends Component {
 
     acceptOrDenyEventAttendee = async (organizer, title, status) => {
         let token = await User.firebase.getIdToken();
