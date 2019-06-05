@@ -583,7 +583,8 @@ export default class MyCalendar extends Component {
                     calendarBackground: 'transparent',
                     textSectionTitleColor: '#CDCEC5', //white
                     dayTextColor: '#CDCEC5', //white
-                    todayTextColor: 'black',
+                    todayTextColor: '#3788E0',   //'lime', //black
+                    todayBackgroundColor: '#fff',
                     textMonthFontSize: 30,
                     textMonthFontWeight: "bold",
                     textDayFontSize: 18,
@@ -595,7 +596,7 @@ export default class MyCalendar extends Component {
                 hideExtraDays={false} // show days of other months in month page
                 // markedDates are to visually match the mock-up
                 markedDates={{
-                  '2019-06-04': {
+                  '2019-06-05': {
                     selected: true,
                     customStyles: {
                       container: {
