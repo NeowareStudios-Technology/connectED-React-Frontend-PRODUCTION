@@ -40,10 +40,13 @@ class EventEditFinishingTouches extends React.Component {
         aspect: [1, 1],
         allowsEditing: true
       });
-      console.log(result)
-      if (result.cancelled) {
-        console.log("Image select cancelled")
-        return;
+      if (!result.cancelled) {
+        let data = await FileSystem.readAsStringAsync(result.uri, {
+          encoding: FileSystem.EncodingTypes.Base64
+        });
+        if (data) {
+          this.props.onInputChange("e_photo",data);
+        } 
       }
 
       let resizedBase64 = await ImageManipulator.manipulateAsync(
