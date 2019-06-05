@@ -17,8 +17,6 @@ import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
 import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
-import ProfileHistory from "../components/ProfileHistory";
-import ProfileCreated from "../components/ProfileCreated";
 import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
@@ -54,6 +52,7 @@ export default class HomeScreen extends React.Component {
 
   // loads any events the user created and sorts by date
   loadCreatedEvent = async (eventName, index, callback) => {
+    // console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -72,11 +71,11 @@ export default class HomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 let createdEvents = []
-                // keep state immutable by using slice to return new array
                 if (this.state.createdEvents) {
                   createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
+                // event.key = "event-" + index;
                 createdEvents.push(event);
                 this.setState(
                   {
@@ -90,69 +89,12 @@ export default class HomeScreen extends React.Component {
 
               }
             } catch (error) { }
-          }
-          else {
-            callback();
-          }
-        });
-      } catch (error) { }
-    }
-  };
-
-  // Loads and filters registered events to only include past events sorted by date 
-  loadPastEvent = async (eventName, index, callback) => {
-    let token = await User.firebase.getIdToken();
-    if (token) {
-      try {
-        let url =
-          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
-          eventName;
-        fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          }
-        }).then(response => {
-          if (response.ok) {
+          } else {
+            // Response from server not ok
             try {
-              let responseData = JSON.parse(response._bodyText);
-              // check if date is in past
-              let now = moment()
-              let eventDate = moment(responseData.date, "MM/DD/YYYY")
-              if (responseData && now.isAfter(eventDate, 'day')) {
-                let pastEvents = []
-                // keep state immutable by using slice to return new array
-                if (this.state.pastEvents) {
-                  pastEvents = this.state.pastEvents.slice();
-                }
-                let event = responseData;
-                event.key = "event-" + index;
-                pastEvents.push(event);
-                this.setState(
-                  {
-                    pastEvents: pastEvents,
-                    loading: false
-                  },
-                  () => {
-                    callback();
-                  }
-                );
-
-              } else {
-                // event not in the past
-                if (!this.state.pastEvents) {
-                  this.setState({ pastEvents: [] },
-                    () => {
-                      callback();
-                    })
-                } else {
-                  callback()
-                }
-              }
+              let errorData = JSON.parse(response._bodyText);
+              console.log(eventName + " " + errorData.error.message)
             } catch (error) { }
-          }
-          else {
             callback();
           }
         });
@@ -164,81 +106,37 @@ export default class HomeScreen extends React.Component {
     this.loadUser()
   }
 
-  // // Takes the array of user opportunities and loads and sorts each event
-  // loadEvents = () => {
-  //   // TODO: Don't include duplicate events. only fetch the event once
-  //   let sequence = new Sequencer();
-  //   let registeredEvents = this.state.events.registered_events
-  //   let createdEvents = this.state.events.created_events
-  //   if (registeredEvents && registeredEvents.length > 0) {
-  //     registeredEvents.map((eventName, index) => {
-  //       eventName = eventName.replace("_", "/")
-  //       sequence.promise(() => {
-  //         this.loadPastEvent(eventName, index, () => {
-  //           sequence.next();
-  //         });
-  //       });
-  //     });
-  //   } else {
-  //     this.setState({ pastEvents: [] })
-  //   }
-  //   if (createdEvents && createdEvents.length > 0) {
-  //     createdEvents.map((eventName, index) => {
-  //       eventName = eventName.replace("_", "/")
-  //       sequence.promise(() => {
-  //         this.loadCreatedEvent(eventName, index, () => {
-  //           sequence.next();
-  //         });
-  //       });
-  //     });
-  //   } else {
-  //     this.setState({ createdEvents: [] })
-  //   }
-  //   sequence.next();
-  // };
-
-
-
-
+  // Takes the array of user opportunities and loads and sorts each event
   loadEvents = () => {
-    let { events } = this.state;
-    let regEvents = [];
-    let createdEvents = [];
-
-    if (events.created_events) {
-      createdEvents = events.created_events
-    }
-    if (events.registeredEvents) {
-      regEvents = events.registeredEvents
-    }
+    // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
-
-    if (regEvents.length > 0) {
-      regEvents.map((eventName, index) => {
+    let registeredEvents = this.state.events.registered_events
+    let createdEvents = this.state.events.created_events
+    if (registeredEvents && registeredEvents.length > 0) {
+      registeredEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
         sequence.promise(() => {
           this.loadRegEvent(eventName, index, () => {
             sequence.next();
           });
-
         });
       });
     }
-
-    if (createdEvents.length > 0) {
+    if (createdEvents && createdEvents.length > 0) {
       createdEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
         sequence.promise(() => {
           this.loadCreatedEvent(eventName, index, () => {
             sequence.next();
           });
-
         });
       });
     }
-
     sequence.next();
   };
 
   loadRegEvent = async (eventName, index, callback) => {
+    console.log("LOAD REG EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -256,18 +154,18 @@ export default class HomeScreen extends React.Component {
             try {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
+                let event = responseData;
+                event.key = "event-" + index;
+
                 // Check if event is past, current or future
                 let now = moment()
                 let eventDate = moment(responseData.date, "MM/DD/YYYY")
-                console.log("EVENT DATE: ", eventDate)
+
                 if (this.isPast(now, eventDate)) {
-                  console.log("EVENT in Past");
                   let pastEvents = []
                   if (this.state.pastEvents) {
                     pastEvents = this.state.pastEvents.slice();
                   }
-                  let event = responseData;
-                  event.key = "event-" + index;
                   pastEvents.push(event);
                   this.setState(
                     {
@@ -279,13 +177,11 @@ export default class HomeScreen extends React.Component {
                     }
                   );
                 } else if (this.isFuture(now, eventDate)) {
-                  console.log("EVENT in Future");
                   let futureEvents = []
                   // keep state immutable by using slice to return new array
                   if (this.state.futureEvents) {
                     futureEvents = this.state.futureEvents.slice();
-                  } let event = responseData;
-                  event.key = "event-" + index;
+                  }
                   futureEvents.push(event);
                   this.setState(
                     {
@@ -296,34 +192,30 @@ export default class HomeScreen extends React.Component {
                       callback();
                     }
                   );
-
-                }
-                else {
-                  console.log("EVENT is today");
-                  let pastEvents = []
+                } else {
+                  let currentEvents = []
                   // keep state immutable by using slice to return new array
-                  if (this.state.pastEvents) {
-                    pastEvents = this.state.pastEvents.slice();
-                  } let event = responseData;
-                  event.key = "event-" + index;
-                  event.distance = this.state.distances[index];
-                  events.push(event);
-                  this.arrayholder = events
+                  if (this.state.currentEvents) {
+                    currentEvents = this.state.currentEvents.slice();
+                  }
+                  currentEvents.push(event);
                   this.setState(
                     {
-                      events: events,
+                      currentEvents: currentEvents,
                       loading: false
                     },
                     () => {
                       callback();
-                    }
-                  );
-
+                    });
                 }
               }
             } catch (error) { }
-          }
-          else {
+          } else {
+            // Response from server not ok
+            try {
+              let errorData = JSON.parse(response._bodyText);
+              console.log(eventName + " " + errorData.error.message)
+            } catch (error) { }
             callback();
           }
         });
@@ -331,453 +223,443 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  isCurrent = (today, date) => {
-    date.isSame(today, 'day')
-  }
-  isPast = (today, date) => {
-    date.isBefore(today, 'day')
-  }
-  isFuture = (today, date) => {
-  date.isAfter(today, 'day')
-}
+  isCurrent = (today, date) => date.isSame(today, 'day')
 
-sortEvents = () => {
-  let { events } = this.state;
-  let createdEvents, currentEvents, pastEvents, futureEvents, regEvents = []
-  if (events.created_events) {
-    createdEvents = events.created_events
-  }
-  if (events.registeredEvents) {
-    regEvents = events.registeredEvents
-  }
+  isPast = (today, date) => date.isBefore(today, 'day')
 
-  // Sort registeredEvents into current, upcoming and past
+  isFuture = (today, date) => date.isAfter(today, 'day')
 
-
-  // update state then call loadEvents
-}
-
-loadUserOpportunities = async () => {
-  let createdEvents = [];
-  let token = await User.firebase.getIdToken();
-  console.log("Profile token", token)
-  if (token) {
-    try {
-      let url =
-        "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
-        this.state.user.email +
-        "/events";
-      fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        }
-      }).then(response => {
-        if (response.ok) {
-          try {
-            let events = JSON.parse(response._bodyText);
-            console.log("PROFILE events:", events)
-            if (typeof events === "object") {
-              this.setState({ events: events },
-                () => this.loadEvents()
-              )
-            } else {
-              this.setState({ loading: false });
-            }
-          } catch (error) { }
-        } else {
-          this.setState({
-            loading: false
-          });
-        }
-      });
-    } catch (error) { }
-  }
-}
-
-async loadUser() {
-  let user = await User.isLoggedIn();
-  if (user) {
-    this.setState({ user: user }, () => {
-      this.loadUserOpportunities();
-    });
-  }
-  return true;
-}
-
-componentDidMount() {
-  this.loadUser()
-}
-
-navigateToPage = (page) => {
-  this.props.navigation.navigate(page, { loadUser: this.loadUser });
-  // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
-  this.setState({ open: false })
-}
-
-openDrawer = () => {
-  LayoutAnimation.linear();
-  this.setState({ open: true });
-};
-
-closeDrawer = () => {
-  LayoutAnimation.linear();
-  this.setState({ open: false });
-};
-
-updateTab = (activeTab) => {
-  this.setState({ activeTab })
-}
-
-// ********************
-// Accordion Functions
-//  *******************
-_renderHeader = section => {
-  return (
-    <View style={styles.dropdownSectionHeader}>
-      <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
-      <Icon.Ionicons
-        name={
-          Platform.OS === "ios"
-            ? "ios-arrow-down"
-            : "md-arrow-dropdown"
-        }
-        size={26}
-      />
-    </View>
-  );
-};
-_renderContent = section => {
-  let events;
-  if (section.title === 'Current Events') {
-    events = this.state.currentEvents
-  }
-  else if (section.title === 'Upcoming Events') {
-    events = this.state.futureEvents
-  }
-  else {
-    events = this.state.pastEvents
-  }
-  return (
-    <EventListItems events={events} />
-  );
-};
-_updateSections = activeSections => {
-  this.setState({ activeSections });
-};
-renderAccordion = () => {
-  let sections = [
-    {
-      title: 'Current Events',
-    }, {
-      title: 'Upcoming Events',
-    }, {
-      title: 'Past Events',
+  loadUserOpportunities = async () => {
+    let createdEvents = [];
+    let token = await User.firebase.getIdToken();
+    console.log("Profile token", token)
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/" +
+          this.state.user.email +
+          "/events";
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let events = JSON.parse(response._bodyText);
+              console.log("USER OPPORTUNITIES:", events)
+              if (typeof events === "object") {
+                this.setState({ events: events },
+                  () => this.loadEvents()
+                )
+              } else {
+                this.setState({ loading: false });
+              }
+            } catch (error) { }
+          } else {
+            this.setState({
+              loading: false
+            });
+          }
+        });
+      } catch (error) { }
     }
-  ]
-  return (
-    <View style={styles.dropdownContainer}>
-      <Accordion
-        sections={sections}
-        activeSections={this.state.activeSections}
-        renderSectionTitle={this._renderSectionTitle}
-        renderHeader={this._renderHeader}
-        renderContent={this._renderContent}
-        onChange={this._updateSections}
-        underlayColor={'transparent'}
-      />
+  }
 
-    </View>
-  )
-}
+  async loadUser() {
+    let user = await User.isLoggedIn();
+    if (user) {
+      this.setState({ user: user }, () => {
+        this.loadUserOpportunities();
+      });
+    }
+    return true;
+  }
 
-render() {
-  const buttons = ["Info", "History", "Created"];
-  return (
-    <View style={styles.container}>
-      <View
-        style={styles.container}
-        contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
-      >
-        {this.state.user ? (
-          <>
-            <View
-              style={{
-                paddingHorizontal: 24,
-                paddingTop: 18,
-                flexDirection: "row"
-              }}
-            >
-              <View style={{ flex: 2 }}>
-                {this.state.user.profile &&
-                  this.state.user.profile.photo !== "" ? (
-                    <>
-                      <Avatar
-                        size={80}
-                        rounded
-                        source={{
-                          uri:
-                            "data:image/png;base64," +
-                            this.state.user.profile.photo
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <Avatar rounded size={80} icon={{ name: "face" }} />
-                  )}
-                <Text
-                  style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}
-                >
-                  {this.state.user.profile.first_name +
-                    " " +
-                    this.state.user.profile.last_name}
-                </Text>
-                <Text
-                  style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}
-                >
-                  Volunteer
-                  </Text>
-              </View>
+  componentDidMount() {
+    this.loadUser()
+  }
+
+  navigateToPage = (page) => {
+    this.props.navigation.navigate(page, { loadUser: this.loadUser });
+    // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
+    this.setState({ open: false })
+  }
+
+  openDrawer = () => {
+    LayoutAnimation.linear();
+    this.setState({ open: true });
+  };
+
+  closeDrawer = () => {
+    LayoutAnimation.linear();
+    this.setState({ open: false });
+  };
+
+  updateTab = (activeTab) => {
+    this.setState({ activeTab })
+  }
+
+  // ********************
+  // Accordion Functions
+  //  *******************
+  _renderHeader = section => {
+    return (
+      <View style={styles.dropdownSectionHeader}>
+        <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
+        <Icon.Ionicons
+          name={
+            Platform.OS === "ios"
+              ? "ios-arrow-down"
+              : "md-arrow-dropdown"
+          }
+          size={26}
+        />
+      </View>
+    );
+  };
+  _renderContent = section => {
+    let events, sort;
+    if (section.title === 'Current Events') {
+      events = this.state.currentEvents
+      sort = "asc"
+    }
+    else if (section.title === 'Upcoming Events') {
+      events = this.state.futureEvents
+      sort = "asc"
+    }
+    else {
+      events = this.state.pastEvents
+      sort = "desc"
+    }
+    return (
+      <EventListItems events={events} sort={sort} />
+    );
+  };
+  _updateSections = activeSections => {
+    this.setState({ activeSections });
+  };
+  renderAccordion = () => {
+    let sections = [
+      {
+        title: 'Current Events',
+      }, {
+        title: 'Upcoming Events',
+      }, {
+        title: 'Past Events',
+      }
+    ]
+    return (
+      <View style={styles.dropdownContainer}>
+        <Accordion
+          sections={sections}
+          activeSections={this.state.activeSections}
+          renderSectionTitle={this._renderSectionTitle}
+          renderHeader={this._renderHeader}
+          renderContent={this._renderContent}
+          onChange={this._updateSections}
+          underlayColor={'transparent'}
+        />
+      </View>
+    )
+  }
+
+  render() {
+    const buttons = ["Info", "History", "Created"];
+    return (
+      <View style={styles.container}>
+        <View
+          style={styles.container}
+          contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
+        >
+          {this.state.user ? (
+            <>
               <View
                 style={{
-                  flex: 2,
-                  justifyContent: "flex-end",
+                  paddingHorizontal: 24,
+                  paddingTop: 18,
                   flexDirection: "row"
                 }}
               >
-                <TouchableOpacity
-                  style={{ padding: 10, height: 40, width: 40 }}
-                  onPress={this.openDrawer}
-                >
-                  <Icon.Ionicons
-                    name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
-                    size={26}
-                    color={Colors.tabIconDefault}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View
-              style={{
-                paddingHorizontal: 30,
-                paddingVertical: 12
-              }}
-            >
-              <Divider style={{ height: 2, backgroundColor: "#dddddd" }} />
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                paddingHorizontal: 24
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                {this.state.user.profile.hours ?
-                  <Text style={styles.largeNumber}>
-                    {this.state.user.profile.hours}
-                  </Text>
-                  :
-                  <Text style={styles.largeNumber}>0</Text>
-                }
-                <Text style={styles.largeNumberCaption}>Total Hours</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                {this.state.pastEvents ? (
-                  <>
-                    <Text style={styles.largeNumber}>
-                      {this.state.pastEvents.length}
-                    </Text>
-                  </>
-                ) : (
-                    <>
-                      <ActivityIndicator
-                        style={{ marginBottom: 16 }}
-                        size="small"
-                        color="#0d0d0d"
-                      />
-                    </>
-                  )}
-                <Text style={styles.largeNumberCaption}>
-                  Total Opportunities
-                  </Text>
-              </View>
-            </View>
-            <View style={{ marginTop: 8, flex: 1 }}>
-              <ButtonGroup
-                onPress={this.updateTab}
-                selectedIndex={this.state.activeTab}
-                buttons={buttons}
-                containerStyle={{ height: 42 }}
-              />
-              {this.state.activeTab === 0 && (
-                <ProfileInfo user={this.state.user} />
-              )}
-              {this.state.activeTab === 1 && (
-                <>
-                  {this.state.events ? (this.renderAccordion()) : (
-                    <ActivityIndicator
-                      style={{ marginBottom: 16 }}
-                      size="small"
-                      color="#0d0d0d"
-                    />
-                  )}
-                </>
-              )}
-              {this.state.activeTab === 2 && (
-                <>
-                  {this.state.createdEvents ? (
-                    <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
-                  ) : (
-                      <ActivityIndicator
-                        style={{ marginBottom: 16 }}
-                        size="small"
-                        color="#0d0d0d"
-                      />
+                <View style={{ flex: 2 }}>
+                  {this.state.user.profile &&
+                    this.state.user.profile.photo !== "" ? (
+                      <>
+                        <Avatar
+                          size={80}
+                          rounded
+                          source={{
+                            uri:
+                              "data:image/png;base64," +
+                              this.state.user.profile.photo
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <Avatar rounded size={80} icon={{ name: "face" }} />
                     )}
-
-                </>
-              )}
-            </View>
-            {this.state.open && (
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: "#fafafa",
-                  borderLeftColor: "#dedede",
-                  borderLeftWidth: 1,
-                  width: screenWidth * 0.75,
-                  height: screenHeight,
-                  position: "absolute",
-                  left: screenWidth * 0.25
-                }}
-              >
-                <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}
+                  >
+                    {this.state.user.profile.first_name +
+                      " " +
+                      this.state.user.profile.last_name}
+                  </Text>
+                  <Text
+                    style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}
+                  >
+                    Volunteer
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 2,
+                    justifyContent: "flex-end",
+                    flexDirection: "row"
+                  }}
+                >
                   <TouchableOpacity
-                    style={{
-                      padding: 10,
-                      height: 40,
-                      width: 40,
-                      marginBottom: 12
-                    }}
-                    onPress={this.closeDrawer}
+                    style={{ padding: 10, height: 40, width: 40 }}
+                    onPress={this.openDrawer}
                   >
                     <Icon.Ionicons
-                      name={
-                        Platform.OS === "ios"
-                          ? "ios-arrow-forward"
-                          : "md-arrow-forward"
-                      }
+                      name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
                       size={26}
                       color={Colors.tabIconDefault}
                     />
                   </TouchableOpacity>
-                  <View style={{ paddingHorizontal: 10 }}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        marginBottom: 18
-                      }}
-                    >
-                      SETTINGS
-                                  </Text>
-                    <View style={styles.drawerSectionWrapper}>
-                      <View style={styles.drawerSectionLabelContainer}>
-                        <Icon.Ionicons
-                          name={
-                            Platform.OS === "ios" ? "ios-person" : "md-person"
-                          }
-                          size={20}
-                          color={Colors.tabIconDefault}
+                </View>
+              </View>
+              <View
+                style={{
+                  paddingHorizontal: 30,
+                  paddingVertical: 12
+                }}
+              >
+                <Divider style={{ height: 2, backgroundColor: "#dddddd" }} />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  paddingHorizontal: 24
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  {this.state.user.profile.hours ?
+                    <Text style={styles.largeNumber}>
+                      {this.state.user.profile.hours}
+                    </Text>
+                    :
+                    <Text style={styles.largeNumber}>0</Text>
+                  }
+                  <Text style={styles.largeNumberCaption}>Total Hours</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  {this.state.pastEvents ? (
+                    <>
+                      <Text style={styles.largeNumber}>
+                        {this.state.pastEvents.length}
+                      </Text>
+                    </>
+                  ) : (
+                      <>
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
                         />
-                        <Text style={styles.drawerSectionLabel}>Account</Text>
-                      </View>
-                      <Divider
-                        style={{
-                          height: 1,
-                          marginBottom: 8,
-                          backgroundColor: "#dddddd"
-                        }}
+                      </>
+                    )}
+                  <Text style={styles.largeNumberCaption}>
+                    Total Opportunities
+                  </Text>
+                </View>
+              </View>
+              <View style={{ marginTop: 8, flex: 1 }}>
+                <ButtonGroup
+                  onPress={this.updateTab}
+                  selectedIndex={this.state.activeTab}
+                  buttons={buttons}
+                  containerStyle={{ height: 42 }}
+                />
+                {this.state.activeTab === 0 && (
+                  <ProfileInfo user={this.state.user} />
+                )}
+                {this.state.activeTab === 1 && (
+                  <>
+                    {this.state.events ? (
+                      this.renderAccordion()
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
+                {this.state.activeTab === 2 && (
+                  <>
+                    {!this.state.loading ? (
+                      <>
+                        {
+                          this.state.createdEvents &&
+                          <View style={styles.dropdownContainer}>
+                            <EventListItems events={this.state.createdEvents} />
+                          </View>
+                        }
+                      </>
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
+              </View>
+              {this.state.open && (
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "#fafafa",
+                    borderLeftColor: "#dedede",
+                    borderLeftWidth: 1,
+                    width: screenWidth * 0.75,
+                    height: screenHeight,
+                    position: "absolute",
+                    left: screenWidth * 0.25
+                  }}
+                >
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
+                    <TouchableOpacity
+                      style={{
+                        padding: 10,
+                        height: 40,
+                        width: 40,
+                        marginBottom: 12
+                      }}
+                      onPress={this.closeDrawer}
+                    >
+                      <Icon.Ionicons
+                        name={
+                          Platform.OS === "ios"
+                            ? "ios-arrow-forward"
+                            : "md-arrow-forward"
+                        }
+                        size={26}
+                        color={Colors.tabIconDefault}
                       />
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => {
-                            this.navigateToPage("ProfileEdit")
+                    </TouchableOpacity>
+                    <View style={{ paddingHorizontal: 10 }}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: 18,
+                          marginBottom: 18
+                        }}
+                      >
+                        SETTINGS
+                                  </Text>
+                      <View style={styles.drawerSectionWrapper}>
+                        <View style={styles.drawerSectionLabelContainer}>
+                          <Icon.Ionicons
+                            name={
+                              Platform.OS === "ios" ? "ios-person" : "md-person"
+                            }
+                            size={20}
+                            color={Colors.tabIconDefault}
+                          />
+                          <Text style={styles.drawerSectionLabel}>Account</Text>
+                        </View>
+                        <Divider
+                          style={{
+                            height: 1,
+                            marginBottom: 8,
+                            backgroundColor: "#dddddd"
                           }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Edit Profile
+                        />
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("ProfileEdit")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Edit Profile
                                           </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => {
-                            this.navigateToPage("ResetPassword")
-                          }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Change Password
-                                          </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-
-                      </View>
-                      <View style={styles.menuItemWrapper}>
-                        <TouchableOpacity
-                          style={styles.menuItemTouchable}
-                          onPress={() => {
-                            this.navigateToPage("PrivacyPolicy")
-                          }}
-                        >
-                          <View style={styles.menuItemContainer}>
-                            <Text style={styles.menuItemLabel}>
-                              Privacy Policy
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
                               </Text>
-                            <Text style={styles.menuItemIconContainer}>
-                              <Icon.Ionicons
-                                name={
-                                  Platform.OS === "ios"
-                                    ? "ios-arrow-forward"
-                                    : "md-arrow-forward"
-                                }
-                                size={20}
-                                color={Colors.tabIconDefault}
-                              />
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("ResetPassword")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Change Password
+                                          </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+
+                        </View>
+                        <View style={styles.menuItemWrapper}>
+                          <TouchableOpacity
+                            style={styles.menuItemTouchable}
+                            onPress={() => {
+                              this.navigateToPage("PrivacyPolicy")
+                            }}
+                          >
+                            <View style={styles.menuItemContainer}>
+                              <Text style={styles.menuItemLabel}>
+                                Privacy Policy
+                              </Text>
+                              <Text style={styles.menuItemIconContainer}>
+                                <Icon.Ionicons
+                                  name={
+                                    Platform.OS === "ios"
+                                      ? "ios-arrow-forward"
+                                      : "md-arrow-forward"
+                                  }
+                                  size={20}
+                                  color={Colors.tabIconDefault}
+                                />
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                    {/* <View style={styles.drawerSectionWrapper}>
+                      {/* <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
                           <Icon.Ionicons
                             name={
@@ -907,43 +789,43 @@ render() {
                           </TouchableOpacity>
                         </View>
                       </View> */}
-                    <View
-                      style={{ flexDirection: "row", justifyContent: "center" }}
-                    >
-                      <Button
-                        title="Logout"
-                        onPress={() => {
-                          User.logout(() => {
-                            this.props.navigation.navigate("Main");
-                          });
-                        }}
-                      />
+                      <View
+                        style={{ flexDirection: "row", justifyContent: "center" }}
+                      >
+                        <Button
+                          title="Logout"
+                          onPress={() => {
+                            User.logout(() => {
+                              this.props.navigation.navigate("Main");
+                            });
+                          }}
+                        />
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
 
-            )}
-          </>
-        ) : (
-            <>
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontSize: 18,
-                  marginTop: 24,
-                  marginBottom: 24
-                }}
-              >
-                Loading profile...
-              </Text>
-              <ActivityIndicator size="large" color="#0d0d0d" />
+              )}
             </>
-          )}
+          ) : (
+              <>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 18,
+                    marginTop: 24,
+                    marginBottom: 24
+                  }}
+                >
+                  Loading profile...
+              </Text>
+                <ActivityIndicator size="large" color="#0d0d0d" />
+              </>
+            )}
+        </View>
       </View>
-    </View>
-  );
-}
+    );
+  }
 }
 
 const styles = StyleSheet.create({

@@ -3,22 +3,44 @@ import { Text, View } from "react-native";
 import { ListItem } from 'react-native-elements';
 import moment from 'moment';
 
+/**
+ * Description: Displays list of events
+ * Props:
+ *  events - Array of events to display
+ *  sort - String of sorting order
+ *    - "asc": Sort by event date in ascending order (oldest to newest)
+ *    - "desc": Sort by event date in descending order (newest to oldest)
+ *  
+ * */ 
 
 class EventListItems extends React.PureComponent {
-  _keyExtractor = (item, index) => index.toString();
+
+  sortDesc = (events) => events.slice().sort((a, b) => new Date(b.date[0]) - new Date(a.date[0]));
+  sortAsc = (events) => events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
 
   render() {
-    if (!this.props.events) {
+    const { events, sort } = this.props
+    if (!events) {
       return null
     }
-    // sort events in descending order
-    let sortedEvents = this.props.events.slice().sort((a, b) => new Date(b.date[0]) - new Date(a.date[0]));
-    console.log(sortedEvents)
+    
+    let sortedEvents
+    switch (sort) {
+      case "asc":
+        sortedEvents = this.sortAsc(events)
+        break;
+      case "desc":
+        sortedEvents = this.sortDesc(events)
+        break;
+      default:
+        sortedEvents = events
+        break;
+    }
     return (
       <View>
         {sortedEvents.map((item, index) => (
           <ListItem
-            key={item.key}
+            key={item.key || index}
             leftAvatar={{ source: { uri: "data:image/png;base64," + item.e_photo }, rounded: false }}
             title={item.e_title}
             subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
