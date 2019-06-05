@@ -400,17 +400,14 @@ export default class HomeScreen extends React.Component {
     }
   };
   showEventDetails = (event) => {
-    console.log("SHOW EVENT DETAILS", event.e_title)
     LayoutAnimation.easeInEaseOut();
     this.setState({ eventDetailVisible: true, activeItem: event })
   }
   showAdminEventDetails = (event) => {
-    console.log("SHOW EVENT DETAILS", event)
     LayoutAnimation.easeInEaseOut();
     this.setState({ adminEventDetailVisible: true, activeItem: event })
   }
   hideDetails = () => {
-    console.log('hide details')
     LayoutAnimation.easeInEaseOut();
     this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
   };

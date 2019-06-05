@@ -43,7 +43,7 @@ class AdminEventDetails extends React.Component {
     let item = this.props.event;
     return (
       <>
-        <View style={{flexDirection: "column", flex: 1}}>
+        <View style={{ flexDirection: "column", flex: 1 }}>
           <View style={{ flex: 3, backgroundColor: "#124b73" }} >
             <ImageBackground
               source={{
@@ -73,57 +73,56 @@ class AdminEventDetails extends React.Component {
                     />
                   </TouchableOpacity>
                 </View>
-                </View>
+              </View>
             </ImageBackground>
           </View>
-        {item ?
-          <View style={styles.container}>
-            <Text style={styles.title}>{item.e_title}</Text>
-            <Text style={styles.header}>General Info</Text>
-            <Text>{item.date[0]} {item.start[0]}</Text>
-            <Text>{item.street} {`\n`}{item.city}, {item.state} {item.zip_code}</Text>
-            <Text style={styles.header}>Event Roster Info</Text>
-            <Text style={styles.sub}>Event Capacity: {item.capacity}</Text>
-            <Text style={styles.sub}>Registered: {item.num_attendees}</Text>
-            <Text style={styles.sub}>Pending: {item.num_pending_attendees}</Text>
-            {item.num_attendees > 0 ?
-              <View>
-                <Text style={styles.header}>Attending Volunteers</Text>
-                {item.attendees.map((a, index) => (
-                  <View key={index} style={{ flexDirection: "row" }}>
-                    <Text>{a}</Text>
-                  </View>
+          {item &&
+            <View style={styles.container}>
+              <Text style={styles.title}>{item.e_title}</Text>
+              <Text style={styles.header}>General Info</Text>
+              <Text>{item.date[0]} {item.start[0]}</Text>
+              <Text>{item.street} {`\n`}{item.city}, {item.state} {item.zip_code}</Text>
+              <Text style={styles.header}>Event Roster Info</Text>
+              <Text style={styles.sub}>Event Capacity: {item.capacity}</Text>
+              <Text style={styles.sub}>Registered: {item.num_attendees}</Text>
+              <Text style={styles.sub}>Pending: {item.num_pending_attendees}</Text>
+              {item.num_attendees > 0 &&
+                <View>
+                  <Text style={styles.header}>Attending Volunteers</Text>
+                  {item.attendees.map((a, index) => (
+                    <View key={index} style={{ flexDirection: "row" }}>
+                      <Text>{a}</Text>
+                    </View>
 
-                ))}
+                  ))}
 
-              </View>
-              : null}
-            {item.num_pending_attendees > 0 ?
-              <View>
-                <Text style={styles.header}>Pending Volunteers</Text>
-                {item.pending_attendees.map((a, index) => (
-                  <View key={index} style={{ flexDirection: "row" }}>
-                    <Text>{a}</Text>
-                    <Button
-                      onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "approve")}
-                      title="Accept"
-                      color="green"
-                      accessibilityLabel="Accept volunteer to this Event"
-                    />
-                    <Button
-                      onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
-                      title="Deny"
-                      color="red"
-                      accessibilityLabel="Deny volunteer to this Event"
-                    />
-                  </View>
-                ))}
-              </View>
-              : null}
-          </View>
-          : null
-        }
-      </View>
+                </View>
+              }
+              {item.num_pending_attendees > 0 &&
+                <View>
+                  <Text style={styles.header}>Pending Volunteers</Text>
+                  {item.pending_attendees.map((a, index) => (
+                    <View key={index} style={{ flexDirection: "row" }}>
+                      <Text>{a}</Text>
+                      <Button
+                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "approve")}
+                        title="Accept"
+                        color="green"
+                        accessibilityLabel="Accept volunteer to this Event"
+                      />
+                      <Button
+                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
+                        title="Deny"
+                        color="red"
+                        accessibilityLabel="Deny volunteer to this Event"
+                      />
+                    </View>
+                  ))}
+                </View>
+              }
+            </View>
+          }
+        </View>
       </>
     );
   }
