@@ -655,7 +655,8 @@ export default class MyCalendar extends Component {
                     paddingBottom: 0, 
                     marginBottom: 0, 
                     backgroundColor: '#3788E0',
-                    borderColor: 'transparent'
+                    borderColor: 'transparent',
+                    width: 210,
                   }}
                 />
 
