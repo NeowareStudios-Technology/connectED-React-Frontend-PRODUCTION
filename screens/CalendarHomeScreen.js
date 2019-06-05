@@ -596,7 +596,7 @@ export default class MyCalendar extends Component {
                 hideExtraDays={false} // show days of other months in month page
                 // markedDates are to visually match the mock-up
                 markedDates={{
-                  '2019-06-05': {
+                  '2019-06-05': { // change this date to be current date
                     selected: true,
                     customStyles: {
                       container: {
@@ -646,7 +646,8 @@ export default class MyCalendar extends Component {
                   <View style={{ marginTop: 0, flex: 1, backgroundColor: '#3788E0' }}> 
             {/* Is the background of the bottom half of screen background */}
                 <ButtonGroup
-              //    style={styles.buttonGroups}
+              //  style={styles.buttonGroups}
+                //  divider={false}
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
