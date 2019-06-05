@@ -16,14 +16,17 @@ import EventCreateScreen from "../screens/EventCreateScreen";
 import CalendarHomeScreen from "../screens/CalendarHomeScreen";
 import TeamsHomeScreen from "../screens/TeamsHomeScreen";
 import AdminEventDetailsScreen from "../screens/AdminEventDetailsScreen";
-import EventDetailScreen from "../screens/EventDetailScreen";
+import AdminTeamDetails from "../screens/AdminTeamDetailsScreen";
+import AdminOpenTeamDetails from "../screens/AdminOpenTeamDetailsScreen";
 
 const ProfileHomeStack = createStackNavigator({
   ProfileHome: ProfileHomeScreen,
   ProfileEdit: ProfileEditScreen,
   ResetPassword: ResetPassword,
   PrivacyPolicy: PrivacyPolicy,
-  AdminEventDetails: AdminEventDetailsScreen
+  AdminEventDetails: AdminEventDetailsScreen,
+  AdminTeamDetails: AdminTeamDetails,
+  AdminOpenTeamDetails: AdminOpenTeamDetails
 });
 
 ProfileHomeStack.navigationOptions = {

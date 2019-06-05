@@ -628,7 +628,7 @@ export default class HomeScreen extends React.Component {
                   containerStyle={{ height: 42 }}
                 />
                 {this.state.activeTab === 0 && (
-                  <ProfileInfo user={this.state.user} />
+                  <ProfileInfo user={this.state.user} navigation={this.props.navigation}/>
                 )}
                 {this.state.activeTab === 1 && (
                   <>
