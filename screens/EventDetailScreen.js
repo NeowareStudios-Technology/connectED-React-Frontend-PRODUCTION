@@ -1,4 +1,5 @@
 import React from "react";
+import EventListCard from "../components/EventListCard"
 
 class EventDetailScreen extends React.Component {
   constructor(props) {
@@ -7,6 +8,7 @@ class EventDetailScreen extends React.Component {
 
   render() {
     return (
+      <EventListCard event={this.props.navigation.state.params.event}
     );
   }
 }
