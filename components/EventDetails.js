@@ -298,12 +298,20 @@ class EventDetails extends React.Component {
                     </>
                   )}
                   {item.is_registered === "1" && (
-                    <>
-                      <Button
-                        onPress={this.props.onDeregister}
-                        title="Deregister"
-                      />
-                    </>
+                    <View style={{flexDirection: "row", }}>
+                    <Button
+                      containerStyle={{width: '50%'}}
+                      onPress={this.props.onDeregister}
+                      title="Deregister"
+                    />
+                    <Button
+                      containerStyle={{width: '50%'}}
+                      buttonStyle={{backgroundColor: 'green'}}
+                      onPress={console.log("signin")}
+                      title="Sign into Event"
+                      
+                    />
+                  </View>
                   )}
                 </View>
               </View>
