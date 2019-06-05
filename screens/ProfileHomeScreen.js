@@ -10,18 +10,19 @@ import {
   TouchableOpacity,
   View,
   LayoutAnimation,
-  Dimensions
+  Dimensions,
+  Picker
 } from "react-native";
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
 import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
-import ProfileHistory from "../components/ProfileHistory";
 import ProfileCreated from "../components/ProfileCreated";
+import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
 import moment from 'moment';
-import uuidv4 from 'uuid/v4';
+import Accordion from 'react-native-collapsible/Accordion';
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -37,18 +38,22 @@ export default class HomeScreen extends React.Component {
     this.state = {
       user: null,
       events: null,
-      userEvents: null, // events created by user
+      createdEvents: null, // events created by user
       pastEvents: null, // past events the user has volunteered for
+      currentEvents: null,
+      futureEvents: null,
       activeTab: 0,
-      loading: true
+      loading: true,
+      activeSections: [] // array for dropdown/accordion
     };
   }
   updateUser = (user) => {
-    this.setState({user: user})
+    this.setState({ user: user })
   }
 
   // loads any events the user created and sorts by date
-  loadUserEvent = async (eventName, index, callback) => {
+  loadCreatedEvent = async (eventName, index, callback) => {
+    console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -66,17 +71,16 @@ export default class HomeScreen extends React.Component {
             try {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
-                let userEvents = []
-                // keep state immutable by using slice to return new array
-                if (this.state.userEvents) {
-                  userEvents = this.state.userEvents.slice();
+                let createdEvents = []
+                if (this.state.createdEvents) {
+                  createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
-                event.key = "user-event-" + uuidv4();
-                userEvents.push(event);
+                event.key = "event-" + index;
+                createdEvents.push(event);
                 this.setState(
                   {
-                    userEvents: userEvents,
+                    createdEvents: createdEvents,
                     loading: false
                   },
                   () => {
@@ -86,8 +90,12 @@ export default class HomeScreen extends React.Component {
 
               }
             } catch (error) { }
-          }
-          else {
+          } else {
+            // Response from server not ok
+            try {
+              let errorData = JSON.parse(response._bodyText);
+              // console.log(eventName + " " + errorData.error.message)
+            } catch (error) { }
             callback();
           }
         });
@@ -95,8 +103,41 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  // Loads and filters registered events to only include past events sorted by date 
-  loadPastEvent = async (eventName, index, callback) => {
+  updateUser() {
+    this.loadUser()
+  }
+
+  // Takes the array of user opportunities and loads and sorts each event
+  loadEvents = () => {
+    // TODO: Don't include duplicate events. only fetch the event once
+    let sequence = new Sequencer();
+    let registeredEvents = this.state.events.registered_events
+    let createdEvents = this.state.events.created_events
+    if (registeredEvents && registeredEvents.length > 0) {
+      registeredEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadRegEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+    if (createdEvents && createdEvents.length > 0) {
+      createdEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadCreatedEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+    sequence.next();
+  };
+
+  loadRegEvent = async (eventName, index, callback) => {
+    console.log("LOAD REG EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -113,88 +154,86 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              // check if date is in past
-              let now = moment()
-              let eventDate = moment(responseData.date, "MM/DD/YYYY")
-              if (responseData && now.isAfter(eventDate, 'day')) {
-                let pastEvents = []
-                // keep state immutable by using slice to return new array
-                if (this.state.pastEvents) {
-                  pastEvents = this.state.pastEvents.slice();
-                }
+              if (responseData) {
                 let event = responseData;
-                event.key = "past-event-" + uuidv4();
-                pastEvents.push(event);
-                this.setState(
-                  {
-                    pastEvents: pastEvents,
-                    loading: false
-                  },
-                  () => {
-                    callback();
-                  }
-                );
+                event.key = "event-" + index;
 
-              } else {
-                // event not in the past
-                if (!this.state.pastEvents) {
-                  this.setState({ pastEvents: [] },
+                // Check if event is past, current or future
+                let now = moment()
+                let eventDate = moment(responseData.date, "MM/DD/YYYY")
+
+                if (this.isPast(now, eventDate)) {
+                  let pastEvents = []
+                  if (this.state.pastEvents) {
+                    pastEvents = this.state.pastEvents.slice();
+                  }
+                  pastEvents.push(event);
+                  this.setState(
+                    {
+                      pastEvents: pastEvents,
+                      loading: false
+                    },
                     () => {
                       callback();
-                    })
+                    }
+                  );
+                } else if (this.isFuture(now, eventDate)) {
+                  let futureEvents = []
+                  // keep state immutable by using slice to return new array
+                  if (this.state.futureEvents) {
+                    futureEvents = this.state.futureEvents.slice();
+                  }
+                  futureEvents.push(event);
+                  this.setState(
+                    {
+                      futureEvents: futureEvents,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    }
+                  );
                 } else {
-                  callback()
+                  let currentEvents = []
+                  // keep state immutable by using slice to return new array
+                  if (this.state.currentEvents) {
+                    currentEvents = this.state.currentEvents.slice();
+                  }
+                  currentEvents.push(event);
+                  this.setState(
+                    {
+                      currentEvents: currentEvents,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    });
                 }
               }
             } catch (error) { }
-          }
-          else {
+          } else {
+            // Response from server not ok
+            try {
+              let errorData = JSON.parse(response._bodyText);
+              // console.log(eventName + " " + errorData.error.message)
+            } catch (error) { }
             callback();
           }
         });
       } catch (error) { }
     }
   };
-  updateUser() {
-    this.loadUser()
-  }
 
-  loadEvents = () => {
-    // TODO: Don't include duplicate events. only fetch the event once
-    let sequence = new Sequencer();
-    let registeredEvents = this.state.events.registered_events
-    let userEvents = this.state.events.created_events
-    if (registeredEvents && registeredEvents.length > 0) {
-      registeredEvents.map((eventName, index) => {
-        eventName = eventName.replace("_", "/")
-        sequence.promise(() => {
-          this.loadPastEvent(eventName, index, () => {
-            sequence.next();
-          });
-        });
-      });
-    } else {
-      this.setState({ pastEvents: [] })
-    }
-    if (userEvents && userEvents.length > 0) {
-      userEvents.map((eventName, index) => {
-        eventName = eventName.replace("_", "/")
-        sequence.promise(() => {
-          this.loadUserEvent(eventName, index, () => {
-            sequence.next();
-          });
-        });
-      });
-    } else {
-      this.setState({ userEvents: [] })
-    }
-    sequence.next();
-  };
+  isCurrent = (today, date) => date.isSame(today, 'day')
+
+  isPast = (today, date) => date.isBefore(today, 'day')
+
+  isFuture = (today, date) => date.isAfter(today, 'day')
 
   loadUserOpportunities = async () => {
-    let userEvents = [];
+    let createdEvents = [];
     let token = await User.firebase.getIdToken();
-    console.log("Profile token", token)
+    // console.log("Profile token", token)
     if (token) {
       try {
         let url =
@@ -211,8 +250,11 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
+              // console.log("USER OPPORTUNITIES:", events)
               if (typeof events === "object") {
-                this.setState({ events: events }, () => this.loadEvents())
+                this.setState({ events: events },
+                  () => this.loadEvents()
+                )
               } else {
                 this.setState({ loading: false });
               }
@@ -227,31 +269,22 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.loadUser()
-  }
-  // componentDidUpdate(prevState){
-  //   if(prevState.user !== this.props.navigation.getParam('user')) {
-  //     this.loadUser()
-  //   }
-  // }
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
-      this.setState(
-        {
-          user: user
-        },
-        () => {
-          this.loadUserOpportunities();
-        }
-      );
+      this.setState({ user: user }, () => {
+        this.loadUserOpportunities();
+      });
     }
     return true;
   }
 
+  componentDidMount() {
+    this.loadUser()
+  }
+
   navigateToPage = (page) => {
-    this.props.navigation.navigate(page, {loadUser: this.loadUser});
+    this.props.navigation.navigate(page, { loadUser: this.loadUser });
     // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
     this.setState({ open: false })
   }
@@ -270,9 +303,71 @@ export default class HomeScreen extends React.Component {
     this.setState({ activeTab })
   }
 
+  // ********************
+  // Accordion Functions
+  //  *******************
+  _renderHeader = section => {
+    return (
+      <View style={styles.dropdownSectionHeader}>
+        <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
+        <Icon.Ionicons
+          name={
+            Platform.OS === "ios"
+              ? "ios-arrow-down"
+              : "md-arrow-dropdown"
+          }
+          size={26}
+        />
+      </View>
+    );
+  };
+  _renderContent = section => {
+    let events, sort;
+    if (section.title === 'Current Events') {
+      events = this.state.currentEvents
+      sort = "asc"
+    }
+    else if (section.title === 'Upcoming Events') {
+      events = this.state.futureEvents
+      sort = "asc"
+    }
+    else {
+      events = this.state.pastEvents
+      sort = "desc"
+    }
+    return (
+      <EventListItems events={events} sort={sort} />
+    );
+  };
+  _updateSections = activeSections => {
+    this.setState({ activeSections });
+  };
+  renderAccordion = () => {
+    let sections = [
+      {
+        title: 'Current Events',
+      }, {
+        title: 'Upcoming Events',
+      }, {
+        title: 'Past Events',
+      }
+    ]
+    return (
+      <View style={styles.dropdownContainer}>
+        <Accordion
+          sections={sections}
+          activeSections={this.state.activeSections}
+          renderSectionTitle={this._renderSectionTitle}
+          renderHeader={this._renderHeader}
+          renderContent={this._renderContent}
+          onChange={this._updateSections}
+          underlayColor={'transparent'}
+        />
+      </View>
+    )
+  }
+
   render() {
-    // console.log("this is from getParams", this.props.navigation.getParam("user"))
-    // console.log("this is from state", this.state.user)
     const buttons = ["Info", "History", "Created"];
     return (
       <View style={styles.container}>
@@ -383,46 +478,52 @@ export default class HomeScreen extends React.Component {
                   </Text>
                 </View>
               </View>
-              <View style={{ marginTop: 8, flex:1 }}>
+              <View style={{ marginTop: 8, flex: 1 }}>
                 <ButtonGroup
                   onPress={this.updateTab}
                   selectedIndex={this.state.activeTab}
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                  {this.state.activeTab === 0 && (
-                    <>
-                      <ProfileInfo user={this.state.user} />
-                    </>
-                  )}
-                  {this.state.activeTab === 1 && (
-                    <>
-                      {this.state.pastEvents ? (
-                        <ProfileHistory events={this.state.pastEvents} />
+                {this.state.activeTab === 0 && (
+                  <ProfileInfo user={this.state.user} />
+                )}
+                {this.state.activeTab === 1 && (
+                  <>
+                    {this.state.events ? (
+                      this.renderAccordion()
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
+                {this.state.activeTab === 2 && (
+                  <>
+                  {this.state.createdEvents ? (
+                        <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation}/>
                       ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
-
-                    </>
-                  )}
-                  {this.state.activeTab === 2 && (
-                    <>
-                      {this.state.userEvents ? (
-                        <ProfileCreated events={this.state.userEvents} navigation={this.props.navigation}/>
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
-
-                    </>
-                  )}
+                    // {!this.state.loading ? (
+                    //   <>
+                    //     {
+                    //       this.state.createdEvents &&
+                    //       <View style={styles.dropdownContainer}>
+                    //         <EventListItems events={this.state.createdEvents} />
+                    //       </View>
+                    //     }
+                    //   </>
+                    // ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
               </View>
               {this.state.open && (
                 <View
@@ -534,9 +635,9 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                        
-                      </View>
-                      <View style={styles.menuItemWrapper}>
+
+                        </View>
+                        <View style={styles.menuItemWrapper}>
                           <TouchableOpacity
                             style={styles.menuItemTouchable}
                             onPress={() => {
@@ -560,7 +661,7 @@ export default class HomeScreen extends React.Component {
                               </Text>
                             </View>
                           </TouchableOpacity>
-                          </View>
+                        </View>
                       </View>
                       {/* <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
@@ -764,5 +865,21 @@ const styles = StyleSheet.create({
   },
   menuItemContainer: { flexDirection: "row" },
   menuItemLabel: { flex: 3 },
-  menuItemIconContainer: { flex: 1 }
+  menuItemIconContainer: { flex: 1 },
+  dropdownContainer: {
+    marginTop: 6,
+    paddingHorizontal: 12
+  },
+  dropdownSection: {
+    marginBottom: 12
+  },
+  dropdownSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dropdownSectionHeaderText: {
+    fontSize: 16,
+    color: "#b0b0b0",
+    marginBottom: 6
+  }
 });
