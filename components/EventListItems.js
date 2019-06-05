@@ -13,7 +13,7 @@ import moment from 'moment';
  *  
  * */ 
 
-class EventListItems extends React.PureComponent {
+class EventListItems extends React.Component {
 
   sortDesc = (events) => events.slice().sort((a, b) => new Date(b.date[0]) - new Date(a.date[0]));
   sortAsc = (events) => events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
@@ -23,7 +23,7 @@ class EventListItems extends React.PureComponent {
     if (!events) {
       return null
     }
-    
+
     let sortedEvents
     switch (sort) {
       case "asc":
@@ -45,6 +45,7 @@ class EventListItems extends React.PureComponent {
             title={item.e_title}
             subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
             contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
+            onPress={() => console.log("clicked " + item.e_title)}
           />
         ))
         }

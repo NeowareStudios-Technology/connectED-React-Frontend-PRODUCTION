@@ -17,6 +17,7 @@ import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
 import User from "../components/User";
 import ProfileInfo from "../components/ProfileInfo";
+import ProfileCreated from "../components/ProfileCreated";
 import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
 import Colors from "../constants/Colors";
@@ -52,7 +53,7 @@ export default class HomeScreen extends React.Component {
 
   // loads any events the user created and sorts by date
   loadCreatedEvent = async (eventName, index, callback) => {
-    // console.log("LOAD CREATED EVENT - " + eventName)
+    console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -75,7 +76,7 @@ export default class HomeScreen extends React.Component {
                   createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
-                // event.key = "event-" + index;
+                event.key = "event-" + index;
                 createdEvents.push(event);
                 this.setState(
                   {
@@ -93,7 +94,7 @@ export default class HomeScreen extends React.Component {
             // Response from server not ok
             try {
               let errorData = JSON.parse(response._bodyText);
-              console.log(eventName + " " + errorData.error.message)
+              // console.log(eventName + " " + errorData.error.message)
             } catch (error) { }
             callback();
           }
@@ -214,7 +215,7 @@ export default class HomeScreen extends React.Component {
             // Response from server not ok
             try {
               let errorData = JSON.parse(response._bodyText);
-              console.log(eventName + " " + errorData.error.message)
+              // console.log(eventName + " " + errorData.error.message)
             } catch (error) { }
             callback();
           }
@@ -232,7 +233,7 @@ export default class HomeScreen extends React.Component {
   loadUserOpportunities = async () => {
     let createdEvents = [];
     let token = await User.firebase.getIdToken();
-    console.log("Profile token", token)
+    // console.log("Profile token", token)
     if (token) {
       try {
         let url =
@@ -249,7 +250,7 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
-              console.log("USER OPPORTUNITIES:", events)
+              // console.log("USER OPPORTUNITIES:", events)
               if (typeof events === "object") {
                 this.setState({ events: events },
                   () => this.loadEvents()
@@ -502,16 +503,19 @@ export default class HomeScreen extends React.Component {
                 )}
                 {this.state.activeTab === 2 && (
                   <>
-                    {!this.state.loading ? (
-                      <>
-                        {
-                          this.state.createdEvents &&
-                          <View style={styles.dropdownContainer}>
-                            <EventListItems events={this.state.createdEvents} />
-                          </View>
-                        }
-                      </>
-                    ) : (
+                  {this.state.createdEvents ? (
+                        <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation}/>
+                      ) : (
+                    // {!this.state.loading ? (
+                    //   <>
+                    //     {
+                    //       this.state.createdEvents &&
+                    //       <View style={styles.dropdownContainer}>
+                    //         <EventListItems events={this.state.createdEvents} />
+                    //       </View>
+                    //     }
+                    //   </>
+                    // ) : (
                         <ActivityIndicator
                           style={{ marginBottom: 16 }}
                           size="small"
