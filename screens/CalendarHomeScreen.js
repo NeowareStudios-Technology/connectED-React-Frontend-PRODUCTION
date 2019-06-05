@@ -50,10 +50,10 @@ export default class MyCalendar extends Component {
         loading: true,
         activeIndex:0,
         carouselItems: [
-         [ { title: "Tech & Talk", date: "April 2nd", url: "http://www.arnold.fun/50/50" },
-           { title: "Walkathon 2019", date: "April 8th", url: "http://www.placepuppy.net/50/50" } ],
-        [ { title: "Ultimate Logging Competition", date: "May 2nd", url: "https://placebear.com/50/50" },
-        { title: "Stuff n Stuff", date: "June 2nd", url: "http://placekitten.com/50/50" } ],
+         [ { title: "Tech & Talk", date: "June 3rd", url: "http://www.arnold.fun/50/50" },
+           { title: "Walkathon 2019", date: "June 14th", url: "http://www.placepuppy.net/50/50" } ],
+        [ { title: "Linux Hacking", date: "June 16th", url: "https://placebear.com/50/50" },
+        { title: "PWA Talk", date: "June 29th", url: "http://placekitten.com/50/50" } ],
         [ { title: "Wild Event", date: "July 2nd", url: "http://www.arnold.fun/50/50" },
         { title: "500K Fun Run", date: "August 15th", url: "http://www.placepuppy.net/50/50" } ],
         [{ title: "Tree Planting", date: "October 2nd", url: "https://placebear.com/50/50" },
@@ -592,9 +592,10 @@ export default class MyCalendar extends Component {
                     arrowColor: 'white',
                 }}
                 markingType={'custom'}
+                hideExtraDays={false} // show days of other months in month page
                 // markedDates are to visually match the mock-up
                 markedDates={{
-                  '2019-06-02': {
+                  '2019-06-04': {
                     selected: true,
                     customStyles: {
                       container: {
