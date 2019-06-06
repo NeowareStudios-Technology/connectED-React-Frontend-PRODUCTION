@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { ListItem } from 'react-native-elements';
+import { ListItem, Overlay } from 'react-native-elements';
 import moment from 'moment';
 
 /**
@@ -10,20 +10,28 @@ import moment from 'moment';
  *  sort - String of sorting order
  *    - "asc": Sort by event date in ascending order (oldest to newest)
  *    - "desc": Sort by event date in descending order (newest to oldest)
- *  
- * */ 
+ *  overlay - method to call in the parent class in order to retrieve the selected event
+ * */
 
-class EventListItems extends React.Component {
+class EventListItems extends React.PureComponent {
 
+  // Methods to sort array
   sortDesc = (events) => events.slice().sort((a, b) => new Date(b.date[0]) - new Date(a.date[0]));
   sortAsc = (events) => events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
+
+  // Method to handle if parent passes the overlay prop
+  triggerOverlay = (item) => {
+    if (this.props.overlay && item) {
+      return this.props.overlay(item)
+    }
+    return null
+  }
 
   render() {
     const { events, sort } = this.props
     if (!events) {
       return null
     }
-
     let sortedEvents
     switch (sort) {
       case "asc":
@@ -36,6 +44,7 @@ class EventListItems extends React.Component {
         sortedEvents = events
         break;
     }
+
     return (
       <View>
         {sortedEvents.map((item, index) => (
@@ -45,10 +54,9 @@ class EventListItems extends React.Component {
             title={item.e_title}
             subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
             contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
-            onPress={() => console.log("clicked " + item.e_title)}
+            onPress={() => this.triggerOverlay(item)}
           />
-        ))
-        }
+        ))}
       </View>
     );
   }
