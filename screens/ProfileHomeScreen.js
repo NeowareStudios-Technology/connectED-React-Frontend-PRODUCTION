@@ -49,7 +49,9 @@ export default class HomeScreen extends React.Component {
       activeSections: [], // array for dropdown/accordion
       activeItem: null,
       adminEventDetailVisible: false,
-      eventDetailVisible: false
+      eventDetailVisible: false,
+      signInOutTitle: "Sign in to Event",
+      signInOutMessage: null
     };
   }
   updateUser = (user) => {
@@ -399,6 +401,50 @@ export default class HomeScreen extends React.Component {
       }
     }
   };
+  signInOrOut = async () => {
+    let organizerEmail = "karina@dijatek.com"
+    let eventName = "Jewel+hunt"
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventName}/qr`;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              console.warn(responseData)
+              let text= responseData.response
+              console.warn(text)
+              let title = ""
+              if (text.includes('in')){
+                let title = "Sign Out of Event"
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title  
+                })
+              } else {
+                let title = "Sign Into Event"
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title
+                })
+              }
+              
+            } catch (error) { }
+          } else {
+            alert("Not able to sign in or out of event")
+          }
+        });
+      } catch (error) { }
+    }
+  }
   showEventDetails = (event) => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ eventDetailVisible: true, activeItem: event })
@@ -488,6 +534,10 @@ export default class HomeScreen extends React.Component {
           onDeregister={() => {
             this.deregister();
           }}
+          signInOrOut={()=>{
+            this.signInOrOut()
+          }}
+          title={this.state.signInOutTitle}
         />
       </View>
 
@@ -561,12 +611,12 @@ export default class HomeScreen extends React.Component {
                   }}
                 >
                   <TouchableOpacity
-                    style={{ padding: 10, height: 40, width: 40 }}
+                    style={{ paddingTop: 10, height: 60, width: 50 }}
                     onPress={this.openDrawer}
                   >
                     <Icon.Ionicons
                       name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
-                      size={26}
+                      size={50}
                       color={Colors.tabIconDefault}
                     />
                   </TouchableOpacity>
@@ -589,7 +639,7 @@ export default class HomeScreen extends React.Component {
                 <View style={{ flex: 1 }}>
                   {this.state.user.profile.hours ?
                     <Text style={styles.largeNumber}>
-                      {this.state.user.profile.hours}
+                      {Number(this.state.user.profile.hours).toFixed(2)}
                     </Text>
                     :
                     <Text style={styles.largeNumber}>0</Text>
@@ -597,6 +647,7 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
+                  
                   {this.state.pastEvents ? (
                     <>
                       <Text style={styles.largeNumber}>
@@ -605,11 +656,14 @@ export default class HomeScreen extends React.Component {
                     </>
                   ) : (
                       <>
-                        <ActivityIndicator
+                        {/* <ActivityIndicator
                           style={{ marginBottom: 16 }}
                           size="small"
                           color="#0d0d0d"
-                        />
+                        /> */}
+                        <Text style={styles.largeNumber}>
+                        0
+                        </Text>
                       </>
                     )}
                   <Text style={styles.largeNumberCaption}>
@@ -999,8 +1053,9 @@ const styles = StyleSheet.create({
   menuItemLabel: { flex: 3 },
   menuItemIconContainer: { flex: 1 },
   dropdownContainer: {
-    marginTop: 6,
-    paddingHorizontal: 12
+    // marginTop: 6,
+    // paddingHorizontal: 
+    justifyContent: "space-between"
   },
   dropdownSection: {
     marginBottom: 12
@@ -1008,10 +1063,16 @@ const styles = StyleSheet.create({
   dropdownSectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    backgroundColor: "#d2d2d2",
+    marginBottom: 2,
+    padding: 12
   },
   dropdownSectionHeaderText: {
     fontSize: 16,
-    color: "#b0b0b0",
-    marginBottom: 6
+    color: "black",
+    // padding: 10,
+
+    
+    
   }
 });

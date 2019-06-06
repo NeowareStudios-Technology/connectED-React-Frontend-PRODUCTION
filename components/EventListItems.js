@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import { ListItem, Overlay } from 'react-native-elements';
 import moment from 'moment';
 
@@ -46,7 +46,7 @@ class EventListItems extends React.PureComponent {
     }
 
     return (
-      <View>
+      <ScrollView>
         {sortedEvents.map((item, index) => (
           <ListItem
             key={item.key || index}
@@ -57,7 +57,7 @@ class EventListItems extends React.PureComponent {
             onPress={() => this.triggerOverlay(item)}
           />
         ))}
-      </View>
+      </ScrollView>
     );
   }
 }
