@@ -307,8 +307,8 @@ class EventDetails extends React.Component {
                     <Button
                       containerStyle={{width: '50%'}}
                       buttonStyle={{backgroundColor: 'green'}}
-                      onPress={console.log("signin")}
-                      title="Sign into Event"
+                      onPress={this.props.signInOrOut}
+                      title={this.props.title}
                       
                     />
                   </View>

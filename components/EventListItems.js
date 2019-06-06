@@ -46,7 +46,7 @@ class EventListItems extends React.PureComponent {
     }
 
     return (
-      <View>
+      <ScrollView>
         {sortedEvents.map((item, index) => (
           <ListItem
             key={item.key || index}
@@ -57,7 +57,7 @@ class EventListItems extends React.PureComponent {
             onPress={() => this.triggerOverlay(item)}
           />
         ))}
-      </View>
+      </ScrollView>
     );
   }
 }
