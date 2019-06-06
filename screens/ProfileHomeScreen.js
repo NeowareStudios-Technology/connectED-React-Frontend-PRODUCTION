@@ -561,12 +561,12 @@ export default class HomeScreen extends React.Component {
                   }}
                 >
                   <TouchableOpacity
-                    style={{ padding: 10, height: 40, width: 40 }}
+                    style={{ paddingTop: 10, height: 60, width: 50 }}
                     onPress={this.openDrawer}
                   >
                     <Icon.Ionicons
                       name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
-                      size={26}
+                      size={50}
                       color={Colors.tabIconDefault}
                     />
                   </TouchableOpacity>
@@ -597,6 +597,7 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
+                  
                   {this.state.pastEvents ? (
                     <>
                       <Text style={styles.largeNumber}>
@@ -605,11 +606,14 @@ export default class HomeScreen extends React.Component {
                     </>
                   ) : (
                       <>
-                        <ActivityIndicator
+                        {/* <ActivityIndicator
                           style={{ marginBottom: 16 }}
                           size="small"
                           color="#0d0d0d"
-                        />
+                        /> */}
+                        <Text style={styles.largeNumber}>
+                        0
+                        </Text>
                       </>
                     )}
                   <Text style={styles.largeNumberCaption}>
@@ -999,8 +1003,9 @@ const styles = StyleSheet.create({
   menuItemLabel: { flex: 3 },
   menuItemIconContainer: { flex: 1 },
   dropdownContainer: {
-    marginTop: 6,
-    paddingHorizontal: 12
+    // marginTop: 6,
+    // paddingHorizontal: 
+    justifyContent: "space-between"
   },
   dropdownSection: {
     marginBottom: 12
@@ -1008,10 +1013,16 @@ const styles = StyleSheet.create({
   dropdownSectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    backgroundColor: "#d2d2d2",
+    marginBottom: 2,
+    padding: 12
   },
   dropdownSectionHeaderText: {
     fontSize: 16,
-    color: "#b0b0b0",
-    marginBottom: 6
+    color: "black",
+    // padding: 10,
+
+    
+    
   }
 });
