@@ -49,7 +49,9 @@ export default class HomeScreen extends React.Component {
       activeSections: [], // array for dropdown/accordion
       activeItem: null,
       adminEventDetailVisible: false,
-      eventDetailVisible: false
+      eventDetailVisible: false,
+      signInOutTitle: "Sign in to Event",
+      signInOutMessage: null
     };
   }
   updateUser = (user) => {
@@ -399,6 +401,50 @@ export default class HomeScreen extends React.Component {
       }
     }
   };
+  signInOrOut = async () => {
+    let organizerEmail = "karina@dijatek.com"
+    let eventName = "Jewel+hunt"
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventName}/qr`;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              console.warn(responseData)
+              let text= responseData.response
+              console.warn(text)
+              let title = ""
+              if (text.includes('in')){
+                let title = "Sign Out of Event"
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title  
+                })
+              } else {
+                let title = "Sign Into Event"
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title
+                })
+              }
+              
+            } catch (error) { }
+          } else {
+            alert("Not able to sign in or out of event")
+          }
+        });
+      } catch (error) { }
+    }
+  }
   showEventDetails = (event) => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ eventDetailVisible: true, activeItem: event })
@@ -488,6 +534,10 @@ export default class HomeScreen extends React.Component {
           onDeregister={() => {
             this.deregister();
           }}
+          signInOrOut={()=>{
+            this.signInOrOut()
+          }}
+          title={this.state.signInOutTitle}
         />
       </View>
 
@@ -589,7 +639,7 @@ export default class HomeScreen extends React.Component {
                 <View style={{ flex: 1 }}>
                   {this.state.user.profile.hours ?
                     <Text style={styles.largeNumber}>
-                      {this.state.user.profile.hours}
+                      {Number(this.state.user.profile.hours).toFixed(2)}
                     </Text>
                     :
                     <Text style={styles.largeNumber}>0</Text>
