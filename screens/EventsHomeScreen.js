@@ -1,9 +1,6 @@
 import React from "react";
 import {
-  Image,
-  ImageBackground,
   ActivityIndicator,
-  StyleSheet,
   ScrollView,
   FlatList,
   TouchableOpacity,
@@ -321,7 +318,6 @@ class EventsHomeScreen extends React.Component {
   );
 
   render() {
-    if (this.state.activeItem) console.log(this.state.activeItem)
     if (this.state.showSearchBar) {
       return (
         <View style={styles.container}>
@@ -333,7 +329,8 @@ class EventsHomeScreen extends React.Component {
               handleClose={this.closeEventSearch}
               data={this.state.events}
             />
-          </ScrollView></View>
+          </ScrollView>
+        </View>
       )
     }
     return (
@@ -447,12 +444,12 @@ class EventsHomeScreen extends React.Component {
                                     this._carousel = c;
                                   }}
                                   data={this.state.events}
-                                  extraData={this.state}
+                                  extraData={this.state.events}
                                   renderItem={this._renderItem}
                                   firstItem={this.state.carouselFirstItem}
                                   itemWidth={screenWidth - 50 * 2}
                                   sliderWidth={screenWidth}
-                                  windowSize={280}
+                                  windowSize={21}
                                 />
                               </>
                             ) : (
