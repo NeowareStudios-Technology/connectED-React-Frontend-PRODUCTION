@@ -1,6 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
-import { ListItem, Overlay } from 'react-native-elements';
+import { View } from "react-native";
+import { ListItem } from 'react-native-elements';
 import moment from 'moment';
 
 /**

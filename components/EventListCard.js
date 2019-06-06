@@ -2,23 +2,17 @@ import React from "react";
 import {
   Text,
   View,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
   Image,
   ImageBackground,
   ActivityIndicator,
   Dimensions
 } from "react-native";
-import { Button, Card } from "react-native-elements";
-import { Icon } from "expo";
+import { Card } from "react-native-elements";
 import moment from "moment";
-import AppData from "../constants/Data";
-// let {height, width} = Dimensions.get('window');
-let screenWidth = Dimensions.get('window').width;
+
 let screenHeight = Dimensions.get('window').height;
 
-class EventListCard extends React.Component {
+class EventListCard extends React.PureComponent {
   constructor(props) {
     super(props);
   }
