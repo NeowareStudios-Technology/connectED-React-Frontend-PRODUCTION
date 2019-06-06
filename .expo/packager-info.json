@@ -3,8 +3,8 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null,
+  "expoServerNgrokUrl": "https://ka-7rh.karinamills.connected-react-frontend-production.exp.direct",
+  "packagerNgrokUrl": "https://packager.ka-7rh.karinamills.connected-react-frontend-production.exp.direct",
+  "ngrokPid": 40436,
   "webpackServerPort": null
 }

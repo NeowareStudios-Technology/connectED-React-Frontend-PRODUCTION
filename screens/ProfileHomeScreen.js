@@ -402,6 +402,8 @@ export default class HomeScreen extends React.Component {
     }
   };
   signInOrOut = async () => {
+
+    
     let organizerEmail = "karina@dijatek.com"
     let eventName = "Jewel+hunt"
     let token = await User.firebase.getIdToken();
@@ -419,9 +421,7 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              console.warn(responseData)
               let text= responseData.response
-              console.warn(text)
               let title = ""
               if (text.includes('in')){
                 let title = "Sign Out of Event"
@@ -480,7 +480,17 @@ export default class HomeScreen extends React.Component {
     let events, sort;
     if (section.title === 'Current Events') {
       events = this.state.currentEvents
+
+      console.warn(events)
       sort = "asc"
+      return (
+        <EventListItems events={events} 
+        sort={sort} 
+        type="current"
+        overlay={this.showEventDetails}
+        signInOrOut={this.signInOrOut}
+        title={this.state.signInOutTitle} />
+      );
     }
     else if (section.title === 'Upcoming Events') {
       events = this.state.futureEvents
@@ -698,7 +708,15 @@ export default class HomeScreen extends React.Component {
                   <>
                     {this.state.createdEvents ? (
                       <View style={styles.dropdownContainer}>
-                        <EventListItems events={this.state.createdEvents} sort={"desc"} overlay={this.showAdminEventDetails} />
+                        <EventListItems 
+                        events={this.state.createdEvents} 
+                        sort={"desc"} 
+                        overlay={this.showAdminEventDetails} 
+                        signInOrOut={()=>{
+                          this.signInOrOut()
+                        }}
+                        title={this.state.signInOutTitle}
+                        />
                       </View>
                       // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
                     ) : (
