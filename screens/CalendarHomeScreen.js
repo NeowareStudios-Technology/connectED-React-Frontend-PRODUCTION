@@ -352,7 +352,49 @@ export default class MyCalendar extends Component {
       }
     }
   };
-
+  signInOrOut = async (name, email) => {
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
+          console.warn(url)
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              let text= responseData.response
+              let title = ""
+              if (text.includes('in')){
+                let title = "Sign Out of Event"
+                alert(text)
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title  
+                })
+              } else {
+                let title = "Sign Into Event"
+                alert(text)
+                this.setState({
+                  signInOutMessage: text,
+                  signInOutTitle: title
+                })
+              }
+              
+            } catch (error) { }
+          } else {
+            alert("Not able to sign in or out of event")
+          }
+        });
+      } catch (error) { }
+    }
+  }
   _keyExtractor = (item, index) => index.toString();
 
   updateTab = (activeTab) => {
@@ -425,6 +467,9 @@ export default class MyCalendar extends Component {
                 }}
                 onDeregister={() => {
                   this.deregister();
+                }}
+                signInOrOut={(email, name)=>{
+                  this.signInOrOut(email, name);
                 }}
               />
             </View>

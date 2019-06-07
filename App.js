@@ -48,7 +48,6 @@ export default class App extends React.Component {
       text = JSON.stringify(this.state.location);
     }
 
-    console.warn(text)
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading

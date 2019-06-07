@@ -401,16 +401,14 @@ export default class HomeScreen extends React.Component {
       }
     }
   };
-  signInOrOut = async () => {
-
-    
+  signInOrOut = async (name, email) => {
     let organizerEmail = "karina@dijatek.com"
     let eventName = "Jewel+hunt"
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
         let url =
-          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventName}/qr`;
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
         fetch(url, {
           method: "GET",
           headers: {
@@ -481,15 +479,17 @@ export default class HomeScreen extends React.Component {
     if (section.title === 'Current Events') {
       events = this.state.currentEvents
 
-      console.warn(events)
+      // console.warn(events)
       sort = "asc"
       return (
         <EventListItems events={events} 
         sort={sort} 
         type="current"
         overlay={this.showEventDetails}
-        signInOrOut={this.signInOrOut}
-        title={this.state.signInOutTitle} />
+        signInOrOut={(email, name)=>{
+          this.signInOrOut(email, name);
+        }}
+        />
       );
     }
     else if (section.title === 'Upcoming Events') {
@@ -501,7 +501,14 @@ export default class HomeScreen extends React.Component {
       sort = "desc"
     }
     return (
-      <EventListItems events={events} sort={sort} overlay={this.showEventDetails} />
+      <EventListItems 
+      events={events} 
+      sort={sort} 
+      overlay={this.showEventDetails} 
+      signInOrOut={(email, name)=>{
+        this.signInOrOut(email, name);
+      }}
+      />
     );
   };
   _updateSections = activeSections => {
@@ -544,8 +551,8 @@ export default class HomeScreen extends React.Component {
           onDeregister={() => {
             this.deregister();
           }}
-          signInOrOut={()=>{
-            this.signInOrOut()
+          signInOrOut={(email, name)=>{
+            this.signInOrOut(email, name);
           }}
           title={this.state.signInOutTitle}
         />
@@ -712,8 +719,8 @@ export default class HomeScreen extends React.Component {
                         events={this.state.createdEvents} 
                         sort={"desc"} 
                         overlay={this.showAdminEventDetails} 
-                        signInOrOut={()=>{
-                          this.signInOrOut()
+                        signInOrOut={(email, name)=>{
+                          this.signInOrOut(email, name);
                         }}
                         title={this.state.signInOutTitle}
                         />

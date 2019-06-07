@@ -28,7 +28,6 @@ class EventListItems extends React.PureComponent {
   }
 
   render() {
-    console.warn(this.props.title)
     const { events, sort } = this.props
     if (!events) {
       return null
@@ -61,7 +60,7 @@ class EventListItems extends React.PureComponent {
           {this.props.type==="current" ? 
           <Button 
           title={this.props.title}
-          onPress={this.props.signInOrOut}
+          onPress={()=>{this.props.signInOrOut(item.e_orig_title, item.e_organizer)}}
           />  
         :null}
           </View>

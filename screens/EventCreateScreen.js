@@ -142,6 +142,8 @@ class EventCreateScreen extends React.Component {
               try {
                 let responseData = JSON.parse(response._bodyText);
                 if (responseData) {
+
+                  console.warn(responseData)
                 }
                 this.props.navigation.navigate("EventsHome");
               } catch (error) {
