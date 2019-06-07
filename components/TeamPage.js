@@ -48,7 +48,7 @@ class TeamPage extends React.Component {
           <View
             style={{
               flex: 3,
-              backgroundColor: "#124b73"
+              backgroundColor: "#eee"
             }}
           >
             <ImageBackground
@@ -185,12 +185,13 @@ class TeamPage extends React.Component {
                         padding: 5,
                         borderRadius: 400,
                         height: 40,
-                        width: 40
+                        width: 40,
+                        backgroundColor: "white"
                       }}
                       icon={
                         <Icon.Ionicons
                           style={{
-                            color: this.state.activeTab === 1 ? "#fff" : "#ccc"
+                            color: this.state.activeTab === 1 ? "#fff" : "#ccc",
                           }}
                           name={
                             Platform.OS === "ios" ? "ios-people" : "md-people"

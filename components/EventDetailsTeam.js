@@ -9,6 +9,7 @@ import {
   ImageBackground,
   ActivityIndicator
 } from "react-native";
+import colors from "./../constants/Colors";
 
 
 class EventDetailsTeam extends React.Component {
@@ -29,7 +30,7 @@ class EventDetailsTeam extends React.Component {
         <Text style={this.styles.title}>{item.e_title}</Text>
         <Text style={{fontSize: 20, marginBottom: 5}}>Volunteer Team</Text>
         {this.calculateRemainingSlots(item) > 0 ?
-        <Text style={{color: 'red', marginBottom: 15}}>{this.calculateRemainingSlots(item)} slots remaining</Text>        
+        <Text style={{color: colors.tintColor, marginBottom: 15}}>{this.calculateRemainingSlots(item)} slots remaining</Text>        
         : <Text style={{color: 'green', marginBottom: 15}}>All slots filled!</Text>        
         }
   

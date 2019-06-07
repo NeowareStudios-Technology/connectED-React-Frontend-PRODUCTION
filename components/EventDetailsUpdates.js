@@ -14,6 +14,7 @@ import { Icon } from "expo";
 import moment from "moment";
 import User from "./User";
 import AppData from "../constants/Data";
+import colors from "../constants/Colors"
 
 class EventDetailsUpdates extends React.Component {
   constructor(props) {
@@ -151,7 +152,7 @@ class EventDetailsUpdates extends React.Component {
     subtitle: {
       fontSize: 18,
       marginBottom: 5,
-      color: 'red',
+      color: colors.tintColor,
       fontWeight: 'bold'
     },
     text: {

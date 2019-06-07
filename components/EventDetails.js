@@ -51,7 +51,7 @@ class EventDetails extends React.Component {
           <View
             style={{
               flex: 3,
-              backgroundColor: "#124b73"
+              backgroundColor: "#eee"
             }}
           >
             <ImageBackground

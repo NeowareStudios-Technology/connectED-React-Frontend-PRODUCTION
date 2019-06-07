@@ -16,7 +16,7 @@ import {
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
 import User from "../components/User";
-import ProfileInfo from "../components/ProfileInfo";
+import TeamUserInfo from "../components/ProfileTeamInfo";
 import ProfileCreated from "../components/ProfileCreated";
 import EventListItems from "../components/EventListItems";
 import { Icon } from "expo";
@@ -297,12 +297,12 @@ export default class HomeScreen extends React.Component {
   }
 
   openDrawer = () => {
-    LayoutAnimation.linear();
+    // LayoutAnimation.linear();
     this.setState({ open: true });
   };
 
   closeDrawer = () => {
-    LayoutAnimation.linear();
+    // LayoutAnimation.linear();
     this.setState({ open: false });
   };
 
@@ -481,16 +481,6 @@ export default class HomeScreen extends React.Component {
 
       // console.warn(events)
       sort = "asc"
-      return (
-        <EventListItems events={events} 
-        sort={sort} 
-        type="current"
-        overlay={this.showEventDetails}
-        signInOrOut={(email, name)=>{
-          this.signInOrOut(email, name);
-        }}
-        />
-      );
     }
     else if (section.title === 'Upcoming Events') {
       events = this.state.futureEvents
@@ -568,7 +558,7 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    const buttons = ["Info", "History", "Created"];
+    const buttons = ["My Teams", "My Events", "Created Events"];
     if (this.state.eventDetailVisible) {
       return (this.renderEventDetails())
     }
@@ -696,7 +686,7 @@ export default class HomeScreen extends React.Component {
                   containerStyle={{ height: 42 }}
                 />
                 {this.state.activeTab === 0 && (
-                  <ProfileInfo user={this.state.user} navigation={this.props.navigation}/>
+                  <TeamUserInfo user={this.state.user} navigation={this.props.navigation}/>
                 )}
                 {this.state.activeTab === 1 && (
                   <>
@@ -806,7 +796,7 @@ export default class HomeScreen extends React.Component {
                           >
                             <View style={styles.menuItemContainer}>
                               <Text style={styles.menuItemLabel}>
-                                Edit Profile
+                                View/Edit Profile
                                           </Text>
                               <Text style={styles.menuItemIconContainer}>
                                 <Icon.Ionicons

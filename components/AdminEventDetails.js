@@ -44,7 +44,7 @@ class AdminEventDetails extends React.Component {
     return (
       <>
         <View style={{ flexDirection: "column", flex: 1 }}>
-          <View style={{ flex: 3, backgroundColor: "#124b73" }} >
+          <View style={{ flex: 3, backgroundColor: "#eee" }} >
             <ImageBackground
               source={{
                 uri: "data:image/png;base64," + item.e_photo
@@ -107,13 +107,13 @@ class AdminEventDetails extends React.Component {
                       <Button
                         onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "approve")}
                         title="Accept"
-                        color="green"
+                        buttonStyle={{backgroundColor: "green"}}
                         accessibilityLabel="Accept volunteer to this Event"
                       />
                       <Button
                         onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
                         title="Deny"
-                        color="red"
+                        buttonStyle={{backgroundColor: "blue"}}
                         accessibilityLabel="Deny volunteer to this Event"
                       />
                     </View>

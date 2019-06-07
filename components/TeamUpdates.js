@@ -14,6 +14,8 @@ import { Icon } from "expo";
 import moment from "moment";
 import User from "./User";
 import AppData from "../constants/Data";
+import colors from "../constants/Colors"
+
 
 class TeamUpdates extends React.Component {
   constructor(props) {
@@ -144,19 +146,21 @@ class TeamUpdates extends React.Component {
   }
   styles={
     title: {
-      fontSize: 26,
-      marginBottom: 10,
-      fontWeight: 'bold'
+      fontWeight: "bold",
+      fontSize: 28,
+      marginBottom: 5,
+      marginTop: 10
     },
     subtitle: {
-      fontSize: 18,
+      fontSize: 20,
       marginBottom: 5,
-      color: 'red',
+      marginTop: 5,
+      color: colors.tintColor,
       fontWeight: 'bold'
     },
     text: {
-      fontSize: 16,
-      lineHeight: 24
+      fontSize: 18,
+      lineHeight: 27
     }
   }
 }

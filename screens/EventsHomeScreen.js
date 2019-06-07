@@ -331,6 +331,8 @@ class EventsHomeScreen extends React.Component {
   closeItem = item => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ activeItem: null });
+    this.fetchData();
+
   };
 
   closeEventSearch = () => {
@@ -399,6 +401,9 @@ class EventsHomeScreen extends React.Component {
                     }}
                     signInOrOut={(email, name)=>{
                       this.signInOrOut(email, name);
+                    }}
+                    fetchData={() => {
+                      this.fetchData();
                     }}
                   />
                 </View>

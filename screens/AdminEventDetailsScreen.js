@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Image, LayoutAnimation, Button } from "react-native";
 import User from "../components/User";
+import colors from "./../constants/Colors";
 
 export default class AdminEventDetailsScreen extends Component {
 
@@ -74,7 +75,7 @@ export default class AdminEventDetailsScreen extends Component {
                                         <Button
                                             onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
                                             title="Deny"
-                                            color="red"
+                                            color={colors.tintColor}
                                             accessibilityLabel="Deny volunteer to this Event"
                                         />
                                     </View>

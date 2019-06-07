@@ -75,7 +75,7 @@ export default class AdminEventDetails extends Component {
                                 <Button
                                     onPress={()=>this.acceptOrDenyEventAttendee(item.t_organizer, item.t_orig_name, "deny")}
                                     title="Deny"
-                                    color="red"
+                                    color="blue"
                                     accessibilityLabel="Deny Member to this Team"
                                 />
                             </View>

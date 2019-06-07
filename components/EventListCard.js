@@ -49,7 +49,7 @@ class EventListCard extends React.PureComponent {
               <View
                 style={{
                   flex: 9,
-                  backgroundColor: "#124b73",
+                  backgroundColor: "#eee",
                   borderTopRightRadius: 15,
                   borderTopLeftRadius: 15
                 }}

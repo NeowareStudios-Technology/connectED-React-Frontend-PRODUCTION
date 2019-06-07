@@ -32,9 +32,9 @@ class TeamRoster extends React.Component {
         {item.t_leaders ? 
           <View>
             {item.t_leaders.length > 1 ? 
-              <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Leaders</Text>
+              <Text style={this.styles.subtitle}>Leaders</Text>
               :
-              <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Lead</Text>
+              <Text style={this.styles.subtitle}>Lead</Text>
             }
             {item.t_leaders.map((leader, index)=>(
               <View key={index}>
@@ -46,13 +46,13 @@ class TeamRoster extends React.Component {
           </View>
         :
           <View>
-            <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Organizer</Text>
+            <Text style={this.styles.subtitle}>Organizer</Text>
             <Text style={this.styles.text} >{ `\u2022  `}{item.t_organizer}{`\n`}</Text>
           </View>
         }
         {item.t_members ? 
           <View>
-            <Text style={{fontSize: 18, marginBottom: 5, fontWeight: "bold"}}>Members</Text>
+            <Text style={this.styles.subtitle}>Members</Text>
             {item.t_members.map((member, index)=>(
               <Text style={this.styles.text} key={index}>{ `\u2022  `}{member}</Text>
             ))}
@@ -66,18 +66,20 @@ class TeamRoster extends React.Component {
   }
   styles={
     title: {
-      fontSize: 26,
+      fontWeight: "bold",
+      fontSize: 28,
       marginBottom: 5,
-      fontWeight: 'bold'
+      marginTop: 10
     },
     subtitle: {
-      fontSize: 18,
+      fontSize: 20,
       marginBottom: 5,
+      marginTop: 5,
       fontWeight: 'bold'
     },
     text: {
-      fontSize: 16,
-      lineHeight: 24
+      fontSize: 18,
+      lineHeight: 27,
     }
   }
 }
