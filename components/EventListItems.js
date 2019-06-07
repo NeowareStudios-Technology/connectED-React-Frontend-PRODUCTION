@@ -1,6 +1,6 @@
 import React from "react";
-import { View } from "react-native";
-import { ListItem } from 'react-native-elements';
+import { Text, View, ScrollView } from "react-native";
+import { ListItem, Overlay, Button } from 'react-native-elements';
 import moment from 'moment';
 
 /**
@@ -48,6 +48,7 @@ class EventListItems extends React.PureComponent {
     return (
       <ScrollView>
         {sortedEvents.map((item, index) => (
+          <View key={item.key || index}>
           <ListItem
             key={item.key || index}
             leftAvatar={{ source: { uri: "data:image/png;base64," + item.e_photo }, rounded: false }}
@@ -56,6 +57,13 @@ class EventListItems extends React.PureComponent {
             contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
             onPress={() => this.triggerOverlay(item)}
           />
+          {this.props.type==="current" ? 
+          <Button 
+          title={this.props.title}
+          onPress={()=>{this.props.signInOrOut(item.e_orig_title, item.e_organizer)}}
+          />  
+        :null}
+          </View>
         ))}
       </ScrollView>
     );
