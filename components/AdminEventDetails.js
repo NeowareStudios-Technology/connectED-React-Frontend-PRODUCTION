@@ -16,21 +16,29 @@ import User from "../components/User";
 
 class AdminEventDetails extends React.Component {
 
-  acceptOrDenyEventAttendee = async (organizer, title, status) => {
+  acceptOrDenyEventAttendee = async (organizer, title, status, attendee) => {
     let token = await User.firebase.getIdToken();
-    console.log(organizer, title, status)
+    console.log(token)
+    console.log(organizer, title, status, attendee)
+    console.log(token)
+
     if (token) {
       let url =
         `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizer}/${title}/${status}`;
+        let bodyData = JSON.stringify({
+          pending_attendee: attendee
+        });
       // status should either be "approve" or "deny"
       fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token
-        }
+        },
+        body: bodyData
       })
         .then(response => {
+          console.log("accept/deny attendee response", response)
           if (response.ok) {
             alert("Thank you for resolving pending requests!")
           }
@@ -105,13 +113,13 @@ class AdminEventDetails extends React.Component {
                     <View key={index} style={{ flexDirection: "row" }}>
                       <Text>{a}</Text>
                       <Button
-                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "approve")}
+                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "approve", a)}
                         title="Accept"
                         color="green"
                         accessibilityLabel="Accept volunteer to this Event"
                       />
                       <Button
-                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny")}
+                        onPress={() => this.acceptOrDenyEventAttendee(item.e_organizer, item.e_orig_title, "deny", a)}
                         title="Deny"
                         color="red"
                         accessibilityLabel="Deny volunteer to this Event"
