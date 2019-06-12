@@ -123,6 +123,7 @@ class EventsHomeScreen extends React.Component {
 
   fetchData = async () => {
     let token = await User.firebase.getIdToken();
+    console.log(token)
     if (token) {
       try {
         let url =
