@@ -25,6 +25,7 @@ import moment from 'moment';
 import Accordion from 'react-native-collapsible/Accordion';
 import EventDetails from "../components/EventDetails";
 import AdminEventDetails from "../components/AdminEventDetails";
+import Styles from "../constants/Styles";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -418,13 +419,13 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              let text= responseData.response
+              let text = responseData.response
               let title = ""
-              if (text.includes('in')){
+              if (text.includes('in')) {
                 let title = "Sign Out of Event"
                 this.setState({
                   signInOutMessage: text,
-                  signInOutTitle: title  
+                  signInOutTitle: title
                 })
               } else {
                 let title = "Sign Into Event"
@@ -433,7 +434,7 @@ export default class HomeScreen extends React.Component {
                   signInOutTitle: title
                 })
               }
-              
+
             } catch (error) { }
           } else {
             alert("Not able to sign in or out of event")
@@ -460,8 +461,8 @@ export default class HomeScreen extends React.Component {
   // ********************
   _renderHeader = section => {
     return (
-      <View style={styles.dropdownSectionHeader}>
-        <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
+      <View style={Styles.dropdownSectionHeader}>
+        <Text style={Styles.dropdownSectionHeaderText}>{section.title}</Text>
         <Icon.Ionicons
           name={
             Platform.OS === "ios"
@@ -474,22 +475,11 @@ export default class HomeScreen extends React.Component {
     );
   };
   _renderContent = section => {
-    let events, sort;
+    let events, sort, title;
     if (section.title === 'Current Events') {
       events = this.state.currentEvents
-
-      // console.warn(events)
       sort = "asc"
-      return (
-        <EventListItems events={events} 
-        sort={sort} 
-        type="current"
-        overlay={this.showEventDetails}
-        signInOrOut={(email, name)=>{
-          this.signInOrOut(email, name);
-        }}
-        />
-      );
+      title = "current"
     }
     else if (section.title === 'Upcoming Events') {
       events = this.state.futureEvents
@@ -500,14 +490,19 @@ export default class HomeScreen extends React.Component {
       sort = "desc"
     }
     return (
-      <EventListItems 
-      events={events} 
-      sort={sort} 
-      overlay={this.showEventDetails} 
-      signInOrOut={(email, name)=>{
-        this.signInOrOut(email, name);
-      }}
-      />
+      <View style={Styles.eventListContainer}>
+        <EventListItems
+          events={events}
+          sort={sort}
+          title={title}
+          overlay={this.showEventDetails}
+          signInOrOut={(email, name) => {
+            this.signInOrOut(email, name);
+          }}
+        />
+      </View>
+
+
     );
   };
   _updateSections = activeSections => {
@@ -524,23 +519,23 @@ export default class HomeScreen extends React.Component {
       }
     ]
     return (
-      <View style={styles.dropdownContainer}>
-        <Accordion
-          sections={sections}
-          activeSections={this.state.activeSections}
-          renderSectionTitle={this._renderSectionTitle}
-          renderHeader={this._renderHeader}
-          renderContent={this._renderContent}
-          onChange={this._updateSections}
-          underlayColor={'transparent'}
-        />
-      </View>
+      <Accordion
+        containerStyle={{}}
+        sectionContainerStyle={{}}
+        sections={sections}
+        activeSections={this.state.activeSections}
+        renderSectionTitle={this._renderSectionTitle}
+        renderHeader={this._renderHeader}
+        renderContent={this._renderContent}
+        onChange={this._updateSections}
+        underlayColor={'transparent'}
+      />
     )
   }
 
   renderEventDetails = () => {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={Styles.contentContainer}>
         <EventDetails
           event={this.state.activeItem}
           onClose={this.hideDetails}
@@ -550,7 +545,7 @@ export default class HomeScreen extends React.Component {
           onDeregister={() => {
             this.deregister();
           }}
-          signInOrOut={(email, name)=>{
+          signInOrOut={(email, name) => {
             this.signInOrOut(email, name);
           }}
           title={this.state.signInOutTitle}
@@ -562,7 +557,9 @@ export default class HomeScreen extends React.Component {
 
   renderAdminEventDetails = () => {
     return (
-      <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+      <View style={Styles.contentContainer}>
+        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+      </View>
     )
   }
 
@@ -575,10 +572,10 @@ export default class HomeScreen extends React.Component {
       return (this.renderAdminEventDetails())
     }
     return (
-      <View style={styles.container}>
+      <View style={Styles.container}>
         <View
-          style={styles.container}
-          contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
+          style={Styles.container}
+          contentContainerStyle={Styles.contentContainer}
         >
           {this.state.user ? (
             <>
@@ -663,7 +660,7 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  
+
                   {this.state.pastEvents ? (
                     <>
                       <Text style={styles.largeNumber}>
@@ -678,7 +675,7 @@ export default class HomeScreen extends React.Component {
                           color="#0d0d0d"
                         /> */}
                         <Text style={styles.largeNumber}>
-                        0
+                          0
                         </Text>
                       </>
                     )}
@@ -694,46 +691,50 @@ export default class HomeScreen extends React.Component {
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                {this.state.activeTab === 0 && (
-                  <ProfileInfo user={this.state.user} navigation={this.props.navigation}/>
-                )}
-                {this.state.activeTab === 1 && (
-                  <>
-                    {this.state.events ? (
-                      this.renderAccordion()
-                    ) : (
-                        <ActivityIndicator
-                          style={{ marginBottom: 16 }}
-                          size="small"
-                          color="#0d0d0d"
-                        />
-                      )}
-                  </>
-                )}
-                {this.state.activeTab === 2 && (
-                  <>
-                    {this.state.createdEvents ? (
-                      <View style={styles.dropdownContainer}>
-                        <EventListItems 
-                        events={this.state.createdEvents} 
-                        sort={"desc"} 
-                        overlay={this.showAdminEventDetails} 
-                        signInOrOut={(email, name)=>{
-                          this.signInOrOut(email, name);
-                        }}
-                        title={this.state.signInOutTitle}
-                        />
-                      </View>
-                      // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
-                    ) : (
-                        <ActivityIndicator
-                          style={{ marginBottom: 16 }}
-                          size="small"
-                          color="#0d0d0d"
-                        />
-                      )}
-                  </>
-                )}
+                <ScrollView>
+                  {this.state.activeTab === 0 && (
+                    <ProfileInfo user={this.state.user} navigation={this.props.navigation} />
+                  )}
+                  {this.state.activeTab === 1 && (
+                    <>
+                      {this.state.events ? (
+                        this.renderAccordion()
+                      ) : (
+                          <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="small"
+                            color="#0d0d0d"
+                          />
+                        )}
+                    </>
+                  )}
+                  {this.state.activeTab === 2 && (
+                    <>
+                      {this.state.createdEvents ? (
+                        <View style={Styles.eventListContainer}>
+                          <EventListItems
+                            events={this.state.createdEvents}
+                            sort={"desc"}
+                            overlay={this.showAdminEventDetails}
+                            signInOrOut={(email, name) => {
+                              this.signInOrOut(email, name);
+                            }}
+                            title={this.state.signInOutTitle}
+                          />
+                        </View>
+
+                        // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
+                      ) : (
+                          <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="large"
+                            color="#0d0d0d"
+                          />
+                        )}
+                    </>
+                  )}
+                </ScrollView>
+
               </View>
               {this.state.open && (
                 <View
@@ -873,136 +874,6 @@ export default class HomeScreen extends React.Component {
                           </TouchableOpacity>
                         </View>
                       </View>
-                      {/* <View style={styles.drawerSectionWrapper}>
-                        <View style={styles.drawerSectionLabelContainer}>
-                          <Icon.Ionicons
-                            name={
-                              Platform.OS === "ios"
-                                ? "ios-notifications"
-                                : "md-notifications"
-                            }
-                            size={20}
-                            color={Colors.tabIconDefault}
-                          />
-                          <Text style={styles.drawerSectionLabel}>
-                            Notifications
-                                      </Text>
-                        </View>
-                        <Divider
-                          style={{
-                            height: 1,
-                            marginBottom: 8,
-                            backgroundColor: "#dddddd"
-                          }}
-                        />
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Notifications
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                App Notifications
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                      <View style={styles.drawerSectionWrapper}>
-                        <View style={styles.drawerSectionLabelContainer}>
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-more" : "md-more"}
-                            size={20}
-                            color={Colors.tabIconDefault}
-                          />
-                          <Text style={styles.drawerSectionLabel}>More</Text>
-                        </View>
-                        <Divider
-                          style={{
-                            height: 1,
-                            marginBottom: 8,
-                            backgroundColor: "#dddddd"
-                          }}
-                        />
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>Agreements</Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Location Services
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                      </View> */}
                       <View
                         style={{ flexDirection: "row", justifyContent: "center" }}
                       >
@@ -1076,27 +947,5 @@ const styles = StyleSheet.create({
   menuItemContainer: { flexDirection: "row" },
   menuItemLabel: { flex: 3 },
   menuItemIconContainer: { flex: 1 },
-  dropdownContainer: {
-    // marginTop: 6,
-    // paddingHorizontal: 
-    justifyContent: "space-between"
-  },
-  dropdownSection: {
-    marginBottom: 12
-  },
-  dropdownSectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#d2d2d2",
-    marginBottom: 2,
-    padding: 12
-  },
-  dropdownSectionHeaderText: {
-    fontSize: 16,
-    color: "black",
-    // padding: 10,
 
-    
-    
-  }
 });

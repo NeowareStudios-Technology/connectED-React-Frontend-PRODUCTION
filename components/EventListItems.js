@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View, ScrollView } from "react-native";
 import { ListItem, Overlay, Button } from 'react-native-elements';
+import Styles from "../constants/Styles";
 import moment from 'moment';
 
 /**
@@ -49,23 +50,24 @@ class EventListItems extends React.PureComponent {
       <ScrollView>
         {sortedEvents.map((item, index) => (
           <View key={item.key || index}>
-          <ListItem
-            key={item.key || index}
-            leftAvatar={{ source: { uri: "data:image/png;base64," + item.e_photo }, rounded: false }}
-            title={item.e_title}
-            subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
-            contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
-            onPress={() => this.triggerOverlay(item)}
-          />
-          {this.props.type==="current" ? 
-          <Button 
-          title={this.props.title}
-          onPress={()=>{this.props.signInOrOut(item.e_orig_title, item.e_organizer)}}
-          />  
-        :null}
+            <ListItem
+              leftAvatar={{ source: { uri: "data:image/png;base64," + item.e_photo }, rounded: false }}
+              title={item.e_title}
+              subtitle={moment(item.date, "MM/DD/YYYY").format("MMM Do")}
+              containerStyle={Styles.eventListing}
+              contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
+              onPress={() => this.triggerOverlay(item)}
+            />
+            {this.props.type === "current" ?
+              <Button
+                title={this.props.title}
+                onPress={() => { this.props.signInOrOut(item.e_orig_title, item.e_organizer) }}
+              />
+              : null}
           </View>
         ))}
       </ScrollView>
+
     );
   }
 }
