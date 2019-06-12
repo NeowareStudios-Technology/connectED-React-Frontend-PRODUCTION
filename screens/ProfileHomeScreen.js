@@ -240,7 +240,6 @@ export default class HomeScreen extends React.Component {
   loadUserOpportunities = async () => {
     let createdEvents = [];
     let token = await User.firebase.getIdToken();
-    // console.log("Profile token", token)
     if (token) {
       try {
         let url =
@@ -257,7 +256,7 @@ export default class HomeScreen extends React.Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
-              // console.log("USER OPPORTUNITIES:", events)
+              console.log("USER OPPORTUNITIES:", events)
               if (typeof events === "object") {
                 this.setState({ events: events },
                   () => this.loadEvents()

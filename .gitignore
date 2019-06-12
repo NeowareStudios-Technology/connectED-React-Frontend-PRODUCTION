@@ -83,5 +83,6 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-./.expo
-.vscode
+.expo/
+packager-info.json
+.vscode/
