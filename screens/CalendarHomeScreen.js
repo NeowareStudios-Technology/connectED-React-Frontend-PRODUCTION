@@ -1,31 +1,22 @@
 import React, { Component } from 'react';
 import {
-  ActivityIndicator,
-  Image,
-  ImageBackground,
-  Platform,
-  ScrollView,
-  StyleSheet,
   Dimensions,
   Text,
-  TouchableOpacity,
   View,
-  FlatList,
   LayoutAnimation
 } from "react-native";
-import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
+import { ButtonGroup } from "react-native-elements";
+import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from "moment"
-import { Icon } from "expo";
+
 import User from "../components/User";
 import Sequencer from "../components/Sequencer";
-import uuidv4 from 'uuid/v4';
-import Styles from "../constants/Styles";
-
-let screenHeight = Dimensions.get('window').height;
-import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import EventDetails from '../components/EventDetails';
 import EventListItems from '../components/EventListItems';
 import AdminEventDetails from '../components/AdminEventDetails';
+import Styles from "../constants/Styles";
+
+let screenHeight = Dimensions.get('window').height;
 
 export default class MyCalendar extends Component {
   static navigationOptions = {
@@ -81,7 +72,7 @@ export default class MyCalendar extends Component {
                   userEvents = this.state.userEvents.slice();
                 }
                 let event = responseData;
-                event.key = "user-event-" + uuidv4();
+                event.key = "event-" + index;
                 userEvents.push(event);
                 this.setState({
                   userEvents: userEvents,
@@ -129,7 +120,7 @@ export default class MyCalendar extends Component {
                   upcomingEvents = this.state.upcomingEvents.slice();
                 }
                 let event = responseData;
-                event.key = "past-event-" + uuidv4();
+                event.key = "event-" + index;
                 upcomingEvents.push(event);
                 this.setState(
                   {
@@ -167,8 +158,7 @@ export default class MyCalendar extends Component {
   }
 
   loadEvents = () => {
-    console.log("Calendar Events", this.state.events)
-    // TODO: Don't include duplicate events. only fetch the event once
+    // console.log("Calendar Events", this.state.events)
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
     let userEvents = this.state.events.created_events
@@ -617,45 +607,3 @@ export default class MyCalendar extends Component {
     );
   }
 }
-const styles = StyleSheet.create({
-
-  eventsContainer: {
-    flex: 1,
-    backgroundColor: "#eee",
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 10,
-  },
-  contentContainer: {
-    paddingTop: 12
-  },
-  largeNumber: {
-    fontSize: 30,
-    fontWeight: "bold"
-  },
-  subtitle: {
-    fontSize: 22,
-    color: 'white',
-    width: 180,
-    marginBottom: 5,
-  },
-  largeNumberCaption: {
-    fontSize: 14,
-    marginTop: 3,
-    color: "#b0b0b0"
-  },
-  eventListing: {
-    backgroundColor: 'white',
-    flex: 1,
-    flexDirection: 'row',
-    color: 'black',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginBottom: 10,
-    borderColor: 'white',
-    borderWidth: 2,
-    borderRadius: 5,
-  }
-});

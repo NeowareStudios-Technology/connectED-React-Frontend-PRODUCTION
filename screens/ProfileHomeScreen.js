@@ -117,7 +117,6 @@ export default class HomeScreen extends React.Component {
 
   // Takes the array of user opportunities and loads and sorts each event
   loadEvents = () => {
-    // TODO: Don't include duplicate events. only fetch the event once
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
     let createdEvents = this.state.events.created_events
@@ -401,6 +400,7 @@ export default class HomeScreen extends React.Component {
       }
     }
   };
+
   signInOrOut = async (name, email) => {
     let organizerEmail = "karina@dijatek.com"
     let eventName = "Jewel+hunt"
@@ -722,8 +722,6 @@ export default class HomeScreen extends React.Component {
                             title={this.state.signInOutTitle}
                           />
                         </View>
-
-                        // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
                       ) : (
                           <ActivityIndicator
                             style={{ marginBottom: 16 }}
@@ -734,8 +732,8 @@ export default class HomeScreen extends React.Component {
                     </>
                   )}
                 </ScrollView>
-
               </View>
+              {/* Side Drawer - Account Settings */}
               {this.state.open && (
                 <View
                   style={{
@@ -889,7 +887,6 @@ export default class HomeScreen extends React.Component {
                     </View>
                   </View>
                 </View>
-
               )}
             </>
           ) : (
