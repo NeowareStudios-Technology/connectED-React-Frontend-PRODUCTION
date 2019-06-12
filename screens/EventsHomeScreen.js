@@ -375,6 +375,10 @@ class EventsHomeScreen extends React.Component {
                           alignItems: "center",
                         }}
                       >
+                        {/*
+                          Mall user photo can go here in place of `circle +` icon.
+                         The below component controls the 'circle +' icon in the upper left hand corner of the screen 
+                        */}
                         <TouchableOpacity
                           style={{
                             paddingHorizontal: 10,
@@ -388,11 +392,13 @@ class EventsHomeScreen extends React.Component {
                         >
                           <Icon.Ionicons
                             name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
-                            size={30}
-                          />
+                            size={50}
+                            color={"#fdf6fab3"}
+                        />
                         </TouchableOpacity>
                         <View>
-                          <Text style={styles.displayH1}>Events</Text>
+                          {/* Added the dispalayMallH1 class to change the text color to #fff for Mall mockup */}
+                          <Text style={styles.displayMallH1}>Events</Text>
                         </View>
                       </View>
                       <View
@@ -417,15 +423,18 @@ class EventsHomeScreen extends React.Component {
                             size={30}
                           />
                         </TouchableOpacity> */}
+                        {/* Below component is for the gear icon in upper right hand corner  */}
                         <TouchableOpacity
                           style={{
+                            ImageBackground: "../assets/images/gear_icon.png",
+                            backgroundColor: "#999",
                             paddingHorizontal: 10,
                             borderRadius: 90,
-                            borderColor: "#000",
+                            borderColor: "#fff",
                             borderWidth: 0,
                           }}
                           onPress={() => {
-                            console.log('TODO: filter')
+                            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$TODO: filter')
                           }}
                         >
                           <Icon.Ionicons
@@ -437,7 +446,9 @@ class EventsHomeScreen extends React.Component {
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
-                    <View style={{
+                      <Image source={require('../assets/images/eventViewStub.png')} style={[styles.image, { width: screenWidth }]} />
+                    {/* Commented out the below Search Input feature for Mall mockup */}
+                    {/* <View style={{
                       flexDirection: 'row',
                       marginHorizontal: 20,
                       paddingHorizontal: 10,
@@ -458,7 +469,7 @@ class EventsHomeScreen extends React.Component {
                         onChangeText={text=>this.searchFilterFunction(text)}
                         autoCorrect={false}
                       />
-                    </View>
+                    </View> */}
                     
 
                       {this.state.loading ? (

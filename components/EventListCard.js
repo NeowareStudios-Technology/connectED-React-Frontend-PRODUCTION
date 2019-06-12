@@ -33,10 +33,13 @@ class EventListCard extends React.Component {
 
     return (
       <>
+        {/* The below Card component controls all of the current displayed event card props */}
         <Card
           containerStyle={{
             padding: 0,
             paddingHorizontal: 0,
+            borderWidth: 4,  // mockup
+            borderColor: "#09f532b3", // mockup
             borderBottomRightRadius: 15,
             borderBottomLeftRadius: 15,
             borderTopRightRadius: 15,
@@ -48,13 +51,14 @@ class EventListCard extends React.Component {
               <View
                 style={{
                   flex: 9,
-                  backgroundColor: "#124b73",
+                  backgroundColor: "#999", // mockup "#124b73", "#09f532b3", 
                   borderTopRightRadius: 15,
                   borderTopLeftRadius: 15
                 }}
               >
                 <ImageBackground
                   source={{
+                    //uri: "../assets/images/eventViewStub.png" 
                     uri: "data:image/png;base64," + item.e_photo
                   }}
                   style={{
@@ -64,7 +68,7 @@ class EventListCard extends React.Component {
                   imageStyle={{ borderRadius: 15}}
 
                 >
-                  <View
+                  {/* <View
                     style={{
                       flex: 1,
                       flexDirection: "column"
@@ -137,7 +141,7 @@ class EventListCard extends React.Component {
                         </Card>
                       </View>
                     </View>
-                  </View>
+                  </View> */}
                 </ImageBackground>
               </View>
               <View

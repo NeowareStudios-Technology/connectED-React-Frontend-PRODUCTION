@@ -437,7 +437,8 @@ class EventsHomeScreen extends React.Component {
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
-                      <View style={{
+                      {/* Commented out the below Search Input feature for Mall mockup */}
+                      {/* <View style={{
                         flexDirection: 'row',
                         marginHorizontal: 20,
                         paddingHorizontal: 10,
@@ -459,7 +460,7 @@ class EventsHomeScreen extends React.Component {
                           onChangeText={text => this.searchFilterFunction(text)}
                           autoCorrect={false}
                         />
-                      </View>
+                      </View> */}
 
 
                       {this.state.loading ? (

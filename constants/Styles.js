@@ -20,6 +20,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingHorizontal: 12
   },
+ // Custom Style for the Mall mockup
+  displayMallH1: {
+    color: "#fff",
+    fontSize: 30,
+    paddingHorizontal: 57
+  },
   btnSm: {
     padding: 6
   },

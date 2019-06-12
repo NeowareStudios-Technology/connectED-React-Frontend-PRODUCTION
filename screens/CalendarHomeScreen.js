@@ -481,8 +481,8 @@ export default class MyCalendar extends Component {
     return (
       <Pagination
         dotsLength={carouselItems.length}
+        //TODO: Fix, is marked required but its values is undefined
         activeDotIndex={activeSlide}
-        //TODO: ^--Fix, is marked required but its values is undefined
         containerStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.0)', paddingVertical: 15 }}
         dotStyle={{
           width: 10,
@@ -672,7 +672,7 @@ export default class MyCalendar extends Component {
                     itemWidth={310}
                     renderItem={this._renderItem}
                     renderItem={this._renderItem}
-                    onSnapToItem = { index => this.setState({activeIndex:index}) }
+                    onSnapToItem={(index) => this.setState({ activeSlide: index })}
                     contentContainerCustomStyle={{ flexGrow: 0, overflow: 'hidden', height: 50 * (this.state.carouselItems.length)}}
                     numColumns={2}
                     onSnapToItem={(index) => this.setState({ activeSlide: index })}
