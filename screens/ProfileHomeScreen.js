@@ -51,15 +51,12 @@ export default class HomeScreen extends React.Component {
       activeItem: null,
       adminEventDetailVisible: false,
       eventDetailVisible: false,
-      signInOutTitle: "Sign in to Event",
-      signInOutMessage: null
+      // signInOutTitle: "Sign in to Event",
+      // signInOutMessage: null,
     };
   }
-  updateUser = (user) => {
-    this.setState({ user: user })
-  }
 
-  // loads any events the user created and sorts by date
+  // loads any events the user created
   loadCreatedEvent = async (eventName, index, callback) => {
     // console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
@@ -111,15 +108,14 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  updateUser() {
-    this.loadUser()
-  }
-
   // Takes the array of user opportunities and loads and sorts each event
   loadEvents = () => {
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
     let createdEvents = this.state.events.created_events
+    let completedEvents = this.state.events.completed_events;
+
+    // Handle events the user is registered to volunteer
     if (registeredEvents && registeredEvents.length > 0) {
       registeredEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
@@ -130,6 +126,7 @@ export default class HomeScreen extends React.Component {
         });
       });
     }
+    // Handle events created by the user
     if (createdEvents && createdEvents.length > 0) {
       createdEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
@@ -140,9 +137,22 @@ export default class HomeScreen extends React.Component {
         });
       });
     }
+
+    // Handle events the user has completed/attended (aka signed into)
+    if (completedEvents && completedEvents.length > 0) {
+      completedEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadCompEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+
     sequence.next();
   };
-
+  // loads any events the user is registered to volunteer and sorts into past, current, future event
   loadRegEvent = async (eventName, index, callback) => {
     // console.log("LOAD REG EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
@@ -230,6 +240,78 @@ export default class HomeScreen extends React.Component {
       } catch (error) { }
     }
   };
+  // loads any events the user completed/attended and sorts into past, current
+  loadCompEvent = async (eventName, index, callback) => {
+    // console.log("LOAD COMPLETED EVENT - " + eventName)
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                let event = responseData;
+                event.key = "event-" + index;
+
+                // Check if event is past, current or future
+                let now = moment()
+                let eventDate = moment(responseData.date, "MM/DD/YYYY")
+
+                if (this.isPast(now, eventDate)) {
+                  let pastEvents = []
+                  if (this.state.pastEvents) {
+                    pastEvents = this.state.pastEvents.slice();
+                  }
+                  pastEvents.push(event);
+                  this.setState(
+                    {
+                      pastEvents: pastEvents,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    }
+                  );
+                } else {
+                  let currentEvents = []
+                  // keep state immutable by using slice to return new array
+                  if (this.state.currentEvents) {
+                    currentEvents = this.state.currentEvents.slice();
+                  }
+                  currentEvents.push(event);
+                  this.setState(
+                    {
+                      currentEvents: currentEvents,
+                      loading: false
+                    },
+                    () => {
+                      callback();
+                    });
+                }
+              }
+            } catch (error) { }
+          } else {
+            // Response from server not ok
+            try {
+              let errorData = JSON.parse(response._bodyText);
+              // console.log(eventName + " " + errorData.error.message)
+            } catch (error) { }
+            callback();
+          }
+        });
+      } catch (error) { }
+    }
+  };
 
   isCurrent = (today, date) => date.isSame(today, 'day')
 
@@ -278,6 +360,7 @@ export default class HomeScreen extends React.Component {
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
+      // console.log('USER:', user)
       this.setState({ user: user }, () => {
         this.loadUserOpportunities();
       });
@@ -291,7 +374,6 @@ export default class HomeScreen extends React.Component {
 
   navigateToPage = (page) => {
     this.props.navigation.navigate(page, { loadUser: this.loadUser });
-    // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
     this.setState({ open: false })
   }
 
@@ -401,14 +483,24 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  signInOrOut = async (name, email) => {
-    let organizerEmail = "karina@dijatek.com"
-    let eventName = "Jewel+hunt"
+  checkSignIn = () => {
+    if(!this.state.user){
+      return false
+    }
+    let userEmail = this.state.user.email
+    let signedInAttendees = this.state.activeItem.signed_in_attendees
+    if(!signedInAttendees){
+      return false
+    }
+    return signedInAttendees.includes(userEmail)
+  }
+  signInOrOut = async (eventName, email) => {
+    let isSignedIn = this.checkSignIn();
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
         let url =
-          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${eventName}/qr`;
         fetch(url, {
           method: "GET",
           headers: {
@@ -416,498 +508,482 @@ export default class HomeScreen extends React.Component {
             Authorization: "Bearer " + token
           }
         }).then(response => {
+          console.log('sign in/out', response)
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
+              console.log(responseData)
               let text = responseData.response
-              let title = ""
-              if (text.includes('in')) {
-                let title = "Sign Out of Event"
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title
-                })
-              } else {
-                let title = "Sign Into Event"
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title
-                })
-              }
-
+              // let title = isSignedIn ? "Sign Out of Event" : "Sign Into Event"
+              // this.setState({
+              //   signInOutMessage: text,
+              //   signInOutTitle: title
+              // })
             } catch (error) { }
-          } else {
+        } else {
             alert("Not able to sign in or out of event")
           }
         });
-      } catch (error) { }
-    }
+    } catch (error) { }
   }
-  showEventDetails = (event) => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ eventDetailVisible: true, activeItem: event })
-  }
-  showAdminEventDetails = (event) => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ adminEventDetailVisible: true, activeItem: event })
-  }
-  hideDetails = () => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
-  };
+}
 
-  // ********************
-  // Accordion Functions
-  // ********************
-  _renderHeader = section => {
-    return (
-      <View style={Styles.dropdownSectionHeader}>
-        <Text style={Styles.dropdownSectionHeaderText}>{section.title}</Text>
-        <Icon.Ionicons
-          name={
-            Platform.OS === "ios"
-              ? "ios-arrow-down"
-              : "md-arrow-dropdown"
-          }
-          size={26}
-        />
-      </View>
-    );
-  };
-  _renderContent = section => {
-    let events, sort, title;
-    if (section.title === 'Current Events') {
-      events = this.state.currentEvents
-      sort = "asc"
-      title = "current"
-    }
-    else if (section.title === 'Upcoming Events') {
-      events = this.state.futureEvents
-      sort = "asc"
-    }
-    else {
-      events = this.state.pastEvents
-      sort = "desc"
-    }
-    return (
-      <View style={Styles.eventListContainer}>
-        <EventListItems
-          events={events}
-          sort={sort}
-          title={title}
-          overlay={this.showEventDetails}
-          signInOrOut={(email, name) => {
-            this.signInOrOut(email, name);
-          }}
-        />
-      </View>
-
-
-    );
-  };
-  _updateSections = activeSections => {
-    this.setState({ activeSections });
-  };
-  renderAccordion = () => {
-    let sections = [
-      {
-        title: 'Current Events',
-      }, {
-        title: 'Upcoming Events',
-      }, {
-        title: 'Past Events',
-      }
-    ]
-    return (
-      <Accordion
-        containerStyle={{}}
-        sectionContainerStyle={{}}
-        sections={sections}
-        activeSections={this.state.activeSections}
-        renderSectionTitle={this._renderSectionTitle}
-        renderHeader={this._renderHeader}
-        renderContent={this._renderContent}
-        onChange={this._updateSections}
-        underlayColor={'transparent'}
+// ********************
+// Accordion Functions
+// ********************
+_renderHeader = section => {
+  return (
+    <View style={Styles.dropdownSectionHeader}>
+      <Text style={Styles.dropdownSectionHeaderText}>{section.title}</Text>
+      <Icon.Ionicons
+        name={
+          Platform.OS === "ios"
+            ? "ios-arrow-down"
+            : "md-arrow-dropdown"
+        }
+        size={26}
       />
-    )
+    </View>
+  );
+};
+_renderContent = section => {
+  let events, sort, title;
+  if (section.title === 'Current Events') {
+    events = this.state.currentEvents
+    sort = "asc"
+    title = "current"
   }
-
-  renderEventDetails = () => {
-    return (
-      <View style={Styles.contentContainer}>
-        <EventDetails
-          event={this.state.activeItem}
-          onClose={this.hideDetails}
-          onVolunteer={() => {
-            this.volunteer();
-          }}
-          onDeregister={() => {
-            this.deregister();
-          }}
-          signInOrOut={(email, name) => {
-            this.signInOrOut(email, name);
-          }}
-          title={this.state.signInOutTitle}
-        />
-      </View>
-
-    )
+  else if (section.title === 'Upcoming Events') {
+    events = this.state.futureEvents
+    sort = "asc"
   }
-
-  renderAdminEventDetails = () => {
-    return (
-      <View style={Styles.contentContainer}>
-        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
-      </View>
-    )
+  else {
+    events = this.state.pastEvents
+    sort = "desc"
   }
+  return (
+    <View style={Styles.eventListContainer}>
+      <EventListItems
+        events={events}
+        sort={sort}
+        title={title}
+        overlay={this.showEventDetails}
+        signInOrOut={(eventName, email) => {
+          this.signInOrOut(eventName, email);
+        }}
+      />
+    </View>
 
-  render() {
-    const buttons = ["Info", "History", "Created"];
-    if (this.state.eventDetailVisible) {
-      return (this.renderEventDetails())
+
+  );
+};
+_updateSections = activeSections => {
+  this.setState({ activeSections });
+};
+renderAccordion = () => {
+  let sections = [
+    {
+      title: 'Current Events',
+    }, {
+      title: 'Upcoming Events',
+    }, {
+      title: 'Past Events',
     }
-    if (this.state.adminEventDetailVisible) {
-      return (this.renderAdminEventDetails())
-    }
-    return (
-      <View style={Styles.container}>
-        <View
-          style={Styles.container}
-          contentContainerStyle={Styles.contentContainer}
-        >
-          {this.state.user ? (
-            <>
+  ]
+  return (
+    <Accordion
+      containerStyle={{}}
+      sectionContainerStyle={{}}
+      sections={sections}
+      activeSections={this.state.activeSections}
+      renderSectionTitle={this._renderSectionTitle}
+      renderHeader={this._renderHeader}
+      renderContent={this._renderContent}
+      onChange={this._updateSections}
+      underlayColor={'transparent'}
+    />
+  )
+}
+
+showEventDetails = (event) => {
+  // console.log("ACTIVE EVENT", event)
+  LayoutAnimation.easeInEaseOut();
+  this.setState({ eventDetailVisible: true, activeItem: event })
+}
+showAdminEventDetails = (event) => {
+  LayoutAnimation.easeInEaseOut();
+  this.setState({ adminEventDetailVisible: true, activeItem: event })
+}
+hideDetails = () => {
+  LayoutAnimation.easeInEaseOut();
+  this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
+};
+
+renderEventDetails = () => {
+  return (
+    <View style={Styles.contentContainer}>
+      <EventDetails
+        event={this.state.activeItem}
+        onClose={this.hideDetails}
+        onVolunteer={() => {
+          this.volunteer();
+        }}
+        onDeregister={() => {
+          this.deregister();
+        }}
+        signInOrOut={(email, name) => {
+          this.signInOrOut(email, name);
+        }}
+        title={this.state.signInOutTitle}
+      />
+    </View>
+
+  )
+}
+renderAdminEventDetails = () => {
+  return (
+    <View style={Styles.contentContainer}>
+      <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+    </View>
+  )
+}
+
+render() {
+  const buttons = ["Info", "History", "Created"];
+  if (this.state.eventDetailVisible) {
+    return (this.renderEventDetails())
+  }
+  if (this.state.adminEventDetailVisible) {
+    return (this.renderAdminEventDetails())
+  }
+  return (
+    <View style={Styles.container}>
+      <View style={Styles.contentContainer}>
+        {this.state.user ? (
+          <>
+            <View
+              style={{
+                paddingHorizontal: 24,
+                paddingTop: 18,
+                flexDirection: "row"
+              }}
+            >
+              <View style={{ flex: 2 }}>
+                {this.state.user.profile &&
+                  this.state.user.profile.photo !== "" ? (
+                    <>
+                      <Avatar
+                        size={80}
+                        rounded
+                        source={{
+                          uri:
+                            "data:image/png;base64," +
+                            this.state.user.profile.photo
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <Avatar rounded size={80} icon={{ name: "face" }} />
+                  )}
+                <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}>
+                  {this.state.user.profile.first_name + " " + this.state.user.profile.last_name}
+                </Text>
+                <Text style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}>
+                  Volunteer
+                  </Text>
+              </View>
               <View
                 style={{
-                  paddingHorizontal: 24,
-                  paddingTop: 18,
+                  flex: 2,
+                  justifyContent: "flex-end",
                   flexDirection: "row"
                 }}
               >
-                <View style={{ flex: 2 }}>
-                  {this.state.user.profile &&
-                    this.state.user.profile.photo !== "" ? (
-                      <>
-                        <Avatar
-                          size={80}
-                          rounded
-                          source={{
-                            uri:
-                              "data:image/png;base64," +
-                              this.state.user.profile.photo
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <Avatar rounded size={80} icon={{ name: "face" }} />
-                    )}
-                  <Text
-                    style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}
-                  >
-                    {this.state.user.profile.first_name +
-                      " " +
-                      this.state.user.profile.last_name}
-                  </Text>
-                  <Text
-                    style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}
-                  >
-                    Volunteer
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flex: 2,
-                    justifyContent: "flex-end",
-                    flexDirection: "row"
-                  }}
+                <TouchableOpacity
+                  style={{ paddingTop: 10, height: 60, width: 50 }}
+                  onPress={this.openDrawer}
                 >
-                  <TouchableOpacity
-                    style={{ paddingTop: 10, height: 60, width: 50 }}
-                    onPress={this.openDrawer}
-                  >
-                    <Icon.Ionicons
-                      name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
-                      size={50}
-                      color={Colors.tabIconDefault}
-                    />
-                  </TouchableOpacity>
-                </View>
+                  <Icon.Ionicons
+                    name={Platform.OS === "ios" ? "ios-menu" : "md-more"}
+                    size={50}
+                    color={Colors.tabIconDefault}
+                  />
+                </TouchableOpacity>
               </View>
-              <View
-                style={{
-                  paddingHorizontal: 30,
-                  paddingVertical: 12
-                }}
-              >
-                <Divider style={{ height: 2, backgroundColor: "#dddddd" }} />
+            </View>
+            <View
+              style={{
+                paddingHorizontal: 30,
+                paddingVertical: 12
+              }}
+            >
+              <Divider style={{ height: 2, backgroundColor: "#dddddd" }} />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                paddingHorizontal: 24
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                {this.state.user.profile.hours ?
+                  <Text style={styles.largeNumber}>
+                    {Number(this.state.user.profile.hours).toFixed(2)}
+                  </Text>
+                  :
+                  <Text style={styles.largeNumber}>0</Text>
+                }
+                <Text style={styles.largeNumberCaption}>Total Hours</Text>
               </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  paddingHorizontal: 24
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  {this.state.user.profile.hours ?
-                    <Text style={styles.largeNumber}>
-                      {Number(this.state.user.profile.hours).toFixed(2)}
-                    </Text>
-                    :
-                    <Text style={styles.largeNumber}>0</Text>
-                  }
-                  <Text style={styles.largeNumberCaption}>Total Hours</Text>
-                </View>
-                <View style={{ flex: 1 }}>
+              <View style={{ flex: 1 }}>
 
-                  {this.state.pastEvents ? (
+                {this.state.pastEvents ? (
+                  <>
+                    <Text style={styles.largeNumber}>
+                      {this.state.pastEvents.length}
+                    </Text>
+                  </>
+                ) : (
                     <>
-                      <Text style={styles.largeNumber}>
-                        {this.state.pastEvents.length}
-                      </Text>
-                    </>
-                  ) : (
-                      <>
-                        {/* <ActivityIndicator
+                      {/* <ActivityIndicator
                           style={{ marginBottom: 16 }}
                           size="small"
                           color="#0d0d0d"
                         /> */}
-                        <Text style={styles.largeNumber}>
-                          0
+                      <Text style={styles.largeNumber}>
+                        0
                         </Text>
-                      </>
-                    )}
-                  <Text style={styles.largeNumberCaption}>
-                    Total Opportunities
+                    </>
+                  )}
+                <Text style={styles.largeNumberCaption}>
+                  Total Opportunities
                   </Text>
-                </View>
               </View>
-              <View style={{ marginTop: 8, flex: 1 }}>
-                <ButtonGroup
-                  onPress={this.updateTab}
-                  selectedIndex={this.state.activeTab}
-                  buttons={buttons}
-                  containerStyle={{ height: 42 }}
-                />
-                <ScrollView>
-                  {this.state.activeTab === 0 && (
-                    <ProfileInfo user={this.state.user} navigation={this.props.navigation} />
-                  )}
-                  {this.state.activeTab === 1 && (
-                    <>
-                      {this.state.events ? (
-                        this.renderAccordion()
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
-                    </>
-                  )}
-                  {this.state.activeTab === 2 && (
-                    <>
-                      {this.state.createdEvents ? (
-                        <View style={Styles.eventListContainer}>
-                          <EventListItems
-                            events={this.state.createdEvents}
-                            sort={"desc"}
-                            overlay={this.showAdminEventDetails}
-                            signInOrOut={(email, name) => {
-                              this.signInOrOut(email, name);
-                            }}
-                            title={this.state.signInOutTitle}
-                          />
-                        </View>
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="large"
-                            color="#0d0d0d"
-                          />
-                        )}
-                    </>
-                  )}
-                </ScrollView>
-              </View>
-              {/* Side Drawer - Account Settings */}
-              {this.state.open && (
-                <View
-                  style={{
-                    flex: 1,
-                    backgroundColor: "#fafafa",
-                    borderLeftColor: "#dedede",
-                    borderLeftWidth: 1,
-                    width: screenWidth * 0.75,
-                    height: screenHeight,
-                    position: "absolute",
-                    left: screenWidth * 0.25
-                  }}
-                >
-                  <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
-                    <TouchableOpacity
+            </View>
+            <View style={{ marginTop: 8, flex: 1 }}>
+              <ButtonGroup
+                onPress={this.updateTab}
+                selectedIndex={this.state.activeTab}
+                buttons={buttons}
+                containerStyle={{ height: 42 }}
+              />
+              <ScrollView>
+                {this.state.activeTab === 0 && (
+                  <ProfileInfo user={this.state.user} navigation={this.props.navigation} />
+                )}
+                {this.state.activeTab === 1 && (
+                  <>
+                    {this.state.events ? (
+                      this.renderAccordion()
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="small"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
+                {this.state.activeTab === 2 && (
+                  <>
+                    {this.state.createdEvents ? (
+                      <View style={Styles.eventListContainer}>
+                        <EventListItems
+                          events={this.state.createdEvents}
+                          sort={"desc"}
+                          overlay={this.showAdminEventDetails}
+                          signInOrOut={(email, name) => {
+                            this.signInOrOut(email, name);
+                          }}
+                          title={this.state.signInOutTitle}
+                        />
+                      </View>
+                    ) : (
+                        <ActivityIndicator
+                          style={{ marginBottom: 16 }}
+                          size="large"
+                          color="#0d0d0d"
+                        />
+                      )}
+                  </>
+                )}
+              </ScrollView>
+            </View>
+            {/* Side Drawer - Account Settings */}
+            {this.state.open && (
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "#fafafa",
+                  borderLeftColor: "#dedede",
+                  borderLeftWidth: 1,
+                  width: screenWidth * 0.75,
+                  height: screenHeight,
+                  position: "absolute",
+                  left: screenWidth * 0.25
+                }}
+              >
+                <View style={{ paddingHorizontal: 8, paddingVertical: 18 }}>
+                  <TouchableOpacity
+                    style={{
+                      padding: 10,
+                      height: 40,
+                      width: 40,
+                      marginBottom: 12
+                    }}
+                    onPress={this.closeDrawer}
+                  >
+                    <Icon.Ionicons
+                      name={
+                        Platform.OS === "ios"
+                          ? "ios-arrow-forward"
+                          : "md-arrow-forward"
+                      }
+                      size={26}
+                      color={Colors.tabIconDefault}
+                    />
+                  </TouchableOpacity>
+                  <View style={{ paddingHorizontal: 10 }}>
+                    <Text
                       style={{
-                        padding: 10,
-                        height: 40,
-                        width: 40,
-                        marginBottom: 12
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        marginBottom: 18
                       }}
-                      onPress={this.closeDrawer}
                     >
-                      <Icon.Ionicons
-                        name={
-                          Platform.OS === "ios"
-                            ? "ios-arrow-forward"
-                            : "md-arrow-forward"
-                        }
-                        size={26}
-                        color={Colors.tabIconDefault}
-                      />
-                    </TouchableOpacity>
-                    <View style={{ paddingHorizontal: 10 }}>
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: 18,
-                          marginBottom: 18
-                        }}
-                      >
-                        SETTINGS
+                      SETTINGS
                                   </Text>
-                      <View style={styles.drawerSectionWrapper}>
-                        <View style={styles.drawerSectionLabelContainer}>
-                          <Icon.Ionicons
-                            name={
-                              Platform.OS === "ios" ? "ios-person" : "md-person"
-                            }
-                            size={20}
-                            color={Colors.tabIconDefault}
-                          />
-                          <Text style={styles.drawerSectionLabel}>Account</Text>
-                        </View>
-                        <Divider
-                          style={{
-                            height: 1,
-                            marginBottom: 8,
-                            backgroundColor: "#dddddd"
-                          }}
+                    <View style={styles.drawerSectionWrapper}>
+                      <View style={styles.drawerSectionLabelContainer}>
+                        <Icon.Ionicons
+                          name={
+                            Platform.OS === "ios" ? "ios-person" : "md-person"
+                          }
+                          size={20}
+                          color={Colors.tabIconDefault}
                         />
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => {
-                              this.navigateToPage("ProfileEdit")
-                            }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Edit Profile
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => {
-                              this.navigateToPage("ResetPassword")
-                            }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Change Password
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => {
-                              this.navigateToPage("PrivacyPolicy")
-                            }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Privacy Policy
-                              </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
+                        <Text style={styles.drawerSectionLabel}>Account</Text>
                       </View>
-                      <View
-                        style={{ flexDirection: "row", justifyContent: "center" }}
-                      >
-                        <Button
-                          title="Logout"
+                      <Divider
+                        style={{
+                          height: 1,
+                          marginBottom: 8,
+                          backgroundColor: "#dddddd"
+                        }}
+                      />
+                      <View style={styles.menuItemWrapper}>
+                        <TouchableOpacity
+                          style={styles.menuItemTouchable}
                           onPress={() => {
-                            User.logout(() => {
-                              this.props.navigation.navigate("Main");
-                            });
+                            this.navigateToPage("ProfileEdit")
                           }}
-                        />
+                        >
+                          <View style={styles.menuItemContainer}>
+                            <Text style={styles.menuItemLabel}>
+                              Edit Profile
+                                          </Text>
+                            <Text style={styles.menuItemIconContainer}>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-forward"
+                                    : "md-arrow-forward"
+                                }
+                                size={20}
+                                color={Colors.tabIconDefault}
+                              />
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
                       </View>
+                      <View style={styles.menuItemWrapper}>
+                        <TouchableOpacity
+                          style={styles.menuItemTouchable}
+                          onPress={() => {
+                            this.navigateToPage("ResetPassword")
+                          }}
+                        >
+                          <View style={styles.menuItemContainer}>
+                            <Text style={styles.menuItemLabel}>
+                              Change Password
+                                          </Text>
+                            <Text style={styles.menuItemIconContainer}>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-forward"
+                                    : "md-arrow-forward"
+                                }
+                                size={20}
+                                color={Colors.tabIconDefault}
+                              />
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+
+                      </View>
+                      <View style={styles.menuItemWrapper}>
+                        <TouchableOpacity
+                          style={styles.menuItemTouchable}
+                          onPress={() => {
+                            this.navigateToPage("PrivacyPolicy")
+                          }}
+                        >
+                          <View style={styles.menuItemContainer}>
+                            <Text style={styles.menuItemLabel}>
+                              Privacy Policy
+                              </Text>
+                            <Text style={styles.menuItemIconContainer}>
+                              <Icon.Ionicons
+                                name={
+                                  Platform.OS === "ios"
+                                    ? "ios-arrow-forward"
+                                    : "md-arrow-forward"
+                                }
+                                size={20}
+                                color={Colors.tabIconDefault}
+                              />
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                    <View
+                      style={{ flexDirection: "row", justifyContent: "center" }}
+                    >
+                      <Button
+                        title="Logout"
+                        onPress={() => {
+                          User.logout(() => {
+                            this.props.navigation.navigate("Main");
+                          });
+                        }}
+                      />
                     </View>
                   </View>
                 </View>
-              )}
-            </>
-          ) : (
-              <>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontSize: 18,
-                    marginTop: 24,
-                    marginBottom: 24
-                  }}
-                >
-                  Loading profile...
-              </Text>
-                <ActivityIndicator size="large" color="#0d0d0d" />
-              </>
+              </View>
             )}
-        </View>
+          </>
+        ) : (
+            <>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: 18,
+                  marginTop: 24,
+                  marginBottom: 24
+                }}
+              >
+                Loading profile...
+              </Text>
+              <ActivityIndicator size="large" color="#0d0d0d" />
+            </>
+          )}
       </View>
-    );
-  }
+    </View>
+  );
+}
 }
 
 const styles = StyleSheet.create({

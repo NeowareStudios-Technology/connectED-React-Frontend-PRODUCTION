@@ -58,12 +58,12 @@ class EventListItems extends React.PureComponent {
               contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
               onPress={() => this.triggerOverlay(item)}
             />
-            {this.props.type === "current" ?
+            {/* {this.props.type === "current" && (
               <Button
                 title={this.props.title}
                 onPress={() => { this.props.signInOrOut(item.e_orig_title, item.e_organizer) }}
               />
-              : null}
+            )} */}
           </View>
         ))}
       </ScrollView>

@@ -60,7 +60,7 @@ class EventCreateScreen extends React.Component {
       procesing: false,
       processingErrors: [],
       activeStep: 0,
-      activeStetpModel: null,
+      activeStepModel: null,
       modelOpen: false,
       errors: {},
       privacy: "open",
@@ -125,7 +125,7 @@ class EventCreateScreen extends React.Component {
       let token = await User.firebase.getIdToken();
       if (token) {
         let bodyData = JSON.stringify(data);
-        console.log(bodyData)
+        // console.log('save event data', bodyData)
         let url =
           "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events";
         fetch(url, {
@@ -137,13 +137,13 @@ class EventCreateScreen extends React.Component {
           body: bodyData
         })
           .then(response => {
-            console.log("Response from save profile", response);
+            console.log("Response from save event", response);
             if (response.ok) {
+              console.log('event created')
               try {
                 let responseData = JSON.parse(response._bodyText);
                 if (responseData) {
-
-                  console.warn(responseData)
+                  // returns an empty {}
                 }
                 this.props.navigation.navigate("EventsHome");
               } catch (error) {
@@ -152,7 +152,7 @@ class EventCreateScreen extends React.Component {
             }
             else {
               // submit without photo
-              console.log('TODO: Submit without photo')
+              console.log('event not created')
             }
           })
           .catch(error => {
@@ -163,15 +163,14 @@ class EventCreateScreen extends React.Component {
           "It seems like you are not logged in or not authorized to create events."
         ]);
       }
-      console.log("event not created")
     } catch (error) {
       callback([error.message]);
     }
   };
 
   processStep = () => {
-    if (this.state.activeStetpModel) {
-      let step = this.state.activeStetpModel;
+    if (this.state.activeStepModel) {
+      let step = this.state.activeStepModel;
       let sequence = new Sequencer();
       sequence.errors = {};
       let fields = step.fields;
@@ -385,7 +384,7 @@ class EventCreateScreen extends React.Component {
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
+                                  this.setState({ activeStepModel: model });
                                 }}
                               />
                             </View>
@@ -398,7 +397,7 @@ class EventCreateScreen extends React.Component {
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
+                                  this.setState({ activeStepModel: model });
                                 }}
                               />
                             </View>
@@ -411,7 +410,7 @@ class EventCreateScreen extends React.Component {
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
+                                  this.setState({ activeStepModel: model });
                                 }}
                                 onModalOpen={this.onModalOpen}
                                 onModalClose={this.onModalClose}
@@ -426,7 +425,7 @@ class EventCreateScreen extends React.Component {
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
+                                  this.setState({ activeStepModel: model });
                                 }}
                                 onModalOpen={this.onModalOpen}
                                 onModalClose={this.onModalClose}
@@ -441,7 +440,7 @@ class EventCreateScreen extends React.Component {
                                 {...this.state}
                                 onInputChange={this.onInputChange}
                                 onLoadModel={model => {
-                                  this.setState({ activeStetpModel: model });
+                                  this.setState({ activeStepModel: model });
                                 }}
                               />
                             </View>

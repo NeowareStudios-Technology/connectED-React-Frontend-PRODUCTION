@@ -16,13 +16,28 @@ import EventDetailsInfo from "./EventDetailsInfo";
 import EventDetailsTeam from "./EventDetailsTeam";
 import EventDetailsUpdates from "./EventDetailsUpdates";
 import AppData from "../constants/Data";
+import User from "../components/User";
 
 class EventDetails extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeTab: 0
+      activeTab: 0,
+      user: null
     };
+  }
+
+  async loadUser() {
+    let user = await User.isLoggedIn();
+    if (user) {
+      this.setState({ user: user });
+    }
+    return true;
+  }
+
+  componentDidMount() {
+    console.log(this.props.event)
+    this.loadUser()
   }
 
   setActiveTab = index => {
@@ -30,6 +45,18 @@ class EventDetails extends React.Component {
       activeTab: index
     });
   };
+
+  checkSignIn = () => {
+    if(!this.state.user){
+      return false
+    }
+    let userEmail = this.state.user.email
+    let signedInAttendees = this.props.event.signed_in_attendees
+    if(!signedInAttendees){
+      return false
+    }
+    return signedInAttendees.includes(userEmail)
+  }
 
   render() {
     let item = this.props.event;
@@ -42,34 +69,10 @@ class EventDetails extends React.Component {
 
     return (
       <>
-        <View
-          style={{
-            flexDirection: "column",
-            flex: 1
-          }}
-        >
-          <View
-            style={{
-              flex: 3,
-              backgroundColor: "#124b73"
-            }}
-          >
-            <ImageBackground
-              source={{
-                uri: "data:image/png;base64," + item.e_photo
-              }}
-              style={{
-                width: "100%",
-                height: "100%"
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  paddingBottom: 12,
-                  flexDirection: "column"
-                }}
-              >
+        <View style={{ flexDirection: "column", flex: 1 }}>
+          <View style={{ flex: 3, backgroundColor: "#124b73" }}>
+            <ImageBackground source={{ uri: "data:image/png;base64," + item.e_photo }} style={{ width: "100%", height: "100%" }}>
+              <View style={{ flex: 1, paddingBottom: 12, flexDirection: "column" }}>
                 <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
                   <TouchableOpacity onPress={this.props.onClose}>
                     <Icon.Ionicons
@@ -96,23 +99,6 @@ class EventDetails extends React.Component {
                     paddingHorizontal: 12
                   }}
                 >
-                  {/* <View
-                    style={{
-                      flex: 6,
-                      alignContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        color: "#000000",
-                        fontSize: 20,
-                        paddingVertical: 6,
-                      }}
-                    > 
-                    titleaskjd;coaisjd;oaijsdo;ciajdos;cj;asoicdjaios;djc
-                    </Text>
-                  </View> */}
                   <View style={{ flex: 2 }} />
                   <View
                     style={{
@@ -137,15 +123,7 @@ class EventDetails extends React.Component {
               </View>
             </ImageBackground>
           </View>
-          <View
-            style={{
-              flex: 10,
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              paddingVertical: 12,
-              paddingHorizontal: 12
-            }}
-          >
+          <View style={{ flex: 10, flexDirection: "column", justifyContent: "flex-end", paddingVertical: 12, paddingHorizontal: 12 }} >
             <View style={{ flex: 20 }}>
               {this.state.activeTab === 0 && (
                 <>
@@ -298,20 +276,20 @@ class EventDetails extends React.Component {
                     </>
                   )}
                   {item.is_registered === "1" && (
-                    <View style={{flexDirection: "row", }}>
-                    <Button
-                      containerStyle={{width: '50%'}}
-                      onPress={this.props.onDeregister}
-                      title="Deregister"
-                    />
-                    <Button
-                      containerStyle={{width: '50%'}}
-                      buttonStyle={{backgroundColor: 'green'}}
-                      onPress={()=>{this.props.signInOrOut(item.e_orig_title, item.e_organizer)}}
-                      title="Sign In/Out"
-                      
-                    />
-                  </View>
+                    <View style={{ flexDirection: "row", }}>
+                      <Button
+                        containerStyle={{ width: '50%' }}
+                        onPress={this.props.onDeregister}
+                        title="Deregister"
+                      />
+                      <Button
+                        containerStyle={{ width: '50%' }}
+                        buttonStyle={{ backgroundColor: 'green' }}
+                        onPress={() => { this.props.signInOrOut(item.e_orig_title, item.e_organizer) }}
+                        title={this.checkSignIn() ? "Sign out" : "Sign in"}
+
+                      />
+                    </View>
                   )}
                 </View>
               </View>
