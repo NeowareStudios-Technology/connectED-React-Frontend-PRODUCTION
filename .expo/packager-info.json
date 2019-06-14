@@ -2,9 +2,9 @@
   "devToolsPort": 19002,
   "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 17000,
+  "packagerPid": 16300,
   "expoServerNgrokUrl": "https://ka-7rh.kendraz.connected-react-frontend-production.exp.direct",
   "packagerNgrokUrl": "https://packager.ka-7rh.kendraz.connected-react-frontend-production.exp.direct",
-  "ngrokPid": 20596,
+  "ngrokPid": 13756,
   "webpackServerPort": null
 }

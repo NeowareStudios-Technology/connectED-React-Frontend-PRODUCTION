@@ -18,26 +18,34 @@ import EventDetailsUpdates from "./EventDetailsUpdates";
 import User from "../components/User";
 import API from "../constants/API";
 
+
 class EventDetails extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       activeTab: 0,
-      signedIn: false
+      isSignedIn: false,
+      isRegistered: 0
     };
   }
+  componentWillUnmount() {
+    // TODO: pass isRegistered state and isSignedIn state to parent to update event
+  }
 
-  async loadUser() {
+  async initializeState() {
     let user = await User.isLoggedIn();
     if (user) {
-      this.setState({ user: user }, () => this.updateSignInStatus());
+      this.setState({
+        user: user,
+        isRegistered: this.props.event.is_registered
+      }, () => this.updateSignInStatus());
     }
     return true;
   }
 
   componentDidMount() {
     console.log(this.props.event)
-    this.loadUser()
+    this.initializeState()
   }
 
   setActiveTab = index => {
@@ -48,54 +56,21 @@ class EventDetails extends React.Component {
 
   volunteer = async () => {
     const { event } = this.props
-
-    if (this.props.event) {
-      let isRegistered = false;
-      if (
-        typeof this.props.event.is_registered !== "undefined" &&
-        this.props.event.is_registered !== "0"
-      ) {
-        isRegistered = true;
-      }
-      if (!isRegistered) {
-        let token = await User.firebase.getIdToken();
-
-        if (token) {
-          let organizerEmail = this.props.event.e_organizer;
-          let eventOrigName = this.props.event.e_orig_title;
-          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-          let putData = {
-            user_action: "both"
-          };
-          try {
-            let bodyData = JSON.stringify(putData);
-            fetch(url, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-              },
-              body: bodyData
-            })
-              .then(response => {
-                if (response.ok) {
-                  let events = this.state.events;
-                  let eventIndex = null;
-                  let event = events.find((anEvent, index) => {
-                    if (anEvent === this.props.event) {
-                      eventIndex = index;
-                      return true;
-                    }
-                    return false;
-                  });
-                  if (eventIndex) {
-                    events[eventIndex].is_registered = "1";
-                  }
-                }
-              })
-              .catch(error => { });
-          } catch (error) { }
+    if (
+      event &&
+      !(typeof event.is_registered !== "undefined" &&
+        event.is_registered !== "0")
+    ) {
+      let response = await API.register(event.e_organizer, event.e_orig_title, "both")
+      console.log(response)
+      if (!response.error) {
+        if (event.privacy === "o") {
+          this.setState({ isRegistered: 1 })
+        } else {
+          this.setState({ isRegistered: -1 })
         }
+      } else {
+        alert(response.error.message)
       }
     }
   };
@@ -141,8 +116,8 @@ class EventDetails extends React.Component {
 
   updateSignInStatus = () => {
     let status = this.checkSignIn()
-    if(this.state.signedIn !== status){
-      this.setState({signedIn: status})
+    if (this.state.isSignedIn !== status) {
+      this.setState({ isSignedIn: status })
     }
   }
 
@@ -162,13 +137,13 @@ class EventDetails extends React.Component {
 
   checkInOrOut = async (eventName, email) => {
     try {
-      let {response, error} = await API.checkInOrOut(eventName, email)
-      if(error){
+      let { response, error } = await API.checkInOrOut(eventName, email)
+      if (error) {
         alert("Server error: " + error.message)
         return
       }
       alert("Success! " + response)
-      this.setState({signedIn: !this.state.signedIn})
+      this.setState({ isSignedIn: !this.state.isSignedIn })
     } catch (error) {
     }
   };
@@ -377,12 +352,12 @@ class EventDetails extends React.Component {
                   </View>
                 </View>
                 <View style={{ justifyContent: "flex-end" }}>
-                  {event.is_registered === "-1" && (
+                  {this.state.isRegistered === "-1" && (
                     <>
                       <Button title="Pending..." />
                     </>
                   )}
-                  {event.is_registered === "0" && (
+                  {this.state.isRegistered === "0" && (
                     <>
                       <Button
                         onPress={this.volunteer}
@@ -390,7 +365,7 @@ class EventDetails extends React.Component {
                       />
                     </>
                   )}
-                  {event.is_registered === "1" && (
+                  {this.state.isRegistered === "1" && (
                     <View style={{ flexDirection: "row", }}>
                       <Button
                         containerStyle={{ width: '50%' }}
@@ -401,7 +376,7 @@ class EventDetails extends React.Component {
                         containerStyle={{ width: '50%' }}
                         buttonStyle={{ backgroundColor: 'green' }}
                         onPress={() => { this.checkInOrOut(event.e_orig_title, event.e_organizer) }}
-                        title={this.state.signedIn ? "Sign out" : "Sign in"}
+                        title={this.state.isSignedIn ? "Check out" : "Check in"}
 
                       />
                     </View>
