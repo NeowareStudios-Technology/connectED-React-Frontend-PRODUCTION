@@ -6,15 +6,12 @@ import { sortEventsDesc, sortEventsAsc } from '../constants/Utils'
 import moment from 'moment';
 
 /**
- * Description: Displays list of events
- * Props:
- *  events - Array of events to display
- *  sort - String of sorting order
- *    - "asc": Sort by event date in ascending order (oldest to newest)
- *    - "desc": Sort by event date in descending order (newest to oldest)
- *  overlay - method to call in the parent class in order to retrieve the selected event
- * */
-
+ * Displays list of events
+ * @prop {object}  props - props passed in from parent
+ * @prop {function}  props.overlay - returns the event item that is selected
+ * @prop {array}  props.events - list of events to display
+ * @prop {string}  props.sort - "asc" or "desc" to indicate the sort algorithm used on props.events
+ */
 class EventListItems extends React.PureComponent {
 
   // Method to handle if parent passes the overlay prop

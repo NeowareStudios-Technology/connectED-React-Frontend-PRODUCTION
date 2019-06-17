@@ -16,7 +16,7 @@ import EventDetailsInfo from "./EventDetailsInfo";
 import EventDetailsTeam from "./EventDetailsTeam";
 import EventDetailsUpdates from "./EventDetailsUpdates";
 import User from "../components/User";
-import API from "../constants/API";
+import { registerUser, checkUserInOrOut, deregisterUser } from "../constants/API";
 
 
 class EventDetails extends React.Component {
@@ -29,7 +29,7 @@ class EventDetails extends React.Component {
     };
   }
   componentWillUnmount() {
-    // TODO: pass isRegistered state and isSignedIn state to parent to update event
+    // TODO: pass isRegistered state and isSignedIn state to parent to update event as well as adjust "num_attendees" if open privacy
   }
 
   async initializeState() {
@@ -37,7 +37,7 @@ class EventDetails extends React.Component {
     if (user) {
       this.setState({
         user: user,
-        isRegistered: this.props.event.is_registered
+        isRegistered: parseInt(this.props.event.is_registered)
       }, () => this.updateSignInStatus());
     }
     return true;
@@ -54,65 +54,45 @@ class EventDetails extends React.Component {
     });
   };
 
+  // calls api to register user for event
   volunteer = async () => {
+    // User is not registered
+    if(this.state.isRegistered !== 0){
+      alert('You are already registered for this event')
+      return
+    }
     const { event } = this.props
-    if (
-      event &&
-      !(typeof event.is_registered !== "undefined" &&
-        event.is_registered !== "0")
-    ) {
-      let response = await API.register(event.e_organizer, event.e_orig_title, "both")
-      console.log(response)
-      if (!response.error) {
-        if (event.privacy === "o") {
-          this.setState({ isRegistered: 1 })
-        } else {
-          this.setState({ isRegistered: -1 })
-        }
+
+    let response = await registerUser(event.e_organizer, event.e_orig_title)
+    console.log(response)
+    if (!response.error) {
+      if (event.privacy === "o") {
+        this.setState({ isRegistered: 1 })
       } else {
-        alert(response.error.message)
+        this.setState({ isRegistered: -1 })
       }
+    } else {
+      alert(response.error.message)
     }
   };
 
+  // calls api to de-register user from event
   deregister = async () => {
+    // User is not registered
+    if(this.state.isRegistered === 0){
+      alert('You are already de-registered from the event')
+      return
+    }
     const { event } = this.props
 
-    if (this.props.event) {
-      let isRegistered = false;
-      if (
-        typeof this.props.event.is_registered !== "undefined" &&
-        this.props.event.is_registered !== "0"
-      ) {
-        isRegistered = true;
-      }
-      if (isRegistered) {
-        let token = await User.firebase.getIdToken();
-
-        if (token) {
-          let organizerEmail = this.props.event.e_organizer;
-          let eventOrigName = this.props.event.e_orig_title;
-          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-          try {
-            fetch(url, {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-              }
-            })
-              .then(response => {
-                if (response.ok) {
-                  // TODO: remove event from event list so history re-renders
-                  this.hideDetails()
-                }
-              })
-              .catch(error => { });
-          } catch (error) { }
-        }
-      }
+    let response = await deregisterUser(event.e_organizer, event.e_orig_title)
+    console.log(response)
+    if (!response.error) {
+      this.setState({ isRegistered: 0 })
+    } else {
+      alert(response.error.message)
     }
-  };
+  }
 
   updateSignInStatus = () => {
     let status = this.checkSignIn()
@@ -137,7 +117,7 @@ class EventDetails extends React.Component {
 
   checkInOrOut = async (eventName, email) => {
     try {
-      let { response, error } = await API.checkInOrOut(eventName, email)
+      let { response, error } = await checkUserInOrOut(eventName, email)
       if (error) {
         alert("Server error: " + error.message)
         return
@@ -149,6 +129,7 @@ class EventDetails extends React.Component {
   };
 
   render() {
+    console.log('registered', this.state.isRegistered)
     const { event } = this.props;
     let privacyLabel = event.privacy === "o" ? "Open" : "Private";
     let eventDate = moment(event.date, "MM/DD/YYYY");
@@ -232,26 +213,9 @@ class EventDetails extends React.Component {
               )}
             </View>
             <>
-              <View
-                style={{
-                  flex: 6,
-                  paddingBottom: 12
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    marginBottom: 12
-                  }}
-                >
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      justifyContent: "center"
-                    }}
-                  >
+              <View style={{flex: 6,paddingBottom: 12}}>
+                <View style={{flexDirection: "row", justifyContent: "center", marginBottom: 12}}>
+                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }} >
                     <Button
                       type={this.state.activeTab === 0 ? "solid" : "outline"}
                       onPress={() => {
@@ -282,13 +246,7 @@ class EventDetails extends React.Component {
                       }
                     />
                   </View>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      justifyContent: "center"
-                    }}
-                  >
+                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", marginBottom: 12  }} >
                     <Button
                       onPress={() => {
                         this.setActiveTab(1);
@@ -317,13 +275,7 @@ class EventDetails extends React.Component {
                       }
                     />
                   </View>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      justifyContent: "center"
-                    }}
-                  >
+                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", marginBottom: 12 }} >
                     <Button
                       type={this.state.activeTab === 2 ? "solid" : "outline"}
                       onPress={() => {
@@ -352,21 +304,23 @@ class EventDetails extends React.Component {
                   </View>
                 </View>
                 <View style={{ justifyContent: "flex-end" }}>
-                  {this.state.isRegistered === "-1" && (
+                  {this.state.isRegistered === -1 && (
                     <>
                       <Button title="Pending..." />
                     </>
                   )}
-                  {this.state.isRegistered === "0" && (
+                  {this.state.isRegistered === 0 && (
                     <>
                       <Button
                         onPress={this.volunteer}
                         title="Volunteer"
+                        // title={parseInt(event.num_attendees) < parseInt(event.capacity) ? "Volunteer" : "Event at Capacity"}
+                        // disabled={!(parseInt(event.num_attendees) < parseInt(event.capacity))}
                       />
                     </>
                   )}
-                  {this.state.isRegistered === "1" && (
-                    <View style={{ flexDirection: "row", }}>
+                  {this.state.isRegistered === 1 && (
+                    <View style={{ flexDirection: "row" }}>
                       <Button
                         containerStyle={{ width: '50%' }}
                         onPress={this.deregister}
