@@ -26,7 +26,7 @@ import Accordion from 'react-native-collapsible/Accordion';
 import EventDetails from "../components/EventDetails";
 import AdminEventDetails from "../components/AdminEventDetails";
 import Styles from "../constants/Styles";
-import Utils from "../constants/Utils"
+import { isPast, isToday  } from "../constants/Utils";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -129,7 +129,7 @@ export default class HomeScreen extends React.Component {
                 event.key = type + "-event-" + index;
 
                 // Check if event is past, current, or future
-                if (Utils.isPast(event.date)) {
+                if (isPast(event.date)) {
                   let pastEvents = []
                   if (this.state.pastEvents) {
                     pastEvents = this.state.pastEvents.slice();
@@ -152,7 +152,7 @@ export default class HomeScreen extends React.Component {
                     callback()
                   }
                 }
-                else if (Utils.isToday(event.date)) {
+                else if (isToday(event.date)) {
                   let currentEvents = []
                   if (this.state.currentEvents) {
                     currentEvents = this.state.currentEvents.slice();
