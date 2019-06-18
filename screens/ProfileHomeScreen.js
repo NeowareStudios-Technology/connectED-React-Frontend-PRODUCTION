@@ -309,7 +309,6 @@ export default class HomeScreen extends React.Component {
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
-      // console.log('USER:', user)
       this.setState({ user: user }, () => {
         this.loadUserOpportunities();
       });
@@ -445,12 +444,10 @@ export default class HomeScreen extends React.Component {
   updateEvents = (events, event) => {
     let index = events.findIndex((e) => e.e_orig_title === event.e_orig_title)
     if (index === -1) {
-      console.log('event not found in events', event)
       return null
     }
 
     // if event attendee is no longer regiestered, remove from list of events
-    // user is not an attendee AND event is not a "created" event
     if (event.is_registered === "0" && event.type !== "a") {
       // cut out event from list
       events.splice(index, 1)
@@ -464,39 +461,35 @@ export default class HomeScreen extends React.Component {
 
   // closes the event details and updates state
   closeItem = event => {
-    console.log("CLOSED:", event)
     LayoutAnimation.easeInEaseOut();
 
     if (event) {
       let createdEvents = this.updateEvents(this.state.createdEvents.slice(), event)
-      console.log("created events:", createdEvents)
 
       let events
       switch (event.type) {
         case "a": // admin/created events
           events = this.updateEvents(createdEvents, event)
-          this.setState({ createdEvents: events }, () => console.log("update created"))
+          this.setState({ createdEvents: events })
           break;
         case "f": // future events
           events = this.updateEvents(this.state.futureEvents.slice(), event)
-          console.log(events)
-          this.setState({ futureEvents: events }, () => console.log("update future"))
+          this.setState({ futureEvents: events })
           break;
         case "c": // current events
           events = this.updateEvents(this.state.currentEvents.slice(), event)
-          this.setState({ currentEvents: events }, () => console.log("update current"))
+          this.setState({ currentEvents: events })
           break;
         case "p": // past events
           events = this.updateEvents(this.state.pastEvents.slice(), event)
-          console.log(events)
-          this.setState({ pastEvents: events }, () => console.log("update past"))
+          this.setState({ pastEvents: events })
           break;
         default:
           break;
       }
 
       if (event.type !== "a" && createdEvents) {
-        this.setState({ createdEvents }, () => console.log("update created"))
+        this.setState({ createdEvents })
       }
     }
 

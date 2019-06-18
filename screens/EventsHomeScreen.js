@@ -150,7 +150,7 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              console.log('prefill results', responseData)
+              console.log('PREFILL', responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   const newArray = []
@@ -318,17 +318,10 @@ class EventsHomeScreen extends React.Component {
             Authorization: "Bearer " + token
           }
         }).then(response => {
-          console.log('sign in/out', response)
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              console.log(responseData)
               let text = responseData.response
-              // let title = isSignedIn ? "Sign Out of Event" : "Sign Into Event"
-              // this.setState({
-              //   signInOutMessage: text,
-              //   signInOutTitle: title
-              // })
             } catch (error) { }
           } else {
             alert("Not able to sign in or out of event")
@@ -344,7 +337,6 @@ class EventsHomeScreen extends React.Component {
 
   // closes the event details and updates state
   closeItem = event => {
-    console.log("CLOSED:", event)
     LayoutAnimation.easeInEaseOut();
     let events = this.state.events.slice()
     const index = this.state.carouselFirstItem

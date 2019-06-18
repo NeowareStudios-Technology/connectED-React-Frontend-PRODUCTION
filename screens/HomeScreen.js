@@ -29,7 +29,7 @@ export default class HomeScreen extends React.Component {
     this.setState({ processing: true }, async () => {
       let user = await User.isLoggedIn();
       if (user) {
-        this.props.navigation.navigate("CalendarHome"); // Profile, ProfileHome, CalendarHome
+        this.props.navigation.navigate("Profile"); // Profile, ProfileHome, CalendarHome
       } else {
         this.props.navigation.navigate("SignIn");
       }

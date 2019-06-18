@@ -192,7 +192,6 @@ export default class MyCalendar extends Component {
   loadUserOpportunities = async () => {
     let userEvents = [];
     let token = await User.firebase.getIdToken();
-    console.log("token", token)
     if (token) {
       try {
         let url =
@@ -209,7 +208,6 @@ export default class MyCalendar extends Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
-              console.log(events)
               if (typeof events === "object") {
                 this.setState({ events: events }, () => this.loadEvents())
               } else {
@@ -439,12 +437,10 @@ export default class MyCalendar extends Component {
   updateEvents = (events, event) => {
     let index = events.findIndex((e) => e.e_orig_title === event.e_orig_title)
     if (index === -1) {
-      console.log('event not found in events', event)
       return null
     }
 
     // if event attendee is no longer regiestered, remove from list of events
-    // user is not an attendee AND event is not a "created" event
     if (event.is_registered === "0" && event.key.startsWith('registered')) {
       // cut out event from list
       events.splice(index, 1)
@@ -457,17 +453,17 @@ export default class MyCalendar extends Component {
   }
 
   closeItem = (event) => {
-    console.log("CLOSE", event)
     LayoutAnimation.easeInEaseOut();
 
     if (event) {
       let events
-      if (event.key.startsWith('created')){
+      if (event.key.startsWith('created')) {
         events = this.updateEvents(this.state.userEvents.slice(), event)
         this.setState({ userEvents: events }, () => this.getEventDates())
       } else {
         events = this.updateEvents(this.state.upcomingEvents.slice(), event)
-        this.setState({ upcomingEvents: events }, () => this.getEventDates())      }
+        this.setState({ upcomingEvents: events }, () => this.getEventDates())
+      }
     }
 
     this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
@@ -504,57 +500,57 @@ export default class MyCalendar extends Component {
     return (
 
       <View style={Styles.container}>
-            <>
-              <View style={{ height: screenHeight - 300, backgroundColor: "#3788E0" }}>
-                  <CalendarList
-                    current={() => DateNow()}
-                    pastScrollRange={24}
-                    futureScrollRange={24}
-                    style={{
-                      backgroundColor: "transparent",
-                      paddingTop: 40,
-                    }}
-                    markedDates={this.state.marked}
-                    theme={{
-                      calendarBackground: 'transparent',
-                      textSectionTitleColor: 'white',
-                      dayTextColor: 'white',
-                      todayTextColor: 'black',
-                      textMonthFontSize: 30,
-                      textMonthFontWeight: "bold",
-                      textDayFontSize: 18,
-                      monthTextColor: 'white',
-                      selectedDayBackgroundColor: 'darkblue',
-                      arrowColor: 'white',
-                    }}
-                  />
-              </View>
-              <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
-                <ButtonGroup
-                  onPress={this.updateTab}
-                  selectedIndex={this.state.activeTab}
-                  buttons={buttons}
-                  containerStyle={{ paddingBottom: 0, marginBottom: 0 }}
+        <>
+          <View style={{ height: screenHeight - 300, backgroundColor: "#3788E0" }}>
+            <CalendarList
+              current={() => DateNow()}
+              pastScrollRange={24}
+              futureScrollRange={24}
+              style={{
+                backgroundColor: "transparent",
+                paddingTop: 40,
+              }}
+              markedDates={this.state.marked}
+              theme={{
+                calendarBackground: 'transparent',
+                textSectionTitleColor: 'white',
+                dayTextColor: 'white',
+                todayTextColor: 'black',
+                textMonthFontSize: 30,
+                textMonthFontWeight: "bold",
+                textDayFontSize: 18,
+                monthTextColor: 'white',
+                selectedDayBackgroundColor: 'darkblue',
+                arrowColor: 'white',
+              }}
+            />
+          </View>
+          <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
+            <ButtonGroup
+              onPress={this.updateTab}
+              selectedIndex={this.state.activeTab}
+              buttons={buttons}
+              containerStyle={{ paddingBottom: 0, marginBottom: 0 }}
+            />
+            <View style={Styles.eventListContainer}>
+              {this.state.activeTab === 0 && (
+                <EventListItems
+                  events={this.state.userEvents}
+                  sort="asc"
+                  overlay={this.showAdminEventDetails}
                 />
-                <View style={Styles.eventListContainer}>
-                  {this.state.activeTab === 0 && (
-                    <EventListItems
-                      events={this.state.userEvents}
-                      sort="asc"
-                      overlay={this.showAdminEventDetails}
-                    />
-                  )}
-                  {this.state.activeTab === 1 && (
-                    <EventListItems
-                      events={this.state.upcomingEvents}
-                      sort="asc"
-                      overlay={this.showEventDetails}
-                    />
-                  )}
+              )}
+              {this.state.activeTab === 1 && (
+                <EventListItems
+                  events={this.state.upcomingEvents}
+                  sort="asc"
+                  overlay={this.showEventDetails}
+                />
+              )}
 
-                </View>
-              </View>
-            </>
+            </View>
+          </View>
+        </>
 
       </View>
 

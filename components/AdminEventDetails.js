@@ -27,7 +27,6 @@ class AdminEventDetails extends React.Component {
   }
   acceptOrDenyEventAttendee = async (organizer, title, status, attendee) => {
     let token = await User.firebase.getIdToken();
-    console.log(organizer, title, status, attendee)
     if (token) {
       let url =
         `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizer}/${title}/${status}`;
@@ -44,14 +43,12 @@ class AdminEventDetails extends React.Component {
         body: bodyData
       })
         .then(response => {
-          console.log("accept/deny attendee", response)
           if (response.ok) {
             alert("Thank you for resolving pending requests!")
             // remove attendee from pending. add attendee to attendees if approved
             let event = this.state.newEvent
             event.pending_attendees.splice(event.pending_attendees.indexOf(attendee), 1)
             if (status === "approve") {
-              console.log("add attendee")
               if (typeof event.attendees !== "undefined") {
                 event.attendees.push(attendee)
               } else {
@@ -60,7 +57,7 @@ class AdminEventDetails extends React.Component {
               event.num_attendees += 1
               event.num_pending_attendees -= 1
             }
-            this.setState({ newEvent: event }, () => console.log(this.state))
+            this.setState({ newEvent: event })
           }
         })
         .catch(error => { });
