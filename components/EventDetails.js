@@ -142,9 +142,43 @@ class EventDetails extends React.Component {
         return
       }
       alert("Success! " + response)
-      this.setState({ isSignedIn: !this.state.isSignedIn })
-    } catch (error) {
-    }
+
+      // update newEvent data
+      let { newEvent, user } = this.state
+
+      if (typeof newEvent.signed_in_attendees !== 'undefined') {
+        let i = newEvent.signed_in_attendees.indexOf(user.email)
+        // User was already signed in. sign out user - remove from signed_in_attendees. add to signed_out_attendees.
+        if (i !== -1) {
+          newEvent.signed_in_attendees.splice(i, 1)
+          if (typeof newEvent.signed_out_attendees) {
+            newEvent.signed_out_attendees.push(user.email)
+          } else {
+            newEvent.signed_out_attendees = [user.email]
+          }
+        } else {
+          // user was not in signed in list. sign in user - add user to signed_in_attendees. remove user from signed_out_attendees if applicable.
+          newEvent.signed_in_attendees.push(user.email)
+          if (typeof newEvent.signed_out_attendees !== 'undefined') {
+            let j = newEvent.signed_out_attendees.indexOf(user.email)
+            if (j !== -1) {
+              newEvent.signed_out_attendees.splice(j, 1)
+            }
+          }
+        }
+      } else {
+        // no signed in attendees. create signed in add user to it. remove user from signed out list if applicable
+        newEvent.signed_in_attendees = [user.email]
+        if (typeof newEvent.signed_out_attendees !== 'undefined') {
+          let i = newEvent.signed_out_attendees.indexOf(user.email)
+          if (i !== -1) {
+            newEvent.signed_out_attendees.splice(i, 1)
+          }
+        }
+      }
+
+      this.setState({ isSignedIn: !this.state.isSignedIn, newEvent })
+    } catch (error) { }
   };
 
   handleBackPress = () => {
