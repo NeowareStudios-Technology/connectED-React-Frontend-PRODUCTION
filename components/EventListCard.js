@@ -35,7 +35,7 @@ class EventListCard extends React.Component {
       <>
         {/* The below Card component controls all of the current displayed event card props */}
         <Card
-            //TODO: fix the backgroundColor: 'transparent', borderWidth: 0 to remove that #fff background behind the card image.
+            //DONE: fix the backgroundColor: 'transparent', borderWidth: 0 to remove that #fff background behind the card image.
             // in react-devtools window its toggle inspector, click on the white background, & it's inside the <Card></Card>, third element
             // down, the <RTCView></RTCView> component that has the white background properties!
           containerStyle={{
@@ -47,22 +47,33 @@ class EventListCard extends React.Component {
             // borderBottomLeftRadius: 30,
             // borderTopRightRadius: 30,
             // borderTopLeftRadius: 30,
-            backgroundColor: 'transparent', // mockup
+            backgroundColor: 'transparent', // Oviedo Mall mockup, removes white background behind Card
             borderWidth: 0,
+            top: 0,
           }}
         >
-          <View style={{ height: screenHeight - 200 }}>
+          <View style={{ height: screenHeight - 180 }}>
+            <View style={{ zIndex: 2, top: 15, left: 190, borderColor: '#fff', borderWidth: 2, borderRadius: 50, width: 75, height: 75, backgroundColor: 'rgba(29, 29, 29, .8)', justifyContent: 'center'  }}>
+              <Text style={{ color: '#fff', fontSize: 18, left: 10 }}>JUNE</Text>
+              <Text style={{ color: '#fff', fontSize: 22, left: 20, top: -3 }}>14</Text>
+            </View>
+            <View style={{ zIndex: 2 , top: 410 }}>
+              <Text style={{ color: '#fff', fontSize: 22, left: 5 }}>LAUNCH EVENT</Text>
+              <Text style={{ color: '#fff', fontSize: 17, left: 5 }}>VIEWSTUB</Text>
+            </View>
           {/* This adds the png to fill the entire EventListCard per Oviedo Mall Mockup */}
-          <Image 
+          <Image
             source={require('../assets/images/eventViewStub.png')}
             style={{
+              flex: 1,
+              justifyContent: 'flex-start',
               borderColor: "#fff", // mockup
               borderWidth: 3,  // mockup
-              flex: 1,
               height: 525, //"100%",
               width: 285, // "90%",
               borderRadius: 30,
               marginLeft: -10,
+              marginTop: -130,
             }}
           />
             <View >

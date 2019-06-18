@@ -410,7 +410,7 @@ class EventsHomeScreen extends React.Component {
                         >
                         {/* Add Oviedo Mall User photo here */}
                           <View style={{ flex: 1 }}>
-                            <Image source={{uri: "http://www.arnold.fun/12a/50/50"}}
+                            <Image source={{uri: "http://www.arnold.fun/12a/90/90"}}
                             style={{
                               width: "90%",
                               height: "70%",
@@ -428,7 +428,7 @@ class EventsHomeScreen extends React.Component {
                         </TouchableOpacity>
                         <View>
                           {/* Added the dispalayMallH1 class to change the text color to #fff for Mall mockup */}
-                          <Text style={styles.displayMallH1}>Events</Text>
+                          <Text style={styles.displayMallH1}>EVENTS</Text>
                         </View>
                       </View>
                       <View

@@ -247,10 +247,13 @@ Files worked on:
     line 415- style={{}} modified user image in upper left corner
 
   * /EventListCard.js
-    TODO: add 'LAUNCH EVENT', 'VIEWSTUB' labels & circle w/ date 'July 14' to the EventListCard.js <Image>
+    line 56 - added 'LAUNCH EVENT', 'VIEWSTUB' labels & circle w/ date 'July 14' to the EventListCard.js 
+    TODO: position above components to match Mall mockup
     
     IDEA: check out the original connectED app in emulator, the events screen has text labels on top of the event image
 can copy that code. 
+     EventListCard.js line 177 is start of the Text component for the Month & Day listed on Card
+
 
 
 ** USE THIS CODE SNIPPET**
