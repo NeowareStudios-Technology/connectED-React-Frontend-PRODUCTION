@@ -1,5 +1,5 @@
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, Image, View } from "react-native";
 import {
   createStackNavigator,
   createBottomTabNavigator
@@ -22,12 +22,20 @@ const ProfileHomeStack = createStackNavigator({
 });
 
 ProfileHomeStack.navigationOptions = {
-  tabBarLabel: "Profile",
+  tabBarLabel: " ",  // "Profile", changed for Oviedo Mall Mockup
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-person" : "md-person"}
-    />
+    
+    <View>
+      <Image
+        source={require('../assets/OMIcons/menu_grey.png')}
+        style={{ width: 25, height: 20, marginTop: 5 }}
+      />
+    </View>
+   
+    // <TabBarIcon
+    //   focused={focused}
+    //   name={Platform.OS === "ios" ? "ios-person" : "md-person"}
+    // />
   )
 };
 
@@ -37,12 +45,20 @@ const EventsHomeStack = createStackNavigator({
 });
 
 EventsHomeStack.navigationOptions = {
-  tabBarLabel: "Events",
+  tabBarLabel: " ",  // "Events", changed for Oviedo Mall Mockup
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-list" : "md-list"}
-    />
+
+    <View>
+      <Image
+        source={require('../assets/OMIcons/smartphone_highlighted.png')}
+        style={{ width: 25, height: 30 }}
+      />
+    </View>
+
+    // <TabBarIcon
+    //   focused={focused}
+    //   name={Platform.OS === "ios" ? "ios-list" : "md-list"}
+    // />
   )
 };
 
@@ -52,12 +68,20 @@ const CalendarStack = createStackNavigator({
 });
 
 CalendarStack.navigationOptions = {
-  tabBarLabel: "Calendar",
+  tabBarLabel: " ", // "Calendar", changed for Oviedo Mall Mockup
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-calendar" : "md-calendar"}
-    />
+    
+    <View>
+      <Image
+        source={require('../assets/OMIcons/calendar_grey.png')}
+        style={{ width: 30, height: 30 }}
+      />
+    </View>
+    
+    // <TabBarIcon
+    //   focused={focused}
+    //   name={Platform.OS === "ios" ? "ios-calendar" : "md-calendar"}
+    // />
   )
 };
 
@@ -67,12 +91,20 @@ const TeamsStack = createStackNavigator({
 });
 
 TeamsStack.navigationOptions = {
-  tabBarLabel: "Teams",
+  tabBarLabel: " ", // "Teams", changed for Oviedo Mall
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-people" : "md-people"}
-    />
+
+    <View>
+      <Image
+        source={require('../assets/OMIcons/map_grey.png')}
+        style={{ width: 30, height: 30 }}
+      />
+    </View>
+
+    // <TabBarIcon
+    // focused={focused}
+    // name={Platform.OS === "ios" ? "ios-people" : "md-people"}      
+    // />
   )
 };
 

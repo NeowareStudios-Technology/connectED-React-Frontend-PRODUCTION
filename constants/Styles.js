@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 30,
-    flex:1
+    flex:1,
   },
   displayH4: {
     fontSize: 16,
@@ -48,12 +48,12 @@ const styles = StyleSheet.create({
     borderColor: 'lightgray',
     borderWidth: 1,
     borderRadius: 10,
-},
-eventsContainer: {
-  paddingLeft: 30,
-  paddingRight: 30,
-  paddingTop: 15,
-},
+  },
+  eventsContainer: {
+    paddingLeft: 30,
+    paddingRight: 30,
+    paddingTop: 15,
+  },
 });
 
 export default styles;

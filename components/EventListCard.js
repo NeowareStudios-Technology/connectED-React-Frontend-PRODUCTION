@@ -35,30 +35,49 @@ class EventListCard extends React.Component {
       <>
         {/* The below Card component controls all of the current displayed event card props */}
         <Card
+            //TODO: fix the backgroundColor: 'transparent', borderWidth: 0 to remove that #fff background behind the card image.
+            // in react-devtools window its toggle inspector, click on the white background, & it's inside the <Card></Card>, third element
+            // down, the <RTCView></RTCView> component that has the white background properties!
           containerStyle={{
-            padding: 0,
-            paddingHorizontal: 0,
-            borderWidth: 4,  // mockup
-            borderColor: "#09f532b3", // mockup
-            borderBottomRightRadius: 15,
-            borderBottomLeftRadius: 15,
-            borderTopRightRadius: 15,
-            borderTopLeftRadius: 15,
+            // padding: 0,
+            // paddingHorizontal: 2,
+            // borderWidth: 5,  // mockup
+            // borderColor: "#fff", // mockup
+            // borderBottomRightRadius: 30,
+            // borderBottomLeftRadius: 30,
+            // borderTopRightRadius: 30,
+            // borderTopLeftRadius: 30,
+            backgroundColor: 'transparent', // mockup
+            borderWidth: 0,
           }}
         >
           <View style={{ height: screenHeight - 200 }}>
-            <View style={{ flex: 1 }}>
+          {/* This adds the png to fill the entire EventListCard per Oviedo Mall Mockup */}
+          <Image 
+            source={require('../assets/images/eventViewStub.png')}
+            style={{
+              borderColor: "#fff", // mockup
+              borderWidth: 3,  // mockup
+              flex: 1,
+              height: 525, //"100%",
+              width: 285, // "90%",
+              borderRadius: 30,
+              marginLeft: -10,
+            }}
+          />
+            <View >
+          {/*
               <View
                 style={{
                   flex: 9,
-                  backgroundColor: "#999", // mockup "#124b73", "#09f532b3", 
+                  backgroundColor: "#09f532b3", // mockup "#124b73", "#09f532b3",
                   borderTopRightRadius: 15,
                   borderTopLeftRadius: 15
                 }}
               >
                 <ImageBackground
                   source={{
-                    //uri: "../assets/images/eventViewStub.png" 
+                    //uri: "../assets/images/eventViewStub.png"
                     uri: "data:image/png;base64," + item.e_photo
                   }}
                   style={{
@@ -66,9 +85,24 @@ class EventListCard extends React.Component {
                     height: "101.5%",
                   }}
                   imageStyle={{ borderRadius: 15}}
-
                 >
-                  {/* <View
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: "#ffffff",
+                      fontSize: 21,
+                      paddingRight: 12,
+                      paddingTop: 12,
+                      textAlign: "right",
+                      textShadowOffset: { width: 0.5, height: 0.5 },
+                      textShadowRadius: 2,
+                      textShadowColor: '#000',
+
+                    }}
+                  >
+                    {moment(item.start[0], "hh:mm").format("h:mm a")}
+                  </Text>
+                  <View
                     style={{
                       flex: 1,
                       flexDirection: "column"
@@ -141,7 +175,7 @@ class EventListCard extends React.Component {
                         </Card>
                       </View>
                     </View>
-                  </View> */}
+                  </View> 
                 </ImageBackground>
               </View>
               <View
@@ -204,7 +238,7 @@ class EventListCard extends React.Component {
                       <ActivityIndicator size="small" />
                     </>
                   )}
-              </View>
+              </View> */}
             </View>
           </View>
         </Card>

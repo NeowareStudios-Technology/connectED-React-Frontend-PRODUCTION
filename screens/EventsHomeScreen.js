@@ -97,13 +97,13 @@ class EventsHomeScreen extends React.Component {
   };
 
   searchFilterFunction = text => {
-    const newData = this.arrayholder.filter(item => {      
+    const newData = this.arrayholder.filter(item => {
       const itemData = `${item.e_title.toUpperCase()}`;
        const textData = text.toUpperCase();
-       return itemData.indexOf(textData) > -1;    
+       return itemData.indexOf(textData) > -1;
     });
 
-    this.setState({ events: newData });  
+    this.setState({ events: newData });
   };
 
   loadEvents = () => {
@@ -114,7 +114,7 @@ class EventsHomeScreen extends React.Component {
           this.loadEvent(eventName, index, () => {
             sequence.next();
           });
-          
+
         });
       });
     }
@@ -295,6 +295,7 @@ class EventsHomeScreen extends React.Component {
   }
 
   async componentDidMount() {
+    {/* Disable below to not have to log in??? */}
     let user = await User.isLoggedIn();
     if (user) {
       this.fetchData();
@@ -315,6 +316,7 @@ class EventsHomeScreen extends React.Component {
         activeOpacity={1}
       >
         <EventListCard event={item}/>
+        
       </TouchableOpacity>
     </View>
   );
@@ -344,6 +346,22 @@ class EventsHomeScreen extends React.Component {
             {this.state.activeItem ? (
               <>
                 <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      // fontWeight: "bold",
+                      color: "#ffffff",
+                      fontSize: 21,
+                      paddingRight: 12,
+                      paddingTop: 12,
+                      textAlign: "left",
+                      position: "absolute", // for Mall mockup
+                      // textShadowOffset: { width: 0.5, height: 0.5 },
+                      // textShadowRadius: 2,
+                      // textShadowColor: '#000',
+                    }}
+                    LAUNCH EVENT
+                  >
+                  </Text>
                   <EventDetails
                     event={this.state.activeItem}
                     onClose={this.closeItem}
@@ -377,24 +395,36 @@ class EventsHomeScreen extends React.Component {
                       >
                         {/*
                           Mall user photo can go here in place of `circle +` icon.
-                         The below component controls the 'circle +' icon in the upper left hand corner of the screen 
+                         The below component controls the 'circle +' icon in the upper left hand corner of the screen
                         */}
                         <TouchableOpacity
                           style={{
                             paddingHorizontal: 10,
                             borderRadius: 90,
-                            borderColor: "#000",
-                            borderWidth: 0
+                            borderColor: "transparent",
+                            borderWidth: 2
                           }}
                           onPress={() => {
                             this.props.navigation.navigate("EventCreate");
                           }}
                         >
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
-                            size={50}
-                            color={"#fdf6fab3"}
-                        />
+                        {/* Add Oviedo Mall User photo here */}
+                          <View style={{ flex: 1 }}>
+                            <Image source={{uri: "http://www.arnold.fun/12a/50/50"}}
+                            style={{
+                              width: "90%",
+                              height: "70%",
+                              borderRadius: 50,
+                              backgroundColor: 'transparent',
+                              paddingTop: 10,
+                            }}
+                            />
+                            <Icon.Ionicons
+                              name={Platform.OS === "ios" ? "ios-add-circle-outline" : "md-add-circle-outline"}
+                              size={50}
+                              color={"transparent"} // #fdf6fab3 couldn't get the user image to show w/out this <Icon> being in the code
+                            />
+                          </View>
                         </TouchableOpacity>
                         <View>
                           {/* Added the dispalayMallH1 class to change the text color to #fff for Mall mockup */}
@@ -407,7 +437,8 @@ class EventsHomeScreen extends React.Component {
                           alignItems: "center",
                         }}
                       >
-                        {/* <TouchableOpacity
+                        {/* Commented out the search bar feature to match Ovied Mall mockup.
+                        <TouchableOpacity
                           style={{
                             paddingHorizontal: 10,
                             borderRadius: 90,
@@ -423,30 +454,33 @@ class EventsHomeScreen extends React.Component {
                             size={30}
                           />
                         </TouchableOpacity> */}
+                        
                         {/* Below component is for the gear icon in upper right hand corner  */}
                         <TouchableOpacity
-                          style={{
-                            ImageBackground: "../assets/images/gear_icon.png",
-                            backgroundColor: "#999",
-                            paddingHorizontal: 10,
-                            borderRadius: 90,
-                            borderColor: "#fff",
-                            borderWidth: 0,
-                          }}
                           onPress={() => {
                             console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$TODO: filter')
                           }}
                         >
-                          <Icon.Ionicons
+                          <View>
+                            <Image 
+                              source={require('../assets/images/gear_icon.png')}
+                              style={{
+                                backgroundColor: "#999",
+                                paddingHorizontal: 10,
+                                borderRadius: 90,
+                                borderColor: "#fff",
+                                borderWidth: 0,
+                              }}/>
+                          </View>
+                          {/* <Icon.Ionicons
                             name={Platform.OS === "ios" ? "ios-options" : "md-options"}
                             size={30}
-                          />
+                          /> */}
                         </TouchableOpacity>
 
                       </View>
                     </View>
                     <View style={{ flex: 10 }}>
-                      <Image source={require('../assets/images/eventViewStub.png')} style={[styles.image, { width: screenWidth }]} />
                     {/* Commented out the below Search Input feature for Mall mockup */}
                     {/* <View style={{
                       flexDirection: 'row',
@@ -461,7 +495,7 @@ class EventsHomeScreen extends React.Component {
                         name={Platform.OS === "ios" ? "ios-search" : "md-search"}
                         size={20}
                         style={{paddingTop: 0}}
-                        
+
                       />
                       <Input
                         placeholder="Search Events"
@@ -470,7 +504,7 @@ class EventsHomeScreen extends React.Component {
                         autoCorrect={false}
                       />
                     </View> */}
-                    
+
 
                       {this.state.loading ? (
                         <>
@@ -503,6 +537,9 @@ class EventsHomeScreen extends React.Component {
                                   sliderWidth={screenWidth}
                                   windowSize={280}
                                 />
+                                {/* Adds the png but places it on top of the <ScrollView></ScrollView> component */}
+                                    
+
                               </>
                             ) : (
                                 <>

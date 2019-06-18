@@ -109,8 +109,8 @@ class EventDetails extends React.Component {
                         fontSize: 20,
                         paddingVertical: 6,
                       }}
-                    > 
-                    titleaskjd;coaisjd;oaijsdo;ciajdos;cj;asoicdjaios;djc
+                    >
+                    title
                     </Text>
                   </View> */}
                   <View style={{ flex: 2 }} />
@@ -237,15 +237,18 @@ class EventDetails extends React.Component {
                         width: 40
                       }}
                       icon={
-                        <Icon.Ionicons
-                          style={{
-                            color: this.state.activeTab === 1 ? "#fff" : "#ccc"
-                          }}
-                          name={
-                            Platform.OS === "ios" ? "ios-people" : "md-people"
-                          }
-                          size={32}
+                        <Image
+                          source={require('../assets/OMIcons/menu_highlighted.png' )}
                         />
+                        // <Icon.Ionicons
+                        //   style={{
+                        //     color: this.state.activeTab === 1 ? "#fff" : "#ccc"
+                        //   }}
+                        //   name={
+                        //     Platform.OS === "ios" ? "ios-people" : "md-people"
+                        //   }
+                        //   size={32}
+                        // />
                       }
                     />
                   </View>
