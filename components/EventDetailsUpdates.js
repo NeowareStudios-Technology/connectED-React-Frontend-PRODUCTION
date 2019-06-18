@@ -3,17 +3,11 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableOpacity,
-  Platform,
-  Image,
-  ImageBackground,
   ActivityIndicator
 } from "react-native";
-import { Button, Card } from "react-native-elements";
-import { Icon } from "expo";
+import { Card } from "react-native-elements";
 import moment from "moment";
 import User from "./User";
-import AppData from "../constants/Data";
 
 class EventDetailsUpdates extends React.Component {
   constructor(props) {
@@ -69,11 +63,11 @@ class EventDetailsUpdates extends React.Component {
                     })
                   }
                 }
-              } catch (error) {}
+              } catch (error) { }
             }
           })
-          .catch(error => {});
-      } catch (error) {}
+          .catch(error => { });
+      } catch (error) { }
     }
   };
 
@@ -93,56 +87,54 @@ class EventDetailsUpdates extends React.Component {
             </View>
           </>
         ) : (
-          <>
-            <View style={{ paddingBottom: 24 }}>
+            <View style={{ flex: 1}}>
               {this.state.updates.length > 0 ? (
                 <>
                   <Text style={this.styles.title}>{this.props.event.e_title}</Text>
-                  <Text style={{ 
-                    marginBottom: 4, 
-                    fontSize: 20, 
-                    marginBottom: 5, 
+                  <Text style={{
+                    marginBottom: 4,
+                    fontSize: 20,
+                    marginBottom: 5,
                     color: 'green',
-                    fontWeight: 'bold' 
+                    fontWeight: 'bold'
                   }}>
                     Latest Updates:
                   </Text>
-                  <ScrollView contentContainerStyle={{ paddingVertical: 12 }}>
-                    {this.state.updates.slice(0).reverse().map((update, index) => {
-                      return (
-                        <View
-                          key={"update-" + index}
-                          style={{ marginBottom: 0 }}
-                        >
-                          <Card containerStyle={{ paddingVertical: 8 }}>
-                            <Text>{update.update}</Text>
-                            <Text>
-                              {moment(update.time, "MM/DD/YYYY-HH:mm").format(
-                                "M/D h:mm a"
-                              )}
-                            </Text>
-                          </Card>
-                        </View>
-                      );
-                    })}
+                  <ScrollView>
+                    <View>
+                      {this.state.updates.slice(0).reverse().map((update, index) => {
+                        return (
+                          // <View
+                          //   key={"update-" + index}
+                          //   style={{ marginBottom: 0 }}
+                          // >
+                            <Card key={"update-" + index} containerStyle={{ paddingVertical: 8 }}>
+                              <Text>{update.update}</Text>
+                              <Text>
+                                {moment.utc(update.time, "MM/DD/YYYY-HH:mmZ").local().format("M/D h:mm a")}
+                              </Text>
+                            </Card>
+                          // </View>
+                        );
+                      })}
+                    </View>
                   </ScrollView>
                 </>
               ) : (
-                <>
-                  <View>
-                    <Text style={this.styles.title}>{this.props.event.e_title}</Text>
-                    <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
-                    <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
-                  </View>
-                </>
-              )}
+                  <>
+                    <View>
+                      <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                      <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
+                      <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
+                    </View>
+                  </>
+                )}
             </View>
-          </>
-        )}
+          )}
       </>
     );
   }
-  styles={
+  styles = {
     title: {
       fontSize: 26,
       marginBottom: 10,

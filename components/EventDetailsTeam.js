@@ -3,11 +3,6 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableOpacity,
-  Platform,
-  Image,
-  ImageBackground,
-  ActivityIndicator
 } from "react-native";
 
 

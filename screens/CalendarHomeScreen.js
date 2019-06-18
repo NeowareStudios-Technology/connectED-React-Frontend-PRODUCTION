@@ -1,28 +1,22 @@
 import React, { Component } from 'react';
 import {
-  ActivityIndicator,
-  Image,
-  ImageBackground,
-  Platform,
-  ScrollView,
-  StyleSheet,
   Dimensions,
   Text,
-  TouchableOpacity,
   View,
-  FlatList,
   LayoutAnimation
 } from "react-native";
-import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
+import { ButtonGroup } from "react-native-elements";
+import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
 import moment from "moment"
-import { Icon } from "expo";
+
 import User from "../components/User";
 import Sequencer from "../components/Sequencer";
-import uuidv4 from 'uuid/v4';
+import EventDetails from '../components/EventDetails';
+import EventListItems from '../components/EventListItems';
+import AdminEventDetails from '../components/AdminEventDetails';
+import Styles from "../constants/Styles";
 
 let screenHeight = Dimensions.get('window').height;
-import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
-import EventDetails from '../components/EventDetails';
 
 export default class MyCalendar extends Component {
   static navigationOptions = {
@@ -40,7 +34,11 @@ export default class MyCalendar extends Component {
       userEvents: null, // events created by user
       upcomingEvents: null, // past events the user has volunteered for
       activeTab: 0,
-      loading: true
+      loading: true,
+      adminEventDetailVisible: false,
+      eventDetailVisible: false,
+      signInOutTitle: "Sign in to Event",
+      signInOutMessage: null
     };
     this.updateTab = this.updateTab.bind(this)
   }
@@ -74,7 +72,7 @@ export default class MyCalendar extends Component {
                   userEvents = this.state.userEvents.slice();
                 }
                 let event = responseData;
-                event.key = "user-event-" + uuidv4();
+                event.key = "event-" + index;
                 userEvents.push(event);
                 this.setState({
                   userEvents: userEvents,
@@ -122,7 +120,7 @@ export default class MyCalendar extends Component {
                   upcomingEvents = this.state.upcomingEvents.slice();
                 }
                 let event = responseData;
-                event.key = "past-event-" + uuidv4();
+                event.key = "event-" + index;
                 upcomingEvents.push(event);
                 this.setState(
                   {
@@ -160,8 +158,7 @@ export default class MyCalendar extends Component {
   }
 
   loadEvents = () => {
-    console.log("Calendar Events", this.state.events)
-    // TODO: Don't include duplicate events. only fetch the event once
+    // console.log("Calendar Events", this.state.events)
     let sequence = new Sequencer();
     let registeredEvents = this.state.events.registered_events
     let userEvents = this.state.events.created_events
@@ -358,7 +355,7 @@ export default class MyCalendar extends Component {
       try {
         let url =
           `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
-          console.warn(url)
+        console.warn(url)
         fetch(url, {
           method: "GET",
           headers: {
@@ -369,14 +366,14 @@ export default class MyCalendar extends Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              let text= responseData.response
+              let text = responseData.response
               let title = ""
-              if (text.includes('in')){
+              if (text.includes('in')) {
                 let title = "Sign Out of Event"
                 alert(text)
                 this.setState({
                   signInOutMessage: text,
-                  signInOutTitle: title  
+                  signInOutTitle: title
                 })
               } else {
                 let title = "Sign Into Event"
@@ -386,7 +383,7 @@ export default class MyCalendar extends Component {
                   signInOutTitle: title
                 })
               }
-              
+
             } catch (error) { }
           } else {
             alert("Not able to sign in or out of event")
@@ -438,6 +435,47 @@ export default class MyCalendar extends Component {
     this.setState({ marked: obj });
   }
 
+  showEventDetails = (event) => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ eventDetailVisible: true, activeItem: event })
+  }
+  showAdminEventDetails = (event) => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ adminEventDetailVisible: true, activeItem: event })
+  }
+  hideDetails = () => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
+  };
+  renderEventDetails = () => {
+    return (
+      <View style={Styles.contentContainer}>
+        <EventDetails
+          event={this.state.activeItem}
+          onClose={this.hideDetails}
+          onVolunteer={() => {
+            this.volunteer();
+          }}
+          onDeregister={() => {
+            this.deregister();
+          }}
+          signInOrOut={(email, name) => {
+            this.signInOrOut(name, email);
+          }}
+          title={this.state.signInOutTitle}
+        />
+      </View>
+
+    )
+  }
+  renderAdminEventDetails = () => {
+    return (
+      <View style={Styles.contentContainer}>
+        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+      </View>
+    )
+  }
+
   render() {
     let sortedEvents;
     if (!this.state.userEvents) {
@@ -452,10 +490,17 @@ export default class MyCalendar extends Component {
       sortedUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
     }
 
+    if (this.state.eventDetailVisible) {
+      return (this.renderEventDetails())
+    }
+    if (this.state.adminEventDetailVisible) {
+      return (this.renderAdminEventDetails())
+    }
+
     const buttons = ["My Opportunities", "Volunteering"];
     return (
 
-      <View style={styles.container}>
+      <View style={Styles.container}>
         {this.state.activeItem ? (
           <>
             <View style={{ flex: 1 }}>
@@ -468,7 +513,7 @@ export default class MyCalendar extends Component {
                 onDeregister={() => {
                   this.deregister();
                 }}
-                signInOrOut={(email, name)=>{
+                signInOrOut={(email, name) => {
                   this.signInOrOut(email, name);
                 }}
               />
@@ -531,124 +576,30 @@ export default class MyCalendar extends Component {
                   buttons={buttons}
                   containerStyle={{ paddingBottom: 0, marginBottom: 0 }}
                 />
-                <View style={styles.eventsContainer}>
+                <View style={Styles.eventListContainer}>
                   {this.state.activeTab === 0 && (
-                    <View style={{ flex: 1 }}>
-                      {sortedEvents ? (
-
-                        <FlatList
-                          data={sortedEvents}
-                          keyExtractor={this._keyExtractor}
-                          renderItem={({ item, index }) =>
-                            <TouchableOpacity
-                              onPress={() => {
-                                this.openItem(item, index);
-                              }}
-                              activeOpacity={1}
-                            >
-                              <View style={styles.eventListing}>
-                                <View style={{ width: 50, height: 50, backgroundColor: '#275FBC' }}>
-                                  <Image style={{ flex: 1 }} resizeMode='cover' source={{ uri: "data:image/png;base64," + item.e_photo }}></Image>
-                                </View>
-                                <View style={{
-                                  marginLeft: 10,
-                                  paddingLeft: 10,
-                                  borderLeftColor: 'gray',
-                                  borderLeftWidth: 2
-                                }}>
-                                  <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{item.e_title}</Text>
-                                  <Text>{moment(item.date, "MM/DD/YYYY").format("MMM Do")}</Text>
-                                  <Text>{item.start[0]}</Text>
-                                </View>
-                              </View>
-                            </TouchableOpacity>
-                          }
-                        />
-
-
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
-                    </View>
+                    <EventListItems
+                      events={this.state.userEvents}
+                      sort="asc"
+                      overlay={this.showAdminEventDetails}
+                      signInOrOut={(email, name) => {
+                        this.signInOrOut(email, name);
+                      }}
+                    />
                   )}
                   {this.state.activeTab === 1 && (
-                    <>
-                      {sortedUpcomingEvents ? (
-
-                        <FlatList
-                          data={sortedUpcomingEvents}
-                          keyExtractor={this._keyExtractor}
-                          renderItem={({ item, index }) =>
-                            <TouchableOpacity
-                              onPress={() => {
-                                this.openItem(item, index);
-                              }}
-                              activeOpacity={1}
-                            >
-                              <View style={styles.eventListing}>
-                                <View style={{ width: 50, height: 50, backgroundColor: '#275FBC' }}>
-                                  <Image style={{ flex: 1 }} resizeMode='cover' source={{ uri: "data:image/png;base64," + item.e_photo }}></Image>
-                                </View>
-                                <View style={{
-                                  marginLeft: 10,
-                                  paddingLeft: 10,
-                                  borderLeftColor: 'gray',
-                                  borderLeftWidth: 2
-                                }}>
-                                  <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{item.e_title}</Text>
-                                  <Text>{moment(item.date, "MM/DD/YYYY").format("MMM Do")}</Text>
-                                  <Text>{item.start[0]}</Text>
-                                </View>
-                              </View>
-                            </TouchableOpacity>
-
-                          }
-                        />
-
-                      ) : (
-                          <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
-                          />
-                        )}
-
-
-                    </>
+                    <EventListItems
+                      events={this.state.upcomingEvents}
+                      sort="asc"
+                      overlay={this.showEventDetails}
+                      signInOrOut={(email, name) => {
+                        this.signInOrOut(email, name);
+                      }}
+                    />
                   )}
 
                 </View>
               </View>
-
-              {/* <View style={styles.eventsContainer}>
-                <Text style={styles.subtitle}>Volunteering</Text>
-                <ScrollView >
-                    <FlatList
-                        data={DummyData}
-                        keyExtractor={this._keyExtractor}
-                        renderItem={({item}) => 
-                            <View style={styles.eventListing}>
-                                <View style={{width: 50, height: 50, backgroundColor: '#275FBC'}}/>
-                                <View style={{
-                                    marginLeft:10,
-                                    paddingLeft:10,
-                                    borderLeftColor: 'gray',
-                                    borderLeftWidth: 2
-                                }}>
-                                    <Text style={{fontWeight: 'bold', fontSize: 20}}>{item.eventName}</Text>
-                                    <Text>{item.date}</Text>
-                                    <Text>{item.time}</Text>
-                                </View>
-                            </View>
-                        }
-                    />
-        
-                </ScrollView>
-            </View> */}
             </>
           )}
       </View>
@@ -656,48 +607,3 @@ export default class MyCalendar extends Component {
     );
   }
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    //   backgroundColor: "#3788E0"
-  },
-  eventsContainer: {
-    flex: 1,
-    backgroundColor: "#eee",
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 10,
-  },
-  contentContainer: {
-    paddingTop: 12
-  },
-  largeNumber: {
-    fontSize: 30,
-    fontWeight: "bold"
-  },
-  subtitle: {
-    fontSize: 22,
-    color: 'white',
-    width: 180,
-    marginBottom: 5,
-  },
-  largeNumberCaption: {
-    fontSize: 14,
-    marginTop: 3,
-    color: "#b0b0b0"
-  },
-  eventListing: {
-    backgroundColor: 'white',
-    flex: 1,
-    flexDirection: 'row',
-    color: 'black',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginBottom: 10,
-    borderColor: 'white',
-    borderWidth: 2,
-    borderRadius: 5,
-  }
-});

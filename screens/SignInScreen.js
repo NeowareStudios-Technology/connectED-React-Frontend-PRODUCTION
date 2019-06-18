@@ -31,7 +31,8 @@ export default class SignInScreen extends React.Component {
       errors: {
         email: [],
         password: []
-      }
+      },
+      loggingIn: false
     };
   }
   static navigationOptions = {
@@ -40,7 +41,7 @@ export default class SignInScreen extends React.Component {
 
   listenForAuthChangeAndTriggerFirebaseLogin = () => {
     if (!this.state.isLoggedIn && this.state.loginData) {
-      console.log("Listing for auth change", this.state);
+      console.log("Listening for auth change", this.state);
       /**
        * Listen for authentication state to change. If we receive a user
        * get the user token and post the user profile to the /profiles endpoint.
@@ -50,6 +51,9 @@ export default class SignInScreen extends React.Component {
           User.login(user).then(login => {
             if (login) {
               this.props.navigation.navigate("ProfileHome");
+            }
+            else{
+              this.setState({loggingIn: false})
             }
           });
         }
@@ -80,8 +84,9 @@ export default class SignInScreen extends React.Component {
   };
 
   login = () => {
-    let email = this.state.email;
-    let password = this.state.password;
+    // disable button
+    let email = this.state.email.trim();
+    let password = this.state.password.trim();
 
     let sequence = new Sequencer();
     sequence.errors = {};
@@ -120,7 +125,10 @@ export default class SignInScreen extends React.Component {
 
     sequence.onStop = () => {
       if (Object.keys(sequence.errors).length > 0) {
-        this.setState({ errors: sequence.errors });
+        this.setState({
+          errors: sequence.errors,
+          loggingIn: false
+        });
       } else {
         this.setState({ errors: { email: [], password: [] } });
       }
@@ -129,7 +137,7 @@ export default class SignInScreen extends React.Component {
     sequence.next();
   };
 
-  componentDidMount() {}
+  componentDidMount() { }
 
   render() {
     return (
@@ -192,7 +200,11 @@ export default class SignInScreen extends React.Component {
                 />
               </Card>
               <View style={{ paddingHorizontal: 12, marginTop: 18 }}>
-                <Button title="Sign In" onPress={this.login} />
+                <Button
+                  title="Sign In"
+                  onPress={() => { this.setState({ loggingIn: true }); this.login() }}
+                  disabled={this.state.loggingIn}
+                />
               </View>
               <View>
                 <Text

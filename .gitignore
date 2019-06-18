@@ -86,3 +86,4 @@ typings/
 .expo/
 packager-info.json
 .vscode/
+.expo/packager-info.json

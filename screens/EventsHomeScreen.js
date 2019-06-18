@@ -42,11 +42,23 @@ class EventsHomeScreen extends React.Component {
       eventNameArray: [],
       showSearchBar: false,
       signInOutTitle: "Sign in to Event",
-      signInOutMessage: null
-
+      signInOutMessage: null,
+      user: null
     };
     this.arrayholder = [];
 
+  }
+  async loadUser() {
+    let user = await User.isLoggedIn();
+    if (user) {
+      // console.log('USER:', user)
+      this.setState({ user: user });
+    }
+  }
+
+  componentDidMount() {
+    this.loadUser()
+    this.fetchData()
   }
 
   loadEvent = async (eventName, index, callback) => {
@@ -281,13 +293,24 @@ class EventsHomeScreen extends React.Component {
       }
     }
   };
-  signInOrOut = async (name, email) => {
+  checkSignIn = () => {
+    if (!this.state.user) {
+      return false
+    }
+    let userEmail = this.state.user.email
+    let signedInAttendees = this.state.activeItem.signed_in_attendees
+    if (!signedInAttendees) {
+      return false
+    }
+    return signedInAttendees.includes(userEmail)
+  }
+  signInOrOut = async (eventName, email) => {
+    let isSignedIn = this.checkSignIn();
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
         let url =
-          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
-          console.warn(url)
+          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${eventName}/qr`;
         fetch(url, {
           method: "GET",
           headers: {
@@ -295,27 +318,17 @@ class EventsHomeScreen extends React.Component {
             Authorization: "Bearer " + token
           }
         }).then(response => {
+          console.log('sign in/out', response)
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              let text= responseData.response
-              let title = ""
-              if (text.includes('in')){
-                let title = "Sign Out of Event"
-                alert(text)
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title  
-                })
-              } else {
-                let title = "Sign Into Event"
-                alert(text)
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title
-                })
-              }
-              
+              console.log(responseData)
+              let text = responseData.response
+              // let title = isSignedIn ? "Sign Out of Event" : "Sign Into Event"
+              // this.setState({
+              //   signInOutMessage: text,
+              //   signInOutTitle: title
+              // })
             } catch (error) { }
           } else {
             alert("Not able to sign in or out of event")
@@ -329,20 +342,20 @@ class EventsHomeScreen extends React.Component {
     this.setState({ activeItem: item, carouselFirstItem: index });
   };
 
-  closeItem = item => {
+  // closes the event details and updates state
+  closeItem = event => {
+    console.log("CLOSED:", event)
     LayoutAnimation.easeInEaseOut();
-    this.setState({ activeItem: null });
+    let events = this.state.events.slice()
+    const index = this.state.carouselFirstItem
+
+    events[index] = event
+
+    this.setState({ events, activeItem: null })
   };
 
   closeEventSearch = () => {
     this.setState({ showSearchBar: false })
-  }
-
-  async componentDidMount() {
-    let user = await User.isLoggedIn();
-    if (user) {
-      this.fetchData();
-    }
   }
 
   _renderItem = ({ item, index }) => (
@@ -398,9 +411,10 @@ class EventsHomeScreen extends React.Component {
                     onDeregister={() => {
                       this.deregister();
                     }}
-                    signInOrOut={(email, name)=>{
-                      this.signInOrOut(email, name);
+                    signInOrOut={(name, email) => {
+                      this.signInOrOut(name, email);
                     }}
+
                   />
                 </View>
               </>

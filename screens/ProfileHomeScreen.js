@@ -25,6 +25,8 @@ import moment from 'moment';
 import Accordion from 'react-native-collapsible/Accordion';
 import EventDetails from "../components/EventDetails";
 import AdminEventDetails from "../components/AdminEventDetails";
+import Styles from "../constants/Styles";
+import { isPast, isToday  } from "../constants/Utils";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -50,15 +52,12 @@ export default class HomeScreen extends React.Component {
       activeItem: null,
       adminEventDetailVisible: false,
       eventDetailVisible: false,
-      signInOutTitle: "Sign in to Event",
-      signInOutMessage: null
+      // signInOutTitle: "Sign in to Event",
+      // signInOutMessage: null,
     };
   }
-  updateUser = (user) => {
-    this.setState({ user: user })
-  }
 
-  // loads any events the user created and sorts by date
+  // loads any events the user created
   loadCreatedEvent = async (eventName, index, callback) => {
     // console.log("LOAD CREATED EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
@@ -83,7 +82,7 @@ export default class HomeScreen extends React.Component {
                   createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
-                event.key = "event-" + index;
+                event.key = "created-event-" + index;
                 createdEvents.push(event);
                 this.setState(
                   {
@@ -99,10 +98,6 @@ export default class HomeScreen extends React.Component {
             } catch (error) { }
           } else {
             // Response from server not ok
-            try {
-              let errorData = JSON.parse(response._bodyText);
-              // console.log(eventName + " " + errorData.error.message)
-            } catch (error) { }
             callback();
           }
         });
@@ -110,39 +105,111 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  updateUser() {
-    this.loadUser()
-  }
+  // loads any events the user is registered to volunteer and sorts into past, current, future event
+  loadAndSortEventByType = async (eventName, index, type, callback) => {
+    // console.log("LOAD REG EVENT - " + eventName)
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                let event = responseData;
+                event.key = type + "-event-" + index;
 
-  // Takes the array of user opportunities and loads and sorts each event
-  loadEvents = () => {
-    // TODO: Don't include duplicate events. only fetch the event once
-    let sequence = new Sequencer();
-    let registeredEvents = this.state.events.registered_events
-    let createdEvents = this.state.events.created_events
-    if (registeredEvents && registeredEvents.length > 0) {
-      registeredEvents.map((eventName, index) => {
-        eventName = eventName.replace("_", "/")
-        sequence.promise(() => {
-          this.loadRegEvent(eventName, index, () => {
-            sequence.next();
-          });
+                // Check if event is past, current, or future
+                if (isPast(event.date)) {
+                  let pastEvents = []
+                  if (this.state.pastEvents) {
+                    pastEvents = this.state.pastEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = pastEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    pastEvents.push(event);
+                    this.setState(
+                      {
+                        pastEvents: pastEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+                else if (isToday(event.date)) {
+                  let currentEvents = []
+                  if (this.state.currentEvents) {
+                    currentEvents = this.state.currentEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = currentEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    currentEvents.push(event);
+                    this.setState(
+                      {
+                        currentEvents: currentEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+                else {
+                  let futureEvents = []
+                  if (this.state.futureEvents) {
+                    futureEvents = this.state.futureEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = futureEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    futureEvents.push(event);
+                    this.setState(
+                      {
+                        futureEvents: futureEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+              }
+            } catch (error) { }
+          } else {
+            // Response from server not ok
+            callback();
+          }
         });
-      });
+      } catch (error) { }
     }
-    if (createdEvents && createdEvents.length > 0) {
-      createdEvents.map((eventName, index) => {
-        eventName = eventName.replace("_", "/")
-        sequence.promise(() => {
-          this.loadCreatedEvent(eventName, index, () => {
-            sequence.next();
-          });
-        });
-      });
-    }
-    sequence.next();
   };
-
+/* NOTE: loadAndSortEventByType combined the following two functions
+  // loads any events the user is registered to volunteer and sorts into past, current, future event
   loadRegEvent = async (eventName, index, callback) => {
     // console.log("LOAD REG EVENT - " + eventName)
     let token = await User.firebase.getIdToken();
@@ -163,79 +230,242 @@ export default class HomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 let event = responseData;
-                event.key = "event-" + index;
+                event.key = "registered-event-" + index;
 
-                // Check if event is past, current or future
-                let now = moment()
-                let eventDate = moment(responseData.date, "MM/DD/YYYY")
-
-                if (this.isPast(now, eventDate)) {
+                // Check if event is past, current, or future
+                if (Utils.isPast(event.date)) {
                   let pastEvents = []
                   if (this.state.pastEvents) {
                     pastEvents = this.state.pastEvents.slice();
                   }
-                  pastEvents.push(event);
-                  this.setState(
-                    {
-                      pastEvents: pastEvents,
-                      loading: false
-                    },
-                    () => {
-                      callback();
-                    }
-                  );
-                } else if (this.isFuture(now, eventDate)) {
-                  let futureEvents = []
-                  // keep state immutable by using slice to return new array
-                  if (this.state.futureEvents) {
-                    futureEvents = this.state.futureEvents.slice();
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = pastEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    pastEvents.push(event);
+                    this.setState(
+                      {
+                        pastEvents: pastEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
                   }
-                  futureEvents.push(event);
-                  this.setState(
-                    {
-                      futureEvents: futureEvents,
-                      loading: false
-                    },
-                    () => {
-                      callback();
-                    }
-                  );
-                } else {
+                  else {
+                    callback()
+                  }
+                }
+                else if (Utils.isToday(event.date)) {
                   let currentEvents = []
-                  // keep state immutable by using slice to return new array
                   if (this.state.currentEvents) {
                     currentEvents = this.state.currentEvents.slice();
                   }
-                  currentEvents.push(event);
-                  this.setState(
-                    {
-                      currentEvents: currentEvents,
-                      loading: false
-                    },
-                    () => {
-                      callback();
-                    });
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = currentEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    currentEvents.push(event);
+                    this.setState(
+                      {
+                        currentEvents: currentEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+                else {
+                  let futureEvents = []
+                  if (this.state.futureEvents) {
+                    futureEvents = this.state.futureEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = futureEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    futureEvents.push(event);
+                    this.setState(
+                      {
+                        futureEvents: futureEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
                 }
               }
             } catch (error) { }
           } else {
             // Response from server not ok
-            try {
-              let errorData = JSON.parse(response._bodyText);
-              // console.log(eventName + " " + errorData.error.message)
-            } catch (error) { }
             callback();
           }
         });
       } catch (error) { }
     }
   };
+  // loads any events the user completed/attended and sorts into past, current
+  loadCompEvent = async (eventName, index, callback) => {
+    // console.log("LOAD COMPLETED EVENT - " + eventName)
 
-  isCurrent = (today, date) => date.isSame(today, 'day')
+    let token = await User.firebase.getIdToken();
+    if (token) {
+      try {
+        let url =
+          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
+          eventName;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          }
+        }).then(response => {
+          if (response.ok) {
+            try {
+              let responseData = JSON.parse(response._bodyText);
+              if (responseData) {
+                let event = responseData;
+                event.key = "completed-event-" + index;
 
-  isPast = (today, date) => date.isBefore(today, 'day')
+                // Check if event is past, current, or future
+                if (Utils.isPast(event.date)) {
+                  let pastEvents = []
+                  if (this.state.pastEvents) {
+                    pastEvents = this.state.pastEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = pastEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    pastEvents.push(event);
+                    this.setState(
+                      {
+                        pastEvents: pastEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+                else if (Utils.isToday(event.date)) {
+                  let currentEvents = []
+                  if (this.state.currentEvents) {
+                    currentEvents = this.state.currentEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = currentEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    currentEvents.push(event);
+                    this.setState(
+                      {
+                        currentEvents: currentEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+                else {
+                  let futureEvents = []
+                  if (this.state.futureEvents) {
+                    futureEvents = this.state.futureEvents.slice();
+                  }
+                  // Doesn't add duplicates if titles match
+                  let alreadyIncluded = futureEvents.some(e => e.e_orig_title === event.e_orig_title)
+                  if (!alreadyIncluded) {
+                    futureEvents.push(event);
+                    this.setState(
+                      {
+                        futureEvents: futureEvents,
+                        loading: false
+                      },
+                      () => {
+                        callback();
+                      }
+                    );
+                  }
+                  else {
+                    callback()
+                  }
+                }
+              } else {
+                callback()
+              }
 
-  isFuture = (today, date) => date.isAfter(today, 'day')
+            } catch (error) {
+              // error parsing response
+            }
+          } else {
+            // Response from server not ok
+            callback();
+          }
+        });
+      } catch (error) { }
+    }
+  }
+*/
+
+  // Takes the array of user opportunities and loads and sorts each event
+  loadEvents = () => {
+    let sequence = new Sequencer();
+    let registeredEvents = this.state.events.registered_events
+    let createdEvents = this.state.events.created_events
+    let completedEvents = this.state.events.completed_events;
+
+    // Handle events the user is registered to volunteer
+    if (registeredEvents && registeredEvents.length > 0) {
+      registeredEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadAndSortEventByType(eventName, index, "registered", () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+    // Handle events created by the user
+    if (createdEvents && createdEvents.length > 0) {
+      createdEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadCreatedEvent(eventName, index, () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+    // Handle events the user has completed/attended (aka signed into)
+    if (completedEvents && completedEvents.length > 0) {
+      completedEvents.map((eventName, index) => {
+        eventName = eventName.replace("_", "/")
+        sequence.promise(() => {
+          this.loadAndSortEventByType(eventName, index, "completed", () => {
+            sequence.next();
+          });
+        });
+      });
+    }
+
+    sequence.next();
+  };
 
   loadUserOpportunities = async () => {
     let createdEvents = [];
@@ -278,6 +508,7 @@ export default class HomeScreen extends React.Component {
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
+      // console.log('USER:', user)
       this.setState({ user: user }, () => {
         this.loadUserOpportunities();
       });
@@ -291,7 +522,6 @@ export default class HomeScreen extends React.Component {
 
   navigateToPage = (page) => {
     this.props.navigation.navigate(page, { loadUser: this.loadUser });
-    // this.props.navigation.navigate("ProfileHome", {user: this.state.profileData});
     this.setState({ open: false })
   }
 
@@ -308,160 +538,151 @@ export default class HomeScreen extends React.Component {
   updateTab = (activeTab) => {
     this.setState({ activeTab })
   }
-  volunteer = async () => {
-    if (this.state.activeItem) {
-      let isRegistered = false;
-      if (
-        typeof this.state.activeItem.is_registered !== "undefined" &&
-        this.state.activeItem.is_registered !== "0"
-      ) {
-        isRegistered = true;
-      }
-      if (!isRegistered) {
-        let token = await User.firebase.getIdToken();
+  // volunteer = async () => {
+  //   if (this.state.activeItem) {
+  //     let isRegistered = false;
+  //     if (
+  //       typeof this.state.activeItem.is_registered !== "undefined" &&
+  //       this.state.activeItem.is_registered !== "0"
+  //     ) {
+  //       isRegistered = true;
+  //     }
+  //     if (!isRegistered) {
+  //       let token = await User.firebase.getIdToken();
 
-        if (token) {
-          let organizerEmail = this.state.activeItem.e_organizer;
-          let eventOrigName = this.state.activeItem.e_orig_title;
-          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-          let putData = {
-            user_action: "both"
-          };
-          try {
-            let bodyData = JSON.stringify(putData);
-            fetch(url, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-              },
-              body: bodyData
-            })
-              .then(response => {
-                if (response.ok) {
-                  let events = this.state.events;
-                  let eventIndex = null;
-                  let event = events.find((anEvent, index) => {
-                    if (anEvent === this.state.activeItem) {
-                      eventIndex = index;
-                      return true;
-                    }
-                    return false;
-                  });
-                  if (eventIndex) {
-                    events[eventIndex].is_registered = "1";
-                  }
-                  this.setState({
-                    events: events,
-                    activeItem: events[eventIndex]
-                  });
-                }
-              })
-              .catch(error => { });
-          } catch (error) { }
-        }
-      }
-    }
-  };
+  //       if (token) {
+  //         let organizerEmail = this.state.activeItem.e_organizer;
+  //         let eventOrigName = this.state.activeItem.e_orig_title;
+  //         let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+  //         let putData = {
+  //           user_action: "both"
+  //         };
+  //         try {
+  //           let bodyData = JSON.stringify(putData);
+  //           fetch(url, {
+  //             method: "PUT",
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //               Authorization: "Bearer " + token
+  //             },
+  //             body: bodyData
+  //           })
+  //             .then(response => {
+  //               if (response.ok) {
+  //                 let events = this.state.events;
+  //                 let eventIndex = null;
+  //                 let event = events.find((anEvent, index) => {
+  //                   if (anEvent === this.state.activeItem) {
+  //                     eventIndex = index;
+  //                     return true;
+  //                   }
+  //                   return false;
+  //                 });
+  //                 if (eventIndex) {
+  //                   events[eventIndex].is_registered = "1";
+  //                 }
+  //                 this.setState({
+  //                   events: events,
+  //                   activeItem: events[eventIndex]
+  //                 });
+  //               }
+  //             })
+  //             .catch(error => { });
+  //         } catch (error) { }
+  //       }
+  //     }
+  //   }
+  // };
 
-  deregister = async () => {
-    if (this.state.activeItem) {
-      let isRegistered = false;
-      if (
-        typeof this.state.activeItem.is_registered !== "undefined" &&
-        this.state.activeItem.is_registered !== "0"
-      ) {
-        isRegistered = true;
-      }
-      if (isRegistered) {
-        let token = await User.firebase.getIdToken();
+  // deregister = async () => {
+  //   if (this.state.activeItem) {
+  //     let isRegistered = false;
+  //     if (
+  //       typeof this.state.activeItem.is_registered !== "undefined" &&
+  //       this.state.activeItem.is_registered !== "0"
+  //     ) {
+  //       isRegistered = true;
+  //     }
+  //     if (isRegistered) {
+  //       let token = await User.firebase.getIdToken();
 
-        if (token) {
-          let organizerEmail = this.state.activeItem.e_organizer;
-          let eventOrigName = this.state.activeItem.e_orig_title;
-          let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-          try {
-            fetch(url, {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-              }
-            })
-              .then(response => {
-                if (response.ok) {
-                  // TODO: remove event from event list so history re-renders
-                  this.hideDetails()
-                }
-              })
-              .catch(error => { });
-          } catch (error) { }
-        }
-      }
+  //       if (token) {
+  //         let organizerEmail = this.state.activeItem.e_organizer;
+  //         let eventOrigName = this.state.activeItem.e_orig_title;
+  //         let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
+  //         try {
+  //           fetch(url, {
+  //             method: "DELETE",
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //               Authorization: "Bearer " + token
+  //             }
+  //           })
+  //             .then(response => {
+  //               if (response.ok) {
+  //                 // TODO: remove event from event list so history re-renders
+  //                 this.hideDetails()
+  //               }
+  //             })
+  //             .catch(error => { });
+  //         } catch (error) { }
+  //       }
+  //     }
+  //   }
+  // };
+
+  checkSignIn = () => {
+    if (!this.state.user) {
+      return false
     }
-  };
-  signInOrOut = async (name, email) => {
-    let organizerEmail = "karina@dijatek.com"
-    let eventName = "Jewel+hunt"
-    let token = await User.firebase.getIdToken();
-    if (token) {
-      try {
-        let url =
-          `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${name}/qr`;
-        fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          }
-        }).then(response => {
-          if (response.ok) {
-            try {
-              let responseData = JSON.parse(response._bodyText);
-              let text= responseData.response
-              let title = ""
-              if (text.includes('in')){
-                let title = "Sign Out of Event"
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title  
-                })
-              } else {
-                let title = "Sign Into Event"
-                this.setState({
-                  signInOutMessage: text,
-                  signInOutTitle: title
-                })
-              }
-              
-            } catch (error) { }
-          } else {
-            alert("Not able to sign in or out of event")
-          }
-        });
-      } catch (error) { }
+    let userEmail = this.state.user.email
+    let signedInAttendees = this.state.activeItem.signed_in_attendees
+    if (!signedInAttendees) {
+      return false
     }
+    return signedInAttendees.includes(userEmail)
   }
-  showEventDetails = (event) => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ eventDetailVisible: true, activeItem: event })
-  }
-  showAdminEventDetails = (event) => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ adminEventDetailVisible: true, activeItem: event })
-  }
-  hideDetails = () => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
-  };
+  //   signInOrOut = async (eventName, email) => {
+  //     let isSignedIn = this.checkSignIn();
+  //     let token = await User.firebase.getIdToken();
+  //     if (token) {
+  //       try {
+  //         let url =
+  //           `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${eventName}/qr`;
+  //         fetch(url, {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: "Bearer " + token
+  //           }
+  //         }).then(response => {
+  //           console.log('sign in/out', response)
+  //           if (response.ok) {
+  //             try {
+  //               let responseData = JSON.parse(response._bodyText);
+  //               console.log(responseData)
+  //               let text = responseData.response
+  //               // let title = isSignedIn ? "Sign Out of Event" : "Sign Into Event"
+  //               // this.setState({
+  //               //   signInOutMessage: text,
+  //               //   signInOutTitle: title
+  //               // })
+  //             } catch (error) { }
+  //         } else {
+  //             alert("Not able to sign in or out of event")
+  //           }
+  //         });
+  //     } catch (error) { }
+  //   }
+  // }
 
   // ********************
   // Accordion Functions
   // ********************
   _renderHeader = section => {
     return (
-      <View style={styles.dropdownSectionHeader}>
-        <Text style={styles.dropdownSectionHeaderText}>{section.title}</Text>
+      <View style={Styles.dropdownSectionHeader}>
+        <Text style={Styles.dropdownSectionHeaderText}>{section.title}</Text>
         <Icon.Ionicons
           name={
             Platform.OS === "ios"
@@ -474,22 +695,11 @@ export default class HomeScreen extends React.Component {
     );
   };
   _renderContent = section => {
-    let events, sort;
+    let events, sort, title;
     if (section.title === 'Current Events') {
       events = this.state.currentEvents
-
-      // console.warn(events)
       sort = "asc"
-      return (
-        <EventListItems events={events} 
-        sort={sort} 
-        type="current"
-        overlay={this.showEventDetails}
-        signInOrOut={(email, name)=>{
-          this.signInOrOut(email, name);
-        }}
-        />
-      );
+      title = "current"
     }
     else if (section.title === 'Upcoming Events') {
       events = this.state.futureEvents
@@ -500,14 +710,19 @@ export default class HomeScreen extends React.Component {
       sort = "desc"
     }
     return (
-      <EventListItems 
-      events={events} 
-      sort={sort} 
-      overlay={this.showEventDetails} 
-      signInOrOut={(email, name)=>{
-        this.signInOrOut(email, name);
-      }}
-      />
+      <View style={Styles.eventListContainer}>
+        <EventListItems
+          events={events}
+          sort={sort}
+          title={title}
+          overlay={this.showEventDetails}
+          signInOrOut={(eventName, email) => {
+            this.signInOrOut(eventName, email);
+          }}
+        />
+      </View>
+
+
     );
   };
   _updateSections = activeSections => {
@@ -524,45 +739,60 @@ export default class HomeScreen extends React.Component {
       }
     ]
     return (
-      <View style={styles.dropdownContainer}>
-        <Accordion
-          sections={sections}
-          activeSections={this.state.activeSections}
-          renderSectionTitle={this._renderSectionTitle}
-          renderHeader={this._renderHeader}
-          renderContent={this._renderContent}
-          onChange={this._updateSections}
-          underlayColor={'transparent'}
-        />
-      </View>
+      <Accordion
+        containerStyle={{}}
+        sectionContainerStyle={{}}
+        sections={sections}
+        activeSections={this.state.activeSections}
+        renderSectionTitle={this._renderSectionTitle}
+        renderHeader={this._renderHeader}
+        renderContent={this._renderContent}
+        onChange={this._updateSections}
+        underlayColor={'transparent'}
+      />
     )
   }
 
+  showEventDetails = (event) => {
+    // console.log("ACTIVE EVENT", event)
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ eventDetailVisible: true, activeItem: event })
+  }
+  showAdminEventDetails = (event) => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ adminEventDetailVisible: true, activeItem: event })
+  }
+  hideDetails = () => {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
+  };
+
   renderEventDetails = () => {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={Styles.contentContainer}>
         <EventDetails
           event={this.state.activeItem}
           onClose={this.hideDetails}
-          onVolunteer={() => {
-            this.volunteer();
-          }}
-          onDeregister={() => {
-            this.deregister();
-          }}
-          signInOrOut={(email, name)=>{
-            this.signInOrOut(email, name);
-          }}
+          // onVolunteer={() => {
+          //   this.volunteer();
+          // }}
+          // onDeregister={() => {
+          //   this.deregister();
+          // }}
+          // signInOrOut={(email, name) => {
+          //   this.signInOrOut(email, name);
+          // }}
           title={this.state.signInOutTitle}
         />
       </View>
 
     )
   }
-
   renderAdminEventDetails = () => {
     return (
-      <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+      <View style={Styles.contentContainer}>
+        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+      </View>
     )
   }
 
@@ -575,11 +805,8 @@ export default class HomeScreen extends React.Component {
       return (this.renderAdminEventDetails())
     }
     return (
-      <View style={styles.container}>
-        <View
-          style={styles.container}
-          contentContainerStyle={[styles.contentContainer, { height: screenHeight }]}
-        >
+      <View style={Styles.container}>
+        <View style={Styles.contentContainer}>
           {this.state.user ? (
             <>
               <View
@@ -606,16 +833,10 @@ export default class HomeScreen extends React.Component {
                     ) : (
                       <Avatar rounded size={80} icon={{ name: "face" }} />
                     )}
-                  <Text
-                    style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}
-                  >
-                    {this.state.user.profile.first_name +
-                      " " +
-                      this.state.user.profile.last_name}
+                  <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 6 }}>
+                    {this.state.user.profile.first_name + " " + this.state.user.profile.last_name}
                   </Text>
-                  <Text
-                    style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}
-                  >
+                  <Text style={{ fontSize: 16, color: "#77abe4", marginTop: 2 }}>
                     Volunteer
                   </Text>
                 </View>
@@ -663,7 +884,7 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.largeNumberCaption}>Total Hours</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  
+
                   {this.state.pastEvents ? (
                     <>
                       <Text style={styles.largeNumber}>
@@ -678,7 +899,7 @@ export default class HomeScreen extends React.Component {
                           color="#0d0d0d"
                         /> */}
                         <Text style={styles.largeNumber}>
-                        0
+                          0
                         </Text>
                       </>
                     )}
@@ -694,47 +915,49 @@ export default class HomeScreen extends React.Component {
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                {this.state.activeTab === 0 && (
-                  <ProfileInfo user={this.state.user} navigation={this.props.navigation}/>
-                )}
-                {this.state.activeTab === 1 && (
-                  <>
-                    {this.state.events ? (
-                      this.renderAccordion()
-                    ) : (
-                        <ActivityIndicator
-                          style={{ marginBottom: 16 }}
-                          size="small"
-                          color="#0d0d0d"
-                        />
-                      )}
-                  </>
-                )}
-                {this.state.activeTab === 2 && (
-                  <>
-                    {this.state.createdEvents ? (
-                      <View style={styles.dropdownContainer}>
-                        <EventListItems 
-                        events={this.state.createdEvents} 
-                        sort={"desc"} 
-                        overlay={this.showAdminEventDetails} 
-                        signInOrOut={(email, name)=>{
-                          this.signInOrOut(email, name);
-                        }}
-                        title={this.state.signInOutTitle}
-                        />
-                      </View>
-                      // <ProfileCreated events={this.state.createdEvents} navigation={this.props.navigation} />
-                    ) : (
-                        <ActivityIndicator
-                          style={{ marginBottom: 16 }}
-                          size="small"
-                          color="#0d0d0d"
-                        />
-                      )}
-                  </>
-                )}
+                <ScrollView>
+                  {this.state.activeTab === 0 && (
+                    <ProfileInfo user={this.state.user} navigation={this.props.navigation} />
+                  )}
+                  {this.state.activeTab === 1 && (
+                    <>
+                      {this.state.events ? (
+                        this.renderAccordion()
+                      ) : (
+                          <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="small"
+                            color="#0d0d0d"
+                          />
+                        )}
+                    </>
+                  )}
+                  {this.state.activeTab === 2 && (
+                    <>
+                      {this.state.createdEvents ? (
+                        <View style={Styles.eventListContainer}>
+                          <EventListItems
+                            events={this.state.createdEvents}
+                            sort={"desc"}
+                            overlay={this.showAdminEventDetails}
+                            signInOrOut={(email, name) => {
+                              this.signInOrOut(email, name);
+                            }}
+                            title={this.state.signInOutTitle}
+                          />
+                        </View>
+                      ) : (
+                          <ActivityIndicator
+                            style={{ marginBottom: 16 }}
+                            size="large"
+                            color="#0d0d0d"
+                          />
+                        )}
+                    </>
+                  )}
+                </ScrollView>
               </View>
+              {/* Side Drawer - Account Settings */}
               {this.state.open && (
                 <View
                   style={{
@@ -873,136 +1096,6 @@ export default class HomeScreen extends React.Component {
                           </TouchableOpacity>
                         </View>
                       </View>
-                      {/* <View style={styles.drawerSectionWrapper}>
-                        <View style={styles.drawerSectionLabelContainer}>
-                          <Icon.Ionicons
-                            name={
-                              Platform.OS === "ios"
-                                ? "ios-notifications"
-                                : "md-notifications"
-                            }
-                            size={20}
-                            color={Colors.tabIconDefault}
-                          />
-                          <Text style={styles.drawerSectionLabel}>
-                            Notifications
-                                      </Text>
-                        </View>
-                        <Divider
-                          style={{
-                            height: 1,
-                            marginBottom: 8,
-                            backgroundColor: "#dddddd"
-                          }}
-                        />
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Notifications
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                App Notifications
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                      <View style={styles.drawerSectionWrapper}>
-                        <View style={styles.drawerSectionLabelContainer}>
-                          <Icon.Ionicons
-                            name={Platform.OS === "ios" ? "ios-more" : "md-more"}
-                            size={20}
-                            color={Colors.tabIconDefault}
-                          />
-                          <Text style={styles.drawerSectionLabel}>More</Text>
-                        </View>
-                        <Divider
-                          style={{
-                            height: 1,
-                            marginBottom: 8,
-                            backgroundColor: "#dddddd"
-                          }}
-                        />
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>Agreements</Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.menuItemWrapper}>
-                          <TouchableOpacity
-                            style={styles.menuItemTouchable}
-                            onPress={() => { }}
-                          >
-                            <View style={styles.menuItemContainer}>
-                              <Text style={styles.menuItemLabel}>
-                                Location Services
-                                          </Text>
-                              <Text style={styles.menuItemIconContainer}>
-                                <Icon.Ionicons
-                                  name={
-                                    Platform.OS === "ios"
-                                      ? "ios-arrow-forward"
-                                      : "md-arrow-forward"
-                                  }
-                                  size={20}
-                                  color={Colors.tabIconDefault}
-                                />
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                        </View>
-                      </View> */}
                       <View
                         style={{ flexDirection: "row", justifyContent: "center" }}
                       >
@@ -1018,7 +1111,6 @@ export default class HomeScreen extends React.Component {
                     </View>
                   </View>
                 </View>
-
               )}
             </>
           ) : (
@@ -1076,27 +1168,5 @@ const styles = StyleSheet.create({
   menuItemContainer: { flexDirection: "row" },
   menuItemLabel: { flex: 3 },
   menuItemIconContainer: { flex: 1 },
-  dropdownContainer: {
-    // marginTop: 6,
-    // paddingHorizontal: 
-    justifyContent: "space-between"
-  },
-  dropdownSection: {
-    marginBottom: 12
-  },
-  dropdownSectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#d2d2d2",
-    marginBottom: 2,
-    padding: 12
-  },
-  dropdownSectionHeaderText: {
-    fontSize: 16,
-    color: "black",
-    // padding: 10,
 
-    
-    
-  }
 });
