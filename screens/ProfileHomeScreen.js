@@ -11,7 +11,8 @@ import {
   View,
   LayoutAnimation,
   Dimensions,
-  Picker
+  Picker,
+  RefreshControl
 } from "react-native";
 import { Avatar, Button, Divider, ButtonGroup } from "react-native-elements";
 import Sequencer from "../components/Sequencer";
@@ -26,7 +27,7 @@ import Accordion from 'react-native-collapsible/Accordion';
 import EventDetails from "../components/EventDetails";
 import AdminEventDetails from "../components/AdminEventDetails";
 import Styles from "../constants/Styles";
-import { isPast, isToday  } from "../constants/Utils";
+import { isPast, isToday } from "../constants/Utils";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -52,11 +53,25 @@ export default class HomeScreen extends React.Component {
       activeItem: null,
       adminEventDetailVisible: false,
       eventDetailVisible: false,
-      // signInOutTitle: "Sign in to Event",
-      // signInOutMessage: null,
+      refreshing: false
     };
   }
 
+  _onRefresh = () => {
+    this.setState({ 
+      refreshing: true, 
+      events: null, 
+      createdEvents: null, 
+      pastEvents: null, 
+      currentEvents: null, 
+      futureEvents: null,
+      loading: true,
+      activeItem: null
+    })
+    this.loadUserOpportunities().then(() => {
+      this.setState({ refreshing: false })
+    })
+  }
   // loads any events the user created
   loadCreatedEvent = async (eventName, index, callback) => {
     // console.log("LOAD CREATED EVENT - " + eventName)
@@ -82,7 +97,7 @@ export default class HomeScreen extends React.Component {
                   createdEvents = this.state.createdEvents.slice();
                 }
                 let event = responseData;
-                event.key = "created-event-" + index;
+                event.key = "created-" + index;
                 createdEvents.push(event);
                 this.setState(
                   {
@@ -126,7 +141,7 @@ export default class HomeScreen extends React.Component {
               let responseData = JSON.parse(response._bodyText);
               if (responseData) {
                 let event = responseData;
-                event.key = type + "-event-" + index;
+                event.key = type + "-" + index;
 
                 // Check if event is past, current, or future
                 if (isPast(event.date)) {
@@ -208,220 +223,6 @@ export default class HomeScreen extends React.Component {
       } catch (error) { }
     }
   };
-/* NOTE: loadAndSortEventByType combined the following two functions
-  // loads any events the user is registered to volunteer and sorts into past, current, future event
-  loadRegEvent = async (eventName, index, callback) => {
-    // console.log("LOAD REG EVENT - " + eventName)
-    let token = await User.firebase.getIdToken();
-    if (token) {
-      try {
-        let url =
-          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
-          eventName;
-        fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          }
-        }).then(response => {
-          if (response.ok) {
-            try {
-              let responseData = JSON.parse(response._bodyText);
-              if (responseData) {
-                let event = responseData;
-                event.key = "registered-event-" + index;
-
-                // Check if event is past, current, or future
-                if (Utils.isPast(event.date)) {
-                  let pastEvents = []
-                  if (this.state.pastEvents) {
-                    pastEvents = this.state.pastEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = pastEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    pastEvents.push(event);
-                    this.setState(
-                      {
-                        pastEvents: pastEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-                else if (Utils.isToday(event.date)) {
-                  let currentEvents = []
-                  if (this.state.currentEvents) {
-                    currentEvents = this.state.currentEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = currentEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    currentEvents.push(event);
-                    this.setState(
-                      {
-                        currentEvents: currentEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-                else {
-                  let futureEvents = []
-                  if (this.state.futureEvents) {
-                    futureEvents = this.state.futureEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = futureEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    futureEvents.push(event);
-                    this.setState(
-                      {
-                        futureEvents: futureEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-              }
-            } catch (error) { }
-          } else {
-            // Response from server not ok
-            callback();
-          }
-        });
-      } catch (error) { }
-    }
-  };
-  // loads any events the user completed/attended and sorts into past, current
-  loadCompEvent = async (eventName, index, callback) => {
-    // console.log("LOAD COMPLETED EVENT - " + eventName)
-
-    let token = await User.firebase.getIdToken();
-    if (token) {
-      try {
-        let url =
-          "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/" +
-          eventName;
-        fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          }
-        }).then(response => {
-          if (response.ok) {
-            try {
-              let responseData = JSON.parse(response._bodyText);
-              if (responseData) {
-                let event = responseData;
-                event.key = "completed-event-" + index;
-
-                // Check if event is past, current, or future
-                if (Utils.isPast(event.date)) {
-                  let pastEvents = []
-                  if (this.state.pastEvents) {
-                    pastEvents = this.state.pastEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = pastEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    pastEvents.push(event);
-                    this.setState(
-                      {
-                        pastEvents: pastEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-                else if (Utils.isToday(event.date)) {
-                  let currentEvents = []
-                  if (this.state.currentEvents) {
-                    currentEvents = this.state.currentEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = currentEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    currentEvents.push(event);
-                    this.setState(
-                      {
-                        currentEvents: currentEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-                else {
-                  let futureEvents = []
-                  if (this.state.futureEvents) {
-                    futureEvents = this.state.futureEvents.slice();
-                  }
-                  // Doesn't add duplicates if titles match
-                  let alreadyIncluded = futureEvents.some(e => e.e_orig_title === event.e_orig_title)
-                  if (!alreadyIncluded) {
-                    futureEvents.push(event);
-                    this.setState(
-                      {
-                        futureEvents: futureEvents,
-                        loading: false
-                      },
-                      () => {
-                        callback();
-                      }
-                    );
-                  }
-                  else {
-                    callback()
-                  }
-                }
-              } else {
-                callback()
-              }
-
-            } catch (error) {
-              // error parsing response
-            }
-          } else {
-            // Response from server not ok
-            callback();
-          }
-        });
-      } catch (error) { }
-    }
-  }
-*/
 
   // Takes the array of user opportunities and loads and sorts each event
   loadEvents = () => {
@@ -538,98 +339,6 @@ export default class HomeScreen extends React.Component {
   updateTab = (activeTab) => {
     this.setState({ activeTab })
   }
-  // volunteer = async () => {
-  //   if (this.state.activeItem) {
-  //     let isRegistered = false;
-  //     if (
-  //       typeof this.state.activeItem.is_registered !== "undefined" &&
-  //       this.state.activeItem.is_registered !== "0"
-  //     ) {
-  //       isRegistered = true;
-  //     }
-  //     if (!isRegistered) {
-  //       let token = await User.firebase.getIdToken();
-
-  //       if (token) {
-  //         let organizerEmail = this.state.activeItem.e_organizer;
-  //         let eventOrigName = this.state.activeItem.e_orig_title;
-  //         let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-  //         let putData = {
-  //           user_action: "both"
-  //         };
-  //         try {
-  //           let bodyData = JSON.stringify(putData);
-  //           fetch(url, {
-  //             method: "PUT",
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //               Authorization: "Bearer " + token
-  //             },
-  //             body: bodyData
-  //           })
-  //             .then(response => {
-  //               if (response.ok) {
-  //                 let events = this.state.events;
-  //                 let eventIndex = null;
-  //                 let event = events.find((anEvent, index) => {
-  //                   if (anEvent === this.state.activeItem) {
-  //                     eventIndex = index;
-  //                     return true;
-  //                   }
-  //                   return false;
-  //                 });
-  //                 if (eventIndex) {
-  //                   events[eventIndex].is_registered = "1";
-  //                 }
-  //                 this.setState({
-  //                   events: events,
-  //                   activeItem: events[eventIndex]
-  //                 });
-  //               }
-  //             })
-  //             .catch(error => { });
-  //         } catch (error) { }
-  //       }
-  //     }
-  //   }
-  // };
-
-  // deregister = async () => {
-  //   if (this.state.activeItem) {
-  //     let isRegistered = false;
-  //     if (
-  //       typeof this.state.activeItem.is_registered !== "undefined" &&
-  //       this.state.activeItem.is_registered !== "0"
-  //     ) {
-  //       isRegistered = true;
-  //     }
-  //     if (isRegistered) {
-  //       let token = await User.firebase.getIdToken();
-
-  //       if (token) {
-  //         let organizerEmail = this.state.activeItem.e_organizer;
-  //         let eventOrigName = this.state.activeItem.e_orig_title;
-  //         let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizerEmail}/${eventOrigName}/registration`;
-  //         try {
-  //           fetch(url, {
-  //             method: "DELETE",
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //               Authorization: "Bearer " + token
-  //             }
-  //           })
-  //             .then(response => {
-  //               if (response.ok) {
-  //                 // TODO: remove event from event list so history re-renders
-  //                 this.hideDetails()
-  //               }
-  //             })
-  //             .catch(error => { });
-  //         } catch (error) { }
-  //       }
-  //     }
-  //   }
-  // };
 
   checkSignIn = () => {
     if (!this.state.user) {
@@ -642,39 +351,6 @@ export default class HomeScreen extends React.Component {
     }
     return signedInAttendees.includes(userEmail)
   }
-  //   signInOrOut = async (eventName, email) => {
-  //     let isSignedIn = this.checkSignIn();
-  //     let token = await User.firebase.getIdToken();
-  //     if (token) {
-  //       try {
-  //         let url =
-  //           `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${email}/${eventName}/qr`;
-  //         fetch(url, {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: "Bearer " + token
-  //           }
-  //         }).then(response => {
-  //           console.log('sign in/out', response)
-  //           if (response.ok) {
-  //             try {
-  //               let responseData = JSON.parse(response._bodyText);
-  //               console.log(responseData)
-  //               let text = responseData.response
-  //               // let title = isSignedIn ? "Sign Out of Event" : "Sign Into Event"
-  //               // this.setState({
-  //               //   signInOutMessage: text,
-  //               //   signInOutTitle: title
-  //               // })
-  //             } catch (error) { }
-  //         } else {
-  //             alert("Not able to sign in or out of event")
-  //           }
-  //         });
-  //     } catch (error) { }
-  //   }
-  // }
 
   // ********************
   // Accordion Functions
@@ -699,15 +375,18 @@ export default class HomeScreen extends React.Component {
     if (section.title === 'Current Events') {
       events = this.state.currentEvents
       sort = "asc"
-      title = "current"
+      // title = "current"
+      type = "c" // current
     }
     else if (section.title === 'Upcoming Events') {
       events = this.state.futureEvents
       sort = "asc"
+      type = "f" // future
     }
     else {
       events = this.state.pastEvents
       sort = "desc"
+      type = "p" // past
     }
     return (
       <View style={Styles.eventListContainer}>
@@ -716,9 +395,7 @@ export default class HomeScreen extends React.Component {
           sort={sort}
           title={title}
           overlay={this.showEventDetails}
-          signInOrOut={(eventName, email) => {
-            this.signInOrOut(eventName, email);
-          }}
+          type={type}
         />
       </View>
 
@@ -758,12 +435,71 @@ export default class HomeScreen extends React.Component {
     LayoutAnimation.easeInEaseOut();
     this.setState({ eventDetailVisible: true, activeItem: event })
   }
+
   showAdminEventDetails = (event) => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ adminEventDetailVisible: true, activeItem: event })
   }
-  hideDetails = () => {
+
+  // return the updated events array
+  updateEvents = (events, event) => {
+    let index = events.findIndex((e) => e.e_orig_title === event.e_orig_title)
+    if (index === -1) {
+      console.log('event not found in events', event)
+      return null
+    }
+
+    // if event attendee is no longer regiestered, remove from list of events
+    // user is not an attendee AND event is not a "created" event
+    if (event.is_registered === "0" && event.type !== "a") {
+      // cut out event from list
+      events.splice(index, 1)
+    }
+    else {
+      events[index] = event
+    }
+
+    return events
+  }
+
+  // closes the event details and updates state
+  closeItem = event => {
+    console.log("CLOSED:", event)
     LayoutAnimation.easeInEaseOut();
+
+    if (event) {
+      let createdEvents = this.updateEvents(this.state.createdEvents.slice(), event)
+      console.log("created events:", createdEvents)
+
+      let events
+      switch (event.type) {
+        case "a": // admin/created events
+          events = this.updateEvents(createdEvents, event)
+          this.setState({ createdEvents: events }, () => console.log("update created"))
+          break;
+        case "f": // future events
+          events = this.updateEvents(this.state.futureEvents.slice(), event)
+          console.log(events)
+          this.setState({ futureEvents: events }, () => console.log("update future"))
+          break;
+        case "c": // current events
+          events = this.updateEvents(this.state.currentEvents.slice(), event)
+          this.setState({ currentEvents: events }, () => console.log("update current"))
+          break;
+        case "p": // past events
+          events = this.updateEvents(this.state.pastEvents.slice(), event)
+          console.log(events)
+          this.setState({ pastEvents: events }, () => console.log("update past"))
+          break;
+        default:
+          break;
+      }
+
+      if (event.type !== "a" && createdEvents) {
+        this.setState({ createdEvents }, () => console.log("update created"))
+      }
+    }
+
     this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
   };
 
@@ -772,16 +508,7 @@ export default class HomeScreen extends React.Component {
       <View style={Styles.contentContainer}>
         <EventDetails
           event={this.state.activeItem}
-          onClose={this.hideDetails}
-          // onVolunteer={() => {
-          //   this.volunteer();
-          // }}
-          // onDeregister={() => {
-          //   this.deregister();
-          // }}
-          // signInOrOut={(email, name) => {
-          //   this.signInOrOut(email, name);
-          // }}
+          onClose={this.closeItem}
           title={this.state.signInOutTitle}
         />
       </View>
@@ -791,7 +518,7 @@ export default class HomeScreen extends React.Component {
   renderAdminEventDetails = () => {
     return (
       <View style={Styles.contentContainer}>
-        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+        <AdminEventDetails event={this.state.activeItem} onClose={this.closeItem} />
       </View>
     )
   }
@@ -915,7 +642,14 @@ export default class HomeScreen extends React.Component {
                   buttons={buttons}
                   containerStyle={{ height: 42 }}
                 />
-                <ScrollView>
+                <ScrollView
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.refreshing}
+                      onRefresh={this._onRefresh}
+                    />
+                  }
+                >
                   {this.state.activeTab === 0 && (
                     <ProfileInfo user={this.state.user} navigation={this.props.navigation} />
                   )}
@@ -940,10 +674,8 @@ export default class HomeScreen extends React.Component {
                             events={this.state.createdEvents}
                             sort={"desc"}
                             overlay={this.showAdminEventDetails}
-                            signInOrOut={(email, name) => {
-                              this.signInOrOut(email, name);
-                            }}
                             title={this.state.signInOutTitle}
+                            type="a"
                           />
                         </View>
                       ) : (

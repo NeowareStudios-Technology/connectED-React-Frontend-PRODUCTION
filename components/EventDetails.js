@@ -65,14 +65,24 @@ class EventDetails extends React.Component {
         // Open event. Set registered status, add user to attendees and increment number of attendees
         newEvent.is_registered = "1"
         newEvent.num_attendees += 1
-        newEvent.attendees.push(user.email)
+        if(typeof newEvent.attendees !== "undefined"){
+          newEvent.attendees.push(user.email)
+        }
+        else{
+          newEvent.attendees = [user.email]
+        }
         newEvent.teams.push("-") // TODO: use actual team if known and not the dummy/null team of "-"
         this.setState({ isRegistered: 1, newEvent })
       } else {
         // private event. set registered status, add user to pending list, increment number of pending
         newEvent.is_registered = "-1"
         newEvent.num_pending_attendees += 1
-        newEvent.pending_attendees.push(user.email)
+        if(typeof newEvent.pending_attendees !== 'undefined'){
+          newEvent.pending_attendees.push(user.email)
+        }
+        else {
+          newEvent.pending_attendees = [user.email]
+        }
         this.setState({ isRegistered: -1, newEvent })
       }
     } else {
@@ -94,17 +104,21 @@ class EventDetails extends React.Component {
     let response = await deregisterUser(event.e_organizer, event.e_orig_title)
     if (!response.error) {
       newEvent.is_registered = "0"
-      if (event.privacy === "o") {
+      if (newEvent.privacy === "o") {
         // open event - get index of user and remove from attendee list and teams. decrement number of attendees
-        const i = event.attendees.indexOf(user.email)
+        const i = newEvent.attendees.indexOf(user.email)
         newEvent.attendees.splice(i, 1)
         newEvent.teams.splice(i, 1)
         newEvent.num_attendees -= 1
       } else {
         // private event - get index of user and remove from pending list. decrement pending
-        const i = event.pending_attendees.indexOf(user.email)
+        if(typeof newEvent.pending_attendees !== 'undefined'){
+          const i = newEvent.pending_attendees.indexOf(user.email)
+          newEvent.pending_attendees.splice(i, 1)
+        }        else {
+          newEvent.pending_attendees = [user.email]
+        }
         newEvent.num_pending_attendees -= 1
-        newEvent.pending_attendees.splice(i, 1)
       }
       this.setState({ isRegistered: 0, newEvent })
 

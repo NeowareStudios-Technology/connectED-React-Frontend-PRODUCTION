@@ -15,16 +15,26 @@ import User from "../components/User";
 
 
 class AdminEventDetails extends React.Component {
-
+  constructor(props) {
+    super(props);
+    this.state = {
+      newEvent: null,
+      processed: false
+    }
+  }
+  componentDidMount() {
+    console.log(this.props.event)
+    this.setState({ newEvent: this.props.event })
+  }
   acceptOrDenyEventAttendee = async (organizer, title, status, attendee) => {
     let token = await User.firebase.getIdToken();
     console.log(organizer, title, status, attendee)
     if (token) {
       let url =
         `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${organizer}/${title}/${status}`;
-        let bodyData = JSON.stringify({
-          pending_attendee: attendee
-        });
+      let bodyData = JSON.stringify({
+        pending_attendee: attendee
+      });
       // status should either be "approve" or "deny"
       fetch(url, {
         method: "PUT",
@@ -38,14 +48,33 @@ class AdminEventDetails extends React.Component {
           console.log("accept/deny attendee", response)
           if (response.ok) {
             alert("Thank you for resolving pending requests!")
+            // remove attendee from pending. add attendee to attendees if approved
+            let event = this.state.newEvent
+            event.pending_attendees.splice(event.pending_attendees.indexOf(attendee), 1)
+            if (status === "approve") {
+              console.log("add attendee")
+              if (typeof event.attendees !== "undefined") {
+                event.attendees.push(attendee)
+              } else {
+                event.attendees = [attendee]
+              }
+              event.num_attendees += 1
+              event.num_pending_attendees -= 1
+            }
+            this.setState({ newEvent: event }, () => console.log(this.state))
           }
         })
         .catch(error => { });
     }
   }
 
+  handleClose = () => {
+    this.props.onClose(this.state.event)
+  }
+
   render() {
-    let item = this.props.event;
+    let item = this.state.newEvent;
+    if (!item) return null
     return (
       <>
         <View style={{ flexDirection: "column", flex: 1 }}>
@@ -61,7 +90,7 @@ class AdminEventDetails extends React.Component {
             >
               <View style={{ flex: 1, paddingBottom: 12, flexDirection: "column" }} >
                 <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
-                  <TouchableOpacity onPress={this.props.onClose}>
+                  <TouchableOpacity onPress={this.handleClose}>
                     <Icon.Ionicons
                       style={{
                         color: "#fff",
