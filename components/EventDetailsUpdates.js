@@ -87,49 +87,49 @@ class EventDetailsUpdates extends React.Component {
             </View>
           </>
         ) : (
-            <>
-              <View style={{ paddingBottom: 24 }}>
-                {this.state.updates.length > 0 ? (
-                  <>
-                    <Text style={this.styles.title}>{this.props.event.e_title}</Text>
-                    <Text style={{
-                      marginBottom: 4,
-                      fontSize: 20,
-                      marginBottom: 5,
-                      color: 'green',
-                      fontWeight: 'bold'
-                    }}>
-                      Latest Updates:
+            <View style={{ flex: 1}}>
+              {this.state.updates.length > 0 ? (
+                <>
+                  <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                  <Text style={{
+                    marginBottom: 4,
+                    fontSize: 20,
+                    marginBottom: 5,
+                    color: 'green',
+                    fontWeight: 'bold'
+                  }}>
+                    Latest Updates:
                   </Text>
-                    <ScrollView contentContainerStyle={{ paddingVertical: 12 }}>
+                  <ScrollView>
+                    <View>
                       {this.state.updates.slice(0).reverse().map((update, index) => {
                         return (
-                          <View
-                            key={"update-" + index}
-                            style={{ marginBottom: 0 }}
-                          >
-                            <Card containerStyle={{ paddingVertical: 8 }}>
+                          // <View
+                          //   key={"update-" + index}
+                          //   style={{ marginBottom: 0 }}
+                          // >
+                            <Card key={"update-" + index} containerStyle={{ paddingVertical: 8 }}>
                               <Text>{update.update}</Text>
                               <Text>
                                 {moment.utc(update.time, "MM/DD/YYYY-HH:mmZ").local().format("M/D h:mm a")}
                               </Text>
                             </Card>
-                          </View>
+                          // </View>
                         );
                       })}
-                    </ScrollView>
+                    </View>
+                  </ScrollView>
+                </>
+              ) : (
+                  <>
+                    <View>
+                      <Text style={this.styles.title}>{this.props.event.e_title}</Text>
+                      <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
+                      <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
+                    </View>
                   </>
-                ) : (
-                    <>
-                      <View>
-                        <Text style={this.styles.title}>{this.props.event.e_title}</Text>
-                        <Text style={this.styles.subtitle}>There are no updates at this time.</Text>
-                        <Text style={this.styles.text}>If you have any questions, or need to contact the organizer, please send an email to {this.props.event.e_organizer}</Text>
-                      </View>
-                    </>
-                  )}
-              </View>
-            </>
+                )}
+            </View>
           )}
       </>
     );

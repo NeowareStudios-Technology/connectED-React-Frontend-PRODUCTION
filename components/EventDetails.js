@@ -2,12 +2,11 @@ import React from "react";
 import {
   Text,
   View,
-  ScrollView,
   TouchableOpacity,
   Platform,
   Image,
   ImageBackground,
-  ActivityIndicator
+  BackHandler
 } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { Icon } from "expo";
@@ -30,8 +29,6 @@ class EventDetails extends React.Component {
       user: null
     };
   }
-  componentWillUnmount() {
-  }
 
   async initializeState() {
     let user = await User.isLoggedIn();
@@ -42,12 +39,6 @@ class EventDetails extends React.Component {
       }, () => this.updateSignInStatus());
     }
     return true;
-  }
-
-  componentDidMount() {
-    console.log(this.props.event)
-    this.setState({ newEvent: this.props.event })
-    this.initializeState()
   }
 
   setActiveTab = index => {
@@ -156,6 +147,25 @@ class EventDetails extends React.Component {
     }
   };
 
+  handleBackPress = () => {
+    this.onClose()
+    return true
+  }
+  onClose = () => {
+    const event = this.state.newEvent
+    this.props.onClose(event)
+  }
+
+  componentDidMount() {
+    this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+    console.log(this.props.event)
+    this.setState({ newEvent: this.props.event })
+    this.initializeState()
+  }
+
+  componentWillUnmount() {
+    this.backHandler.remove()
+  }
 
   render() {
     const { event } = this.props;
@@ -173,7 +183,7 @@ class EventDetails extends React.Component {
             <ImageBackground source={{ uri: "data:image/png;base64," + event.e_photo }} style={{ width: "100%", height: "100%" }}>
               <View style={{ flex: 1, paddingBottom: 12, flexDirection: "column" }}>
                 <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
-                  <TouchableOpacity onPress={() => this.props.onClose(event)}>
+                  <TouchableOpacity onPress={this.onClose}>
                     <Icon.Ionicons
                       style={{
                         color: "#fff",
@@ -243,7 +253,7 @@ class EventDetails extends React.Component {
             <>
               <View style={{ flex: 6, paddingBottom: 12 }}>
                 {/* Info, Team, and Updates buttons */}
-                <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 12 }}>
                   <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }} >
                     <Button
                       type={this.state.activeTab === 0 ? "solid" : "outline"}
