@@ -65,10 +65,10 @@ class EventDetails extends React.Component {
         // Open event. Set registered status, add user to attendees and increment number of attendees
         newEvent.is_registered = "1"
         newEvent.num_attendees += 1
-        if(typeof newEvent.attendees !== "undefined"){
+        if (typeof newEvent.attendees !== "undefined") {
           newEvent.attendees.push(user.email)
         }
-        else{
+        else {
           newEvent.attendees = [user.email]
         }
         newEvent.teams.push("-") // TODO: use actual team if known and not the dummy/null team of "-"
@@ -77,7 +77,7 @@ class EventDetails extends React.Component {
         // private event. set registered status, add user to pending list, increment number of pending
         newEvent.is_registered = "-1"
         newEvent.num_pending_attendees += 1
-        if(typeof newEvent.pending_attendees !== 'undefined'){
+        if (typeof newEvent.pending_attendees !== 'undefined') {
           newEvent.pending_attendees.push(user.email)
         }
         else {
@@ -112,10 +112,10 @@ class EventDetails extends React.Component {
         newEvent.num_attendees -= 1
       } else {
         // private event - get index of user and remove from pending list. decrement pending
-        if(typeof newEvent.pending_attendees !== 'undefined'){
+        if (typeof newEvent.pending_attendees !== 'undefined') {
           const i = newEvent.pending_attendees.indexOf(user.email)
           newEvent.pending_attendees.splice(i, 1)
-        }        else {
+        } else {
           newEvent.pending_attendees = [user.email]
         }
         newEvent.num_pending_attendees -= 1
@@ -207,8 +207,7 @@ class EventDetails extends React.Component {
   componentDidMount() {
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     console.log(this.props.event)
-    this.setState({ newEvent: this.props.event })
-    this.initializeState()
+    this.setState({ newEvent: this.props.event }, () => this.initializeState())
   }
 
   componentWillUnmount() {

@@ -18,8 +18,7 @@ class AdminEventDetails extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      newEvent: null,
-      processed: false
+      newEvent: null
     }
   }
   componentDidMount() {

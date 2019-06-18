@@ -509,7 +509,6 @@ export default class HomeScreen extends React.Component {
         <EventDetails
           event={this.state.activeItem}
           onClose={this.closeItem}
-          title={this.state.signInOutTitle}
         />
       </View>
 

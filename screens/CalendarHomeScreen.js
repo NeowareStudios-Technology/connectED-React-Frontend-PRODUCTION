@@ -72,7 +72,7 @@ export default class MyCalendar extends Component {
                   userEvents = this.state.userEvents.slice();
                 }
                 let event = responseData;
-                event.key = "event-" + index;
+                event.key = "created-" + index;
                 userEvents.push(event);
                 this.setState({
                   userEvents: userEvents,
@@ -92,8 +92,8 @@ export default class MyCalendar extends Component {
     }
   };
 
-  // Loads and filters registered events to only include past events sorted by date 
-  loadPastEvent = async (eventName, index, callback) => {
+  // Loads registered events
+  loadRegisteredEvent = async (eventName, index, callback) => {
     let token = await User.firebase.getIdToken();
     if (token) {
       try {
@@ -120,7 +120,7 @@ export default class MyCalendar extends Component {
                   upcomingEvents = this.state.upcomingEvents.slice();
                 }
                 let event = responseData;
-                event.key = "event-" + index;
+                event.key = "registered-" + index;
                 upcomingEvents.push(event);
                 this.setState(
                   {
@@ -166,7 +166,7 @@ export default class MyCalendar extends Component {
       registeredEvents.map((eventName, index) => {
         eventName = eventName.replace("_", "/")
         sequence.promise(() => {
-          this.loadPastEvent(eventName, index, () => {
+          this.loadRegisteredEvent(eventName, index, () => {
             sequence.next();
           });
         });
@@ -209,6 +209,7 @@ export default class MyCalendar extends Component {
           if (response.ok) {
             try {
               let events = JSON.parse(response._bodyText);
+              console.log(events)
               if (typeof events === "object") {
                 this.setState({ events: events }, () => this.loadEvents())
               } else {
@@ -228,11 +229,7 @@ export default class MyCalendar extends Component {
   componentDidMount() {
     this.loadUser()
   }
-  // componentDidUpdate(prevState){
-  //   if(prevState.user !== this.props.navigation.getParam('user')) {
-  //     this.loadUser()
-  //   }
-  // }
+
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
@@ -403,11 +400,6 @@ export default class MyCalendar extends Component {
     this.setState({ activeItem: item });
   };
 
-  closeItem = item => {
-    LayoutAnimation.easeInEaseOut();
-    this.setState({ activeItem: null });
-  };
-
   getEventDates() {
     let DatesArray = []
     let myEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
@@ -426,8 +418,7 @@ export default class MyCalendar extends Component {
       let newDate = moment(date, "MM-DD-YYYY").format("YYYY-MM-DD");
       DatesArray.push(newDate)
     }
-    this.setState({ markedDates: DatesArray })
-    this.sendDatesToCalendar();
+    this.setState({ markedDates: DatesArray }, () => this.sendDatesToCalendar())
   }
 
   sendDatesToCalendar = () => {
@@ -443,26 +434,51 @@ export default class MyCalendar extends Component {
     LayoutAnimation.easeInEaseOut();
     this.setState({ adminEventDetailVisible: true, activeItem: event })
   }
-  hideDetails = () => {
+
+  // return the updated events array
+  updateEvents = (events, event) => {
+    let index = events.findIndex((e) => e.e_orig_title === event.e_orig_title)
+    if (index === -1) {
+      console.log('event not found in events', event)
+      return null
+    }
+
+    // if event attendee is no longer regiestered, remove from list of events
+    // user is not an attendee AND event is not a "created" event
+    if (event.is_registered === "0" && event.key.startsWith('registered')) {
+      // cut out event from list
+      events.splice(index, 1)
+    }
+    else {
+      events[index] = event
+    }
+
+    return events
+  }
+
+  closeItem = (event) => {
+    console.log("CLOSE", event)
     LayoutAnimation.easeInEaseOut();
+
+    if (event) {
+      let events
+      if (event.key.startsWith('created')){
+        events = this.updateEvents(this.state.userEvents.slice(), event)
+        this.setState({ userEvents: events }, () => this.getEventDates())
+      } else {
+        events = this.updateEvents(this.state.upcomingEvents.slice(), event)
+        this.setState({ upcomingEvents: events }, () => this.getEventDates())      }
+    }
+
     this.setState({ activeItem: null, adminEventDetailVisible: false, eventDetailVisible: false });
   };
+
   renderEventDetails = () => {
     return (
       <View style={Styles.contentContainer}>
         <EventDetails
           event={this.state.activeItem}
-          onClose={this.hideDetails}
-          onVolunteer={() => {
-            this.volunteer();
-          }}
-          onDeregister={() => {
-            this.deregister();
-          }}
-          signInOrOut={(email, name) => {
-            this.signInOrOut(name, email);
-          }}
-          title={this.state.signInOutTitle}
+          onClose={this.closeItem}
         />
       </View>
 
@@ -471,25 +487,12 @@ export default class MyCalendar extends Component {
   renderAdminEventDetails = () => {
     return (
       <View style={Styles.contentContainer}>
-        <AdminEventDetails event={this.state.activeItem} onClose={this.hideDetails} />
+        <AdminEventDetails event={this.state.activeItem} onClose={this.closeItem} />
       </View>
     )
   }
 
   render() {
-    let sortedEvents;
-    if (!this.state.userEvents) {
-      sortedEvents = null
-    } else {
-      sortedEvents = this.state.userEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
-    }
-    let sortedUpcomingEvents;
-    if (!this.state.upcomingEvents) {
-      sortedUpcomingEvents = null
-    } else {
-      sortedUpcomingEvents = this.state.upcomingEvents.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]));
-    }
-
     if (this.state.eventDetailVisible) {
       return (this.renderEventDetails())
     }
@@ -497,32 +500,12 @@ export default class MyCalendar extends Component {
       return (this.renderAdminEventDetails())
     }
 
-    const buttons = ["My Opportunities", "Volunteering"];
+    const buttons = ["Created Events", "Volunteering"];
     return (
 
       <View style={Styles.container}>
-        {this.state.activeItem ? (
-          <>
-            <View style={{ flex: 1 }}>
-              <EventDetails
-                event={this.state.activeItem}
-                onClose={this.closeItem}
-                onVolunteer={() => {
-                  this.volunteer();
-                }}
-                onDeregister={() => {
-                  this.deregister();
-                }}
-                signInOrOut={(email, name) => {
-                  this.signInOrOut(email, name);
-                }}
-              />
-            </View>
-          </>
-        ) : (
             <>
               <View style={{ height: screenHeight - 300, backgroundColor: "#3788E0" }}>
-                {this.state.marked ?
                   <CalendarList
                     current={() => DateNow()}
                     pastScrollRange={24}
@@ -545,29 +528,6 @@ export default class MyCalendar extends Component {
                       arrowColor: 'white',
                     }}
                   />
-                  :
-                  <CalendarList
-                    current={() => DateNow()}
-                    pastScrollRange={24}
-                    futureScrollRange={24}
-                    style={{
-                      backgroundColor: "transparent",
-                      paddingTop: 40,
-                    }}
-                    theme={{
-                      calendarBackground: 'transparent',
-                      textSectionTitleColor: 'white',
-                      dayTextColor: 'white',
-                      todayTextColor: 'black',
-                      textMonthFontSize: 30,
-                      textMonthFontWeight: "bold",
-                      textDayFontSize: 18,
-                      monthTextColor: 'white',
-                      selectedDayBackgroundColor: 'darkblue',
-                      arrowColor: 'white',
-                    }}
-                  />
-                }
               </View>
               <View style={{ marginTop: 0, flex: 1, backgroundColor: "#eee" }}>
                 <ButtonGroup
@@ -582,9 +542,6 @@ export default class MyCalendar extends Component {
                       events={this.state.userEvents}
                       sort="asc"
                       overlay={this.showAdminEventDetails}
-                      signInOrOut={(email, name) => {
-                        this.signInOrOut(email, name);
-                      }}
                     />
                   )}
                   {this.state.activeTab === 1 && (
@@ -592,16 +549,13 @@ export default class MyCalendar extends Component {
                       events={this.state.upcomingEvents}
                       sort="asc"
                       overlay={this.showEventDetails}
-                      signInOrOut={(email, name) => {
-                        this.signInOrOut(email, name);
-                      }}
                     />
                   )}
 
                 </View>
               </View>
             </>
-          )}
+
       </View>
 
     );
