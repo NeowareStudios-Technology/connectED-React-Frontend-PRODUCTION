@@ -25,11 +25,12 @@ class EventDetails extends React.Component {
     this.state = {
       activeTab: 0,
       isSignedIn: false,
-      isRegistered: 0
+      isRegistered: 0,
+      newEvent: null,
+      user: null
     };
   }
   componentWillUnmount() {
-    // TODO: pass isRegistered state and isSignedIn state to parent to update event as well as adjust "num_attendees" if open privacy
   }
 
   async initializeState() {
@@ -45,6 +46,7 @@ class EventDetails extends React.Component {
 
   componentDidMount() {
     console.log(this.props.event)
+    this.setState({ newEvent: this.props.event })
     this.initializeState()
   }
 
@@ -57,19 +59,30 @@ class EventDetails extends React.Component {
   // calls api to register user for event
   volunteer = async () => {
     // User is not registered
-    if(this.state.isRegistered !== 0){
+    if (this.state.isRegistered !== 0) {
       alert('You are already registered for this event')
       return
     }
     const { event } = this.props
+    const { user } = this.state
 
     let response = await registerUser(event.e_organizer, event.e_orig_title)
-    console.log(response)
     if (!response.error) {
+      let newEvent = this.state.newEvent
+
       if (event.privacy === "o") {
-        this.setState({ isRegistered: 1 })
+        // Open event. Set registered status, add user to attendees and increment number of attendees
+        newEvent.is_registered = "1"
+        newEvent.num_attendees += 1
+        newEvent.attendees.push(user.email)
+        newEvent.teams.push("-") // TODO: use actual team if known and not the dummy/null team of "-"
+        this.setState({ isRegistered: 1, newEvent })
       } else {
-        this.setState({ isRegistered: -1 })
+        // private event. set registered status, add user to pending list, increment number of pending
+        newEvent.is_registered = "-1"
+        newEvent.num_pending_attendees += 1
+        newEvent.pending_attendees.push(user.email)
+        this.setState({ isRegistered: -1, newEvent })
       }
     } else {
       alert(response.error.message)
@@ -79,16 +92,31 @@ class EventDetails extends React.Component {
   // calls api to de-register user from event
   deregister = async () => {
     // User is not registered
-    if(this.state.isRegistered === 0){
+    if (this.state.isRegistered === 0) {
       alert('You are already de-registered from the event')
       return
     }
     const { event } = this.props
+    const { user } = this.state
+    let newEvent = this.state.newEvent
 
     let response = await deregisterUser(event.e_organizer, event.e_orig_title)
-    console.log(response)
     if (!response.error) {
-      this.setState({ isRegistered: 0 })
+      newEvent.is_registered = "0"
+      if (event.privacy === "o") {
+        // open event - get index of user and remove from attendee list and teams. decrement number of attendees
+        const i = event.attendees.indexOf(user.email)
+        newEvent.attendees.splice(i, 1)
+        newEvent.teams.splice(i, 1)
+        newEvent.num_attendees -= 1
+      } else {
+        // private event - get index of user and remove from pending list. decrement pending
+        const i = event.pending_attendees.indexOf(user.email)
+        newEvent.num_pending_attendees -= 1
+        newEvent.pending_attendees.splice(i, 1)
+      }
+      this.setState({ isRegistered: 0, newEvent })
+
     } else {
       alert(response.error.message)
     }
@@ -128,8 +156,8 @@ class EventDetails extends React.Component {
     }
   };
 
+
   render() {
-    console.log('registered', this.state.isRegistered)
     const { event } = this.props;
     let privacyLabel = event.privacy === "o" ? "Open" : "Private";
     let eventDate = moment(event.date, "MM/DD/YYYY");
@@ -145,7 +173,7 @@ class EventDetails extends React.Component {
             <ImageBackground source={{ uri: "data:image/png;base64," + event.e_photo }} style={{ width: "100%", height: "100%" }}>
               <View style={{ flex: 1, paddingBottom: 12, flexDirection: "column" }}>
                 <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
-                  <TouchableOpacity onPress={this.props.onClose}>
+                  <TouchableOpacity onPress={() => this.props.onClose(event)}>
                     <Icon.Ionicons
                       style={{
                         color: "#fff",
@@ -203,7 +231,7 @@ class EventDetails extends React.Component {
               )}
               {this.state.activeTab === 1 && (
                 <>
-                  <EventDetailsTeam event={event} />
+                  <EventDetailsTeam event={this.state.newEvent} />
                 </>
               )}
               {this.state.activeTab === 2 && (
@@ -213,8 +241,9 @@ class EventDetails extends React.Component {
               )}
             </View>
             <>
-              <View style={{flex: 6,paddingBottom: 12}}>
-                <View style={{flexDirection: "row", justifyContent: "center", marginBottom: 12}}>
+              <View style={{ flex: 6, paddingBottom: 12 }}>
+                {/* Info, Team, and Updates buttons */}
+                <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 12 }}>
                   <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }} >
                     <Button
                       type={this.state.activeTab === 0 ? "solid" : "outline"}
@@ -246,7 +275,7 @@ class EventDetails extends React.Component {
                       }
                     />
                   </View>
-                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", marginBottom: 12  }} >
+                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }} >
                     <Button
                       onPress={() => {
                         this.setActiveTab(1);
@@ -275,7 +304,7 @@ class EventDetails extends React.Component {
                       }
                     />
                   </View>
-                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", marginBottom: 12 }} >
+                  <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }} >
                     <Button
                       type={this.state.activeTab === 2 ? "solid" : "outline"}
                       onPress={() => {
@@ -314,8 +343,8 @@ class EventDetails extends React.Component {
                       <Button
                         onPress={this.volunteer}
                         title="Volunteer"
-                        // title={parseInt(event.num_attendees) < parseInt(event.capacity) ? "Volunteer" : "Event at Capacity"}
-                        // disabled={!(parseInt(event.num_attendees) < parseInt(event.capacity))}
+                      // title={parseInt(event.num_attendees) < parseInt(event.capacity) ? "Volunteer" : "Event at Capacity"}
+                      // disabled={!(parseInt(event.num_attendees) < parseInt(event.capacity))}
                       />
                     </>
                   )}

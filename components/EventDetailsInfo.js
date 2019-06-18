@@ -3,16 +3,8 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableOpacity,
-  Platform,
-  Image,
-  ImageBackground,
-  ActivityIndicator
 } from "react-native";
-import { Button, Card } from "react-native-elements";
-import { Icon } from "expo";
 import moment from "moment";
-import AppData from "../constants/Data";
 
 class EventDetailsInfo extends React.Component {
   constructor(props) {

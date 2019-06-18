@@ -54,12 +54,13 @@ class EventsHomeScreen extends React.Component {
       // console.log('USER:', user)
       this.setState({ user: user });
     }
-    return user;
   }
 
   componentDidMount() {
     this.loadUser()
+    this.fetchData()
   }
+
   loadEvent = async (eventName, index, callback) => {
     let token = await User.firebase.getIdToken();
     if (token) {
@@ -341,20 +342,20 @@ class EventsHomeScreen extends React.Component {
     this.setState({ activeItem: item, carouselFirstItem: index });
   };
 
-  closeItem = item => {
+  // closes the event details and updates state
+  closeItem = event => {
+    console.log("CLOSED:", event)
     LayoutAnimation.easeInEaseOut();
-    this.setState({ activeItem: null });
+    let events = this.state.events.slice()
+    const index = this.state.carouselFirstItem
+
+    events[index] = event
+
+    this.setState({ events, activeItem: null })
   };
 
   closeEventSearch = () => {
     this.setState({ showSearchBar: false })
-  }
-
-  async componentDidMount() {
-    let user = await User.isLoggedIn();
-    if (user) {
-      this.fetchData();
-    }
   }
 
   _renderItem = ({ item, index }) => (
@@ -413,6 +414,7 @@ class EventsHomeScreen extends React.Component {
                     signInOrOut={(name, email) => {
                       this.signInOrOut(name, email);
                     }}
+
                   />
                 </View>
               </>
