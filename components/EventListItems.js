@@ -11,12 +11,14 @@ import moment from 'moment';
  * @prop {function}  props.overlay - returns the event item that is selected
  * @prop {array}  props.events - list of events to display
  * @prop {string}  props.sort - "asc" or "desc" to indicate the sort algorithm used on props.events
+ * @prop {string} props.type - the event type ("c" current | "f" future | "p" past | "a" admin) to send to overlay
  */
 class EventListItems extends React.PureComponent {
 
   // Method to handle if parent passes the overlay prop
   triggerOverlay = (item) => {
     if (this.props.overlay && item) {
+      item.type = this.props.type
       return this.props.overlay(item)
     }
     return null
@@ -52,11 +54,9 @@ class EventListItems extends React.PureComponent {
               contentContainerStyle={{ borderLeftColor: "grey", borderLeftWidth: 1, paddingLeft: 10 }}
               onPress={() => this.triggerOverlay(item)}
             />
-
           </View>
         ))}
       </ScrollView>
-
     );
   }
 }

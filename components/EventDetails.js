@@ -65,14 +65,24 @@ class EventDetails extends React.Component {
         // Open event. Set registered status, add user to attendees and increment number of attendees
         newEvent.is_registered = "1"
         newEvent.num_attendees += 1
-        newEvent.attendees.push(user.email)
+        if (typeof newEvent.attendees !== "undefined") {
+          newEvent.attendees.push(user.email)
+        }
+        else {
+          newEvent.attendees = [user.email]
+        }
         newEvent.teams.push("-") // TODO: use actual team if known and not the dummy/null team of "-"
         this.setState({ isRegistered: 1, newEvent })
       } else {
         // private event. set registered status, add user to pending list, increment number of pending
         newEvent.is_registered = "-1"
         newEvent.num_pending_attendees += 1
-        newEvent.pending_attendees.push(user.email)
+        if (typeof newEvent.pending_attendees !== 'undefined') {
+          newEvent.pending_attendees.push(user.email)
+        }
+        else {
+          newEvent.pending_attendees = [user.email]
+        }
         this.setState({ isRegistered: -1, newEvent })
       }
     } else {
@@ -94,17 +104,21 @@ class EventDetails extends React.Component {
     let response = await deregisterUser(event.e_organizer, event.e_orig_title)
     if (!response.error) {
       newEvent.is_registered = "0"
-      if (event.privacy === "o") {
+      if (newEvent.privacy === "o") {
         // open event - get index of user and remove from attendee list and teams. decrement number of attendees
-        const i = event.attendees.indexOf(user.email)
+        const i = newEvent.attendees.indexOf(user.email)
         newEvent.attendees.splice(i, 1)
         newEvent.teams.splice(i, 1)
         newEvent.num_attendees -= 1
       } else {
         // private event - get index of user and remove from pending list. decrement pending
-        const i = event.pending_attendees.indexOf(user.email)
+        if (typeof newEvent.pending_attendees !== 'undefined') {
+          const i = newEvent.pending_attendees.indexOf(user.email)
+          newEvent.pending_attendees.splice(i, 1)
+        } else {
+          newEvent.pending_attendees = [user.email]
+        }
         newEvent.num_pending_attendees -= 1
-        newEvent.pending_attendees.splice(i, 1)
       }
       this.setState({ isRegistered: 0, newEvent })
 
@@ -142,9 +156,43 @@ class EventDetails extends React.Component {
         return
       }
       alert("Success! " + response)
-      this.setState({ isSignedIn: !this.state.isSignedIn })
-    } catch (error) {
-    }
+
+      // update newEvent data
+      let { newEvent, user } = this.state
+
+      if (typeof newEvent.signed_in_attendees !== 'undefined') {
+        let i = newEvent.signed_in_attendees.indexOf(user.email)
+        // User was already signed in. sign out user - remove from signed_in_attendees. add to signed_out_attendees.
+        if (i !== -1) {
+          newEvent.signed_in_attendees.splice(i, 1)
+          if (typeof newEvent.signed_out_attendees) {
+            newEvent.signed_out_attendees.push(user.email)
+          } else {
+            newEvent.signed_out_attendees = [user.email]
+          }
+        } else {
+          // user was not in signed in list. sign in user - add user to signed_in_attendees. remove user from signed_out_attendees if applicable.
+          newEvent.signed_in_attendees.push(user.email)
+          if (typeof newEvent.signed_out_attendees !== 'undefined') {
+            let j = newEvent.signed_out_attendees.indexOf(user.email)
+            if (j !== -1) {
+              newEvent.signed_out_attendees.splice(j, 1)
+            }
+          }
+        }
+      } else {
+        // no signed in attendees. create signed in add user to it. remove user from signed out list if applicable
+        newEvent.signed_in_attendees = [user.email]
+        if (typeof newEvent.signed_out_attendees !== 'undefined') {
+          let i = newEvent.signed_out_attendees.indexOf(user.email)
+          if (i !== -1) {
+            newEvent.signed_out_attendees.splice(i, 1)
+          }
+        }
+      }
+
+      this.setState({ isSignedIn: !this.state.isSignedIn, newEvent })
+    } catch (error) { }
   };
 
   handleBackPress = () => {
@@ -159,8 +207,7 @@ class EventDetails extends React.Component {
   componentDidMount() {
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     console.log(this.props.event)
-    this.setState({ newEvent: this.props.event })
-    this.initializeState()
+    this.setState({ newEvent: this.props.event }, () => this.initializeState())
   }
 
   componentWillUnmount() {
