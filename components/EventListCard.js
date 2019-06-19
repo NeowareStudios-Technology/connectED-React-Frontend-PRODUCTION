@@ -53,12 +53,12 @@ class EventListCard extends React.Component {
           }}
         >
           <View style={{ height: screenHeight - 180 }}>
-            <View style={{ zIndex: 2, top: 15, left: 190, borderColor: '#fff', borderWidth: 2, borderRadius: 50, width: 75, height: 75, backgroundColor: 'rgba(29, 29, 29, .8)', justifyContent: 'center'  }}>
+            <View style={{ zIndex: 2, top: 15, left: 190, borderColor: '#f3e9e9', borderWidth: 2, borderRadius: 50, width: 75, height: 75, backgroundColor: 'rgba(29, 29, 29, .8)', justifyContent: 'center'  }}>
               <Text style={{ color: '#fff', fontSize: 18, left: 10 }}>JUNE</Text>
-              <Text style={{ color: '#fff', fontSize: 22, left: 20, top: -3 }}>14</Text>
+              <Text style={{ color: '#fff', fontSize: 22, left: 22, top: -3 }}>14</Text>
             </View>
             <View style={{ zIndex: 2 , top: 410 }}>
-              <Text style={{ color: '#fff', fontSize: 22, left: 5 }}>LAUNCH EVENT</Text>
+              <Text style={{ color: '#fff', fontSize: 22, letterSpacing: 2, left: 5 }}>LAUNCH EVENT</Text>
               <Text style={{ color: '#fff', fontSize: 17, left: 5 }}>VIEWSTUB</Text>
             </View>
           {/* This adds the png to fill the entire EventListCard per Oviedo Mall Mockup */}
@@ -70,10 +70,10 @@ class EventListCard extends React.Component {
               borderColor: "#fff", // mockup
               borderWidth: 3,  // mockup
               height: 525, //"100%",
-              width: 285, // "90%",
-              borderRadius: 30,
+              width: 290, // "90%",
+              borderRadius: 16,
               marginLeft: -10,
-              marginTop: -130,
+              marginTop: -140,
             }}
           />
             <View >

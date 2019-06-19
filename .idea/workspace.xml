@@ -5,23 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb89b4dd-de3a-4001-a96c-6e42f6b20973" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.expo/packager-info.json" beforeDir="false" afterPath="$PROJECT_DIR$/.expo/packager-info.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/calendar_grey.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/calendar_highlighted.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/map_grey.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/map_highlighted.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/menu_grey.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/menu_highlighted.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/smartphone_grey.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/OM Icons/smartphone_highlighted.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/EventDetails.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/EventDetails.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/EventListCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/EventListCard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/TabBarIcon.js" beforeDir="false" afterPath="$PROJECT_DIR$/components/TabBarIcon.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants/Styles.js" beforeDir="false" afterPath="$PROJECT_DIR$/constants/Styles.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/navigation/ProfileTabs.js" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/ProfileTabs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/screens/EventsHomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/EventsHomeScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,7 +21,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/App.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="544">
+            <state relative-caret-position="163">
               <caret line="54" selection-start-line="54" selection-end-line="54" />
             </state>
           </provider>
@@ -104,7 +88,7 @@
     <property name="DEBUGGABLE_PROCESS" value="host.exp.exponent" />
     <property name="SHOW_ALL_PROCESSES" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
-    <property name="last_opened_file_path" value="$USER_HOME$/sandbox/crate" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -257,7 +241,7 @@
     <frame x="0" y="-4" width="1920" height="1084" extended-state="6" />
     <layout>
       <window_info id="Captures" order="0" sideWeight="0.50160086" side_tool="true" weight="0.3299356" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.21298283" />
+      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.21298283" />
       <window_info id="Structure" order="2" sideWeight="0.50160086" side_tool="true" weight="0.3299356" />
       <window_info id="Favorites" order="3" sideWeight="0.50053364" side_tool="true" weight="0.3299356" />
       <window_info id="Build Variants" order="4" side_tool="true" />
@@ -266,10 +250,10 @@
       <window_info id="Resources Explorer" order="7" sideWeight="0.49839914" weight="0.3299356" />
       <window_info id="Capture Tool" order="8" />
       <window_info anchor="bottom" id="Version Control" order="0" />
-      <window_info anchor="bottom" id="Logcat" order="1" weight="0.32977587" />
-      <window_info anchor="bottom" id="TODO" order="2" weight="0.32977587" />
-      <window_info anchor="bottom" id="Terminal" order="3" weight="0.32977587" />
-      <window_info anchor="bottom" id="Event Log" order="4" sideWeight="0.49248928" side_tool="true" weight="0.48184818" />
+      <window_info anchor="bottom" id="Logcat" order="1" weight="0.8036286" />
+      <window_info anchor="bottom" id="TODO" order="2" sideWeight="0.49946353" weight="0.32977587" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="3" sideWeight="0.49892703" visible="true" weight="0.32977587" />
+      <window_info anchor="bottom" id="Event Log" order="4" sideWeight="0.50107294" side_tool="true" visible="true" weight="0.32977587" />
       <window_info anchor="bottom" id="Android Profiler" order="5" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="6" />
       <window_info anchor="bottom" id="Debug" order="7" />
@@ -303,7 +287,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/App.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
+        <state relative-caret-position="163">
           <caret line="54" selection-start-line="54" selection-end-line="54" />
         </state>
       </provider>

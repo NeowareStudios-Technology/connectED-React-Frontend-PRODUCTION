@@ -48,10 +48,10 @@ class EventDetails extends React.Component {
             flex: 1
           }}
         >
-          <View
+          <View // Header for Event Detail
             style={{
               flex: 3,
-              backgroundColor: "#124b73"
+              backgroundColor: "#fb0900"    // "#124b73"
             }}
           >
             <ImageBackground
@@ -114,7 +114,7 @@ class EventDetails extends React.Component {
                     </Text>
                   </View> */}
                   <View style={{ flex: 2 }} />
-                  <View
+                  <View  // Component for Header Date
                     style={{
                       flex: 2,
                       alignContent: "center",

@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
   displayMallH1: {
     color: "#fff",
     fontSize: 30,
+    fontWeight: "100",
     paddingHorizontal: 57
   },
   btnSm: {

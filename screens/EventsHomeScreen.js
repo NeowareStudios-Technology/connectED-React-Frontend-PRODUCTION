@@ -412,11 +412,12 @@ class EventsHomeScreen extends React.Component {
                           <View style={{ flex: 1 }}>
                             <Image source={{uri: "http://www.arnold.fun/12a/90/90"}}
                             style={{
-                              width: "90%",
-                              height: "70%",
+                              width: "110%",
+                              height: "80%",
                               borderRadius: 50,
                               backgroundColor: 'transparent',
-                              paddingTop: 10,
+                              paddingTop: 30,
+                              marginTop: 9,
                             }}
                             />
                             <Icon.Ionicons
@@ -465,11 +466,8 @@ class EventsHomeScreen extends React.Component {
                             <Image 
                               source={require('../assets/images/gear_icon.png')}
                               style={{
-                                backgroundColor: "#999",
                                 paddingHorizontal: 10,
                                 borderRadius: 90,
-                                borderColor: "#fff",
-                                borderWidth: 0,
                               }}/>
                           </View>
                           {/* <Icon.Ionicons
