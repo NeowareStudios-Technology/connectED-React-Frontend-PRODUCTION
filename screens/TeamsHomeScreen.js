@@ -161,6 +161,7 @@ export default class TeamsScreen extends Component {
                 if (responseData) {
                   // console.warn(responseData)
                   if (typeof responseData === "object") {
+                    console.log("Top Teams: ", responseData)
                     this.setState(
                       {
                         TopTeamNames: responseData.top_team_names,
