@@ -12,7 +12,6 @@ export default class App extends React.Component {
     started: false,
     errorMessage: null,
     location: null
-
   };
   componentWillMount() {
     if (Platform.OS === 'android' && !Constants.isDevice) {

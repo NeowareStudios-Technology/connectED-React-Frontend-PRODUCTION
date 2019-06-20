@@ -328,7 +328,10 @@ export default class HomeScreen extends React.Component {
         this.loadUserTeams()
       });
     }
-    return true;
+    else {
+      this.navigateToPage("SignIn")
+    }
+        return true;
   }
 
   componentDidMount() {
