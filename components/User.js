@@ -1,4 +1,5 @@
 import firebase from "../components/Firebase";
+import { _getLocationAsync } from '../constants/Utils'
 
 /**
  * Singleton user object.
@@ -9,7 +10,7 @@ const User = {
   uid: null,
   firebase: null,
   profile: null,
-  isLoggedIn: async function() {
+  isLoggedIn: async function () {
     if (firebase.auth().currentUser) {
       this.firebase = firebase.auth().currentUser;
     }
@@ -37,11 +38,10 @@ const User = {
                 let profile = JSON.parse(profileResponse._bodyText);
                 if (profile) {
                   this.profile = profile;
-                  this.saveLocation(token);
                 }
-              } catch (error) {}
+              } catch (error) { }
             }
-          } catch (error) {}
+          } catch (error) { }
         }
       }
       /**
@@ -62,35 +62,7 @@ const User = {
       return false;
     }
   },
-  saveLocation: async function(token) {
-    try {
-      let bodyData = JSON.stringify({
-        lat: 28.541053771972656,
-        lon: -81.38108825683594
-      });
-      let url =
-        "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles";
-      fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-        body: bodyData
-      })
-        .then(response => {
-          console.log("Result of saving location", response);
-          if (response.ok) {
-          }
-        })
-        .catch(error => {
-          console.error("Error posting to location", error);
-        });
-    } catch (error) {
-      console.log("error parsing profile data", error.message);
-    }
-  },
-  login: async function(firebaseUser, profile) {
+  login: async function (firebaseUser, profile) {
     if (typeof profile === "undefined") {
       let token = await firebaseUser.getIdToken();
       if (token) {
@@ -105,17 +77,15 @@ const User = {
               Authorization: "Bearer " + token
             }
           });
-
           if (profileResponse.ok) {
             try {
               let userProfile = JSON.parse(profileResponse._bodyText);
               if (userProfile) {
                 profile = userProfile;
-                this.saveLocation();
               }
-            } catch (error) {}
+            } catch (error) { }
           }
-        } catch (error) {}
+        } catch (error) { }
       }
     }
     this.displayName = firebaseUser.displayName;
@@ -125,7 +95,7 @@ const User = {
     this.firebase = firebaseUser;
     return this;
   },
-  logout: async function(callback) {
+  logout: async function (callback) {
     await firebase.auth().signOut();
     this.displayName = null;
     this.email = null;
@@ -136,7 +106,7 @@ const User = {
       callback();
     }
   },
-  setProfile: function(profile) {
+  setProfile: function (profile) {
     this.profile = profile;
   }
 };

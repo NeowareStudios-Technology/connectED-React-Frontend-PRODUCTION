@@ -51,7 +51,7 @@ class EventsHomeScreen extends React.Component {
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
-      // console.log('USER:', user)
+      console.log('USER:', user.profile)
       this.setState({ user: user });
     }
   }
@@ -150,7 +150,7 @@ class EventsHomeScreen extends React.Component {
           if (response.ok) {
             try {
               let responseData = JSON.parse(response._bodyText);
-              console.log('PREFILL', responseData)
+              // console.log('PREFILL', responseData)
               if (responseData) {
                 if (typeof responseData.events === "object") {
                   const newArray = []

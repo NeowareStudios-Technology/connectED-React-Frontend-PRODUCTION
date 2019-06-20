@@ -67,11 +67,12 @@ class EventDetails extends React.Component {
         newEvent.num_attendees += 1
         if (typeof newEvent.attendees !== "undefined") {
           newEvent.attendees.push(user.email)
+          newEvent.teams.push("-")
         }
         else {
           newEvent.attendees = [user.email]
+          newEvent.teams = ["-"]
         }
-        newEvent.teams.push("-") // TODO: use actual team if known and not the dummy/null team of "-"
         this.setState({ isRegistered: 1, newEvent })
       } else {
         // private event. set registered status, add user to pending list, increment number of pending

@@ -6,17 +6,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View
 } from "react-native";
-import { WebBrowser, Icon } from "expo";
 import { Input, Card, Button } from "react-native-elements";
-
-import { MonoText } from "../components/StyledText";
 import User from "../components/User";
-
 import Sequencer from "../components/Sequencer";
 import firebase from "../components/Firebase";
+import { saveUserLocation } from "../constants/API";
 const validator = require("validator");
 
 export default class SignInScreen extends React.Component {
@@ -41,15 +37,15 @@ export default class SignInScreen extends React.Component {
 
   listenForAuthChangeAndTriggerFirebaseLogin = () => {
     if (!this.state.isLoggedIn && this.state.loginData) {
-      console.log("Listening for auth change", this.state);
       /**
        * Listen for authentication state to change. If we receive a user
        * get the user token and post the user profile to the /profiles endpoint.
        */
       firebase.auth().onAuthStateChanged(user => {
         if (user != null) {
-          User.login(user).then(login => {
+          User.login(user).then(async login => {
             if (login) {
+              await saveUserLocation()
               this.props.navigation.navigate("ProfileHome");
             }
             else{
@@ -201,7 +197,7 @@ export default class SignInScreen extends React.Component {
               </Card>
               <View style={{ paddingHorizontal: 12, marginTop: 18 }}>
                 <Button
-                  title="Sign In"
+                  title={this.state.loggingIn ? "Signing in..." : "Sign In" }
                   onPress={() => { this.setState({ loggingIn: true }); this.login() }}
                   disabled={this.state.loggingIn}
                 />

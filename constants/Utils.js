@@ -1,5 +1,6 @@
 // Contains any util/helper functions
 import moment from "moment"
+import { Permissions, Location } from 'expo'
 
 /**
  * Checks if the date passed in occurs today
@@ -49,3 +50,21 @@ export const sortEventsDesc = (events) => {
 export const sortEventsAsc = (events) => {
   return events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]))
 }
+
+/**
+ * Retrieves the user's location if enabled
+ * @returns {object || null} returns a Location object if location found within timeout limit, null otherwise
+ */export const _getLocationAsync = async () => {
+  let { status } = await Permissions.askAsync(Permissions.LOCATION);
+  if (status !== 'granted') {
+    return null
+  }
+  // Return null if it takes too long to get current position
+  // Needed as it can cause an infinite wait on some devices
+  try {
+    let pos = await Location.getCurrentPositionAsync({ timeout: 5000 });
+    return pos
+  } catch (err) {
+    return null
+  }
+};
