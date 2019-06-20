@@ -773,7 +773,7 @@ export default class HomeScreen extends React.Component {
                         }}
                       >
                         SETTINGS
-                                  </Text>
+                      </Text>
                       <View style={styles.drawerSectionWrapper}>
                         <View style={styles.drawerSectionLabelContainer}>
                           <Icon.Ionicons
