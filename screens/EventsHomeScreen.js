@@ -51,7 +51,7 @@ class EventsHomeScreen extends React.Component {
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
-      // console.log('USER:', user)
+      console.log('USER:', user.profile)
       this.setState({ user: user });
     }
   }

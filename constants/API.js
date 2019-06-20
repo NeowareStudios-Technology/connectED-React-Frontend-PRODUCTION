@@ -1,5 +1,6 @@
 //  Helper file for all API calls to the connectED database
 import User from "../components/User"
+import { _getLocationAsync } from "./Utils"
 
 /**
  * Checks user in/out of an event by adding/removing user from signed in/out attendees
@@ -207,8 +208,16 @@ export const fetchUserTeams = async () => {
  * @param {double} lon - longitude coordinate of user in decimal form
  * @returns {object} contains team names and team ids of various type (created, pending, registered, leader)
  */
-export const saveUserLocation = async (lat, lon) => {
+export const saveUserLocation = async () => {
   console.log(`PUT https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles`)
+  let user = await User.isLoggedIn()
+  let location = await _getLocationAsync()
+  if(!location) {
+    console.log('no location found')
+    return
+  }
+  const { latitude, longitude } = location.coords
+
   let token = await User.firebase.getIdToken();
   if (token) {
     let url = "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles"
@@ -219,7 +228,7 @@ export const saveUserLocation = async (lat, lon) => {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token
         },
-        data: JSON.stringify({ lat, lon })
+        body: JSON.stringify({ lat: latitude, lon: longitude })
       })
       console.log(response)
       let responseJson = await response.json()
@@ -240,3 +249,4 @@ export const saveUserLocation = async (lat, lon) => {
     }
   }
 }
+

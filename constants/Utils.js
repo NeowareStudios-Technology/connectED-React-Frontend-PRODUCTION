@@ -1,5 +1,6 @@
 // Contains any util/helper functions
 import moment from "moment"
+import { Permissions, Location } from 'expo'
 
 /**
  * Checks if the date passed in occurs today
@@ -49,3 +50,14 @@ export const sortEventsDesc = (events) => {
 export const sortEventsAsc = (events) => {
   return events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]))
 }
+
+// returns null
+export const _getLocationAsync = async () => {
+  let { status } = await Permissions.askAsync(Permissions.LOCATION);
+  if (status !== 'granted') {
+    return null
+  }
+  let pos = await Location.getCurrentPositionAsync({});
+  console.log("Utils:", pos)
+  return pos
+};

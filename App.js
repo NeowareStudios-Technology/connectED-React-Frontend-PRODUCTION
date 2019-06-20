@@ -11,7 +11,7 @@ import { saveUserLocation } from "./constants/API";
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    // this._bootstrapAsync();
+    this._bootstrapAsync();
   }
   state = {
     isLoadingComplete: false,
@@ -31,16 +31,6 @@ export default class App extends React.Component {
       }
     });
   };
-
-  // componentWillMount() {
-  //   if (Platform.OS === 'android' && !Constants.isDevice) {
-  //     this.setState({
-  //       errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
-  //     });
-  //   } else {
-  //     this._getLocationAsync();
-  //   }
-  // }
 
   getStarted = () => {
     this.setState({
