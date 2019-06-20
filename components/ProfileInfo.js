@@ -7,8 +7,7 @@ class ProfileInfo extends React.Component {
       <>
         <View style={styles.container}>
           <View style={styles.section}>
-          <Button title="See Your Created Teams" onPress={()=>this.props.navigation.navigate("AdminTeamDetails")}/>
-          
+         
             <Text style={styles.sectionHeader}>Fields of Interest:</Text>
             <View>
               {this.props.user.profile && this.props.user.profile.interests && (
