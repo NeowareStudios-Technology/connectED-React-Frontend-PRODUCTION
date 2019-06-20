@@ -20,6 +20,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingHorizontal: 12
   },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10
+  },
   btnSm: {
     padding: 6
   },
@@ -34,11 +41,13 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     paddingTop: 15,
   },
+  teamListContainer: {
+    paddingHorizontal: 10,
+  },
   teamListing: {
     backgroundColor: '#fafafa',
     flex: 1,
     flexDirection: 'row',
-    color: 'black',
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 10,

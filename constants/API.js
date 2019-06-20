@@ -12,7 +12,6 @@ export const checkUserInOrOut = async (url_event_orig_name, e_organizer_email) =
   let token = await User.firebase.getIdToken();
   if (token) {
     let url = `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/events/${e_organizer_email}/${url_event_orig_name}/qr`;
-    console.log(url)
     try {
       let response = await fetch(url, {
         method: "GET",
@@ -108,6 +107,81 @@ export const deregisterUser = async (e_organizer_email, url_event_orig_name) => 
       let responseJson = await response.json()
       console.log("API RESPONSE:", responseJson)
       // error returned from server/database
+      if (responseJson.error) {
+        throw responseJson.error
+      }
+      return responseJson
+    } catch (error) {
+
+    }
+  }
+}
+
+/**
+ * Retrieves a single team from database
+ * path: teams/{url_team_orig_name}
+ * @async
+ * @function fetchTeamData
+ * @param {string} url_team_orig_name - team name
+ * @returns {object} team info or error
+ */
+export const fetchTeamData = async (url_team_orig_name) => {
+  console.log(`GET https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${url_team_orig_name}`)
+  let token = await User.firebase.getIdToken();
+  if (token) {
+    let url =
+      `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/teams/${url_team_orig_name}`;
+    try {
+      let response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        }
+      })
+      let responseJson = await response.json()
+      console.log('API RESPONSE', responseJson)
+      // check if error returned from server/database
+      if (responseJson.error) {
+        throw responseJson.error
+      }
+      return responseJson
+    } catch (error) {
+      return ({
+        error: {
+          message: error.message,
+          errors: error.errors
+        },
+        code: error.code
+      })
+    }
+  }
+}
+
+/**
+ * Retrieves all teams a user is associated with
+ * path: profiles/{email_to_get}/teams
+ * @async
+ * @function fetchUserTeams
+ * @returns {object} contains team names and team ids of various type (created, pending, registered, leader)
+ */
+export const fetchUserTeams = async () => {
+  console.log(`GET https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/${User.email}/teams`)
+  let token = await User.firebase.getIdToken();
+  if (token) {
+    let url =
+      `https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles/${User.email}/teams`;
+    try {
+      let response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        }
+      })
+      let responseJson = await response.json()
+      console.log('API RESPONSE', responseJson)
+      // check if error returned from server/database
       if (responseJson.error) {
         throw responseJson.error
       }

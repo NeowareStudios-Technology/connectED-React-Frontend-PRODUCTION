@@ -28,6 +28,8 @@ import EventDetails from "../components/EventDetails";
 import AdminEventDetails from "../components/AdminEventDetails";
 import Styles from "../constants/Styles";
 import { isPast, isToday } from "../constants/Utils";
+import { fetchUserTeams } from "../constants/API"
+import TeamListItems from "../components/TeamListItems";
 
 let screenHeight = Dimensions.get("window").height - 50; // accounts for bottom navigation
 let screenWidth = Dimensions.get("window").width;
@@ -53,17 +55,18 @@ export default class HomeScreen extends React.Component {
       activeItem: null,
       adminEventDetailVisible: false,
       eventDetailVisible: false,
-      refreshing: false
+      refreshing: false,
+      activeCreatedSection: []
     };
   }
 
   _onRefresh = () => {
-    this.setState({ 
-      refreshing: true, 
-      events: null, 
-      createdEvents: null, 
-      pastEvents: null, 
-      currentEvents: null, 
+    this.setState({
+      refreshing: true,
+      events: null,
+      createdEvents: null,
+      pastEvents: null,
+      currentEvents: null,
       futureEvents: null,
       loading: true,
       activeItem: null
@@ -305,15 +308,30 @@ export default class HomeScreen extends React.Component {
       } catch (error) { }
     }
   }
+  loadUserTeams = async () => {
+    try {
+      let userTeams = await fetchUserTeams()
+      console.log("TEAMS:", userTeams)
+      if (!userTeams.error) {
+        this.setState({ createdTeams: userTeams.created_team_ids });
+      } else {
+        alert("ERROR: " + userTeams.error.message)
+      }
+    } catch (error) { }
+  };
 
   async loadUser() {
     let user = await User.isLoggedIn();
     if (user) {
       this.setState({ user: user }, () => {
         this.loadUserOpportunities();
+        this.loadUserTeams()
       });
     }
-    return true;
+    else {
+      this.navigateToPage("SignIn")
+    }
+        return true;
   }
 
   componentDidMount() {
@@ -369,6 +387,28 @@ export default class HomeScreen extends React.Component {
       </View>
     );
   };
+  _renderCreatedContent = section => {
+    if (section.title === 'Events') {
+      return (
+        <View style={Styles.eventListContainer}>
+          <EventListItems
+            events={this.state.createdEvents}
+            sort={"desc"}
+            overlay={this.showAdminEventDetails}
+            title={this.state.signInOutTitle}
+            type="a"
+          />
+        </View>
+      )
+    } else {
+      return (
+        <View style={Styles.eventListContainer}>
+          <TeamListItems teams={this.state.createdTeams} />
+        </View>
+
+      )
+    }
+  }
   _renderContent = section => {
     let events, sort, title;
     if (section.title === 'Current Events') {
@@ -397,12 +437,13 @@ export default class HomeScreen extends React.Component {
           type={type}
         />
       </View>
-
-
     );
   };
   _updateSections = activeSections => {
     this.setState({ activeSections });
+  };
+  updateCreatedSection = activeCreatedSection => {
+    this.setState({ activeCreatedSection });
   };
   renderAccordion = () => {
     let sections = [
@@ -420,7 +461,6 @@ export default class HomeScreen extends React.Component {
         sectionContainerStyle={{}}
         sections={sections}
         activeSections={this.state.activeSections}
-        renderSectionTitle={this._renderSectionTitle}
         renderHeader={this._renderHeader}
         renderContent={this._renderContent}
         onChange={this._updateSections}
@@ -516,7 +556,7 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    const buttons = ["Info", "History", "Created"];
+    const buttons = ["My Info", "My Events", "Created"];
     if (this.state.eventDetailVisible) {
       return (this.renderEventDetails())
     }
@@ -651,30 +691,41 @@ export default class HomeScreen extends React.Component {
                         this.renderAccordion()
                       ) : (
                           <ActivityIndicator
-                            style={{ marginBottom: 16 }}
-                            size="small"
-                            color="#0d0d0d"
+                            style={Styles.activityIndicator}
                           />
                         )}
                     </>
                   )}
                   {this.state.activeTab === 2 && (
                     <>
-                      {this.state.createdEvents ? (
-                        <View style={Styles.eventListContainer}>
-                          <EventListItems
-                            events={this.state.createdEvents}
-                            sort={"desc"}
-                            overlay={this.showAdminEventDetails}
-                            title={this.state.signInOutTitle}
-                            type="a"
-                          />
-                        </View>
+                      {this.state.createdEvents || this.state.createdTeams ? (
+                        <Accordion
+                          sections={[
+                            {
+                              title: 'Events'
+                            }, {
+                              title: 'Teams'
+                            }
+                          ]}
+                          activeSections={this.state.activeCreatedSection}
+                          onChange={this.updateCreatedSection}
+                          renderHeader={this._renderHeader}
+                          renderContent={this._renderCreatedContent}
+                        />
+                        // <View style={Styles.eventListContainer}>
+                        //   <EventListItems
+                        //     events={this.state.createdEvents}
+                        //     sort={"desc"}
+                        //     overlay={this.showAdminEventDetails}
+                        //     title={this.state.signInOutTitle}
+                        //     type="a"
+                        //   />
+                        // </View>
                       ) : (
                           <ActivityIndicator
-                            style={{ marginBottom: 16 }}
+                            style={Styles.activityIndicator}
                             size="large"
-                            color="#0d0d0d"
+                            
                           />
                         )}
                     </>
@@ -849,7 +900,7 @@ export default class HomeScreen extends React.Component {
                 >
                   Loading profile...
               </Text>
-                <ActivityIndicator size="large" color="#0d0d0d" />
+                <ActivityIndicator size="large" color="#0d0d0d" style={Styles.activityIndicator} />
               </>
             )}
         </View>

@@ -74,7 +74,8 @@ class AdminEventDetails extends React.Component {
     return (
       <>
         <View style={{ flexDirection: "column", flex: 1 }}>
-          <View style={{ flex: 3, backgroundColor: "#124b73" }} >
+          {/* <View style={{ flex: 3, backgroundColor: "#124b73" }} > */}
+          <View style={{ flex: 1, flexDirection: "column" }} >
             <ImageBackground
               source={{
                 uri: "data:image/png;base64," + item.e_photo
@@ -84,28 +85,26 @@ class AdminEventDetails extends React.Component {
                 height: "100%"
               }}
             >
-              <View style={{ flex: 1, paddingBottom: 12, flexDirection: "column" }} >
-                <View style={{ flex: 5, padding: 6, paddingLeft: 9 }}>
-                  <TouchableOpacity onPress={this.handleClose}>
-                    <Icon.Ionicons
-                      style={{
-                        color: "#fff",
-                        textShadowOffset: { width: 0.5, height: 0.5 },
-                        textShadowRadius: 2,
-                        textShadowColor: '#000',
-                      }}
-                      name={
-                        Platform.OS === "ios"
-                          ? "ios-close-circle"
-                          : "md-close-circle"
-                      }
-                      size={32}
-                    />
-                  </TouchableOpacity>
-                </View>
+              <View style={{ padding: 12, backgroundColor: 'rgba(255,255,255, 0.3)' }}>
+                <TouchableOpacity onPress={this.handleClose}>
+                  <Icon.Ionicons
+                    style={{
+                      color: "#000",
+                      textShadowOffset: { width: 0.5, height: 0.5 },
+                      textShadowRadius: 2,
+                      textShadowColor: '#fff',
+                    }}
+                    name="md-arrow-back"
+                    size={32}
+                  />
+                </TouchableOpacity>
               </View>
+
             </ImageBackground>
+
           </View>
+          {/* </ImageBackground> */}
+          {/* </View> */}
           {item &&
             <View style={styles.container}>
               <Text style={styles.title}>{item.e_title}</Text>
