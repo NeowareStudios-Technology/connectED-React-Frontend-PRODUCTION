@@ -51,12 +51,20 @@ export const sortEventsAsc = (events) => {
   return events.slice().sort((a, b) => new Date(a.date[0]) - new Date(b.date[0]))
 }
 
-// returns null
-export const _getLocationAsync = async () => {
+/**
+ * Retrieves the user's location if enabled
+ * @returns {object || null} returns a Location object if location found within timeout limit, null otherwise
+ */export const _getLocationAsync = async () => {
   let { status } = await Permissions.askAsync(Permissions.LOCATION);
   if (status !== 'granted') {
     return null
   }
-  let pos = await Location.getCurrentPositionAsync({});
-  return pos
+  // Return null if it takes too long to get current position
+  // Needed as it can cause an infinite wait on some devices
+  try {
+    let pos = await Location.getCurrentPositionAsync({ timeout: 5000 });
+    return pos
+  } catch (err) {
+    return null
+  }
 };
