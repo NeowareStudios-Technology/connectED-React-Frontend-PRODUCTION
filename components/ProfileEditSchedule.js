@@ -132,7 +132,7 @@ class ProfileEditSchedule extends React.Component {
                   <Button
                     title="Afternoon"
                     type={
-                      this.state.time_day === "afternoon" ? "solid" : "outline"
+                      this.props.time_day === "afternoon" ? "solid" : "outline"
                     }
                     style={styles.timeOfDay}
                     onPress={() => {
@@ -142,7 +142,7 @@ class ProfileEditSchedule extends React.Component {
                   <Button
                     title="Evening"
                     type={
-                      this.state.time_day === "evening" ? "solid" : "outline"
+                      this.props.time_day === "evening" ? "solid" : "outline"
                     }
                     style={styles.timeOfDay}
                     onPress={() => {

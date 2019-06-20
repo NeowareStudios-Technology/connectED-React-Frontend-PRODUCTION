@@ -328,10 +328,8 @@ export default class HomeScreen extends React.Component {
         this.loadUserTeams()
       });
     }
-    else {
-      this.navigateToPage("SignIn")
-    }
-        return true;
+
+    return true;
   }
 
   componentDidMount() {
@@ -725,7 +723,7 @@ export default class HomeScreen extends React.Component {
                           <ActivityIndicator
                             style={Styles.activityIndicator}
                             size="large"
-                            
+
                           />
                         )}
                     </>

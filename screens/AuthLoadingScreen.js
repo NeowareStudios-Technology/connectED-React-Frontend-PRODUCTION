@@ -22,7 +22,6 @@ class AuthLoadingScreen extends React.Component {
   _bootstrapAsync = async () => {
     firebase.auth().onAuthStateChanged(user => {
       if (user != null) {
-        // this.props.navigation.navigate(user ? 'Profile' : 'Main')
         User.login(user).then(login => {
           this.props.navigation.navigate(login ? 'Profile' : 'Main')
         });
@@ -32,7 +31,7 @@ class AuthLoadingScreen extends React.Component {
     });
   };
 
-  // Render any loading content that you like here
+  // Render any loading content
   render() {
     return (
       <View style={styles.container}>
