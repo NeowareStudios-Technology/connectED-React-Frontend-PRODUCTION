@@ -15,7 +15,7 @@ import User from "../components/User"
 import styles from "../constants/Styles"
 
 
-
+// Loading screen to route user to appropriate route if authorized
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -24,7 +24,6 @@ class AuthLoadingScreen extends React.Component {
 
   // Check if user is already logged in
   _bootstrapAsync = async () => {
-    console.log("AuthLoadingScreen")
     firebase.auth().onAuthStateChanged(user => {
       if (user != null) {
         User.login(user).then(async login => {

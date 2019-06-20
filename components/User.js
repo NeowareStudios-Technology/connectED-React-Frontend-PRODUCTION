@@ -38,7 +38,6 @@ const User = {
                 let profile = JSON.parse(profileResponse._bodyText);
                 if (profile) {
                   this.profile = profile;
-                  this.saveLocation(token);
                 }
               } catch (error) { }
             }
@@ -63,34 +62,6 @@ const User = {
       return false;
     }
   },
-  saveLocation: async function (token) {
-    if (!token) return
-    // Get location
-    let location = await _getLocationAsync()
-    if (!location) return
-    let bodyData = JSON.stringify({
-      lat: pos.coords.latitude,
-      lon: pos.coords.longitude
-    });
-    let url =
-      "https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles";
-    fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token
-      },
-      body: bodyData
-    })
-      .then(response => {
-        console.log("Result of saving location", response);
-        if (response.ok) {
-        }
-      })
-      .catch(error => {
-        console.error("Error posting to location", error);
-      });
-  },
   login: async function (firebaseUser, profile) {
     if (typeof profile === "undefined") {
       let token = await firebaseUser.getIdToken();
@@ -106,13 +77,11 @@ const User = {
               Authorization: "Bearer " + token
             }
           });
-
           if (profileResponse.ok) {
             try {
               let userProfile = JSON.parse(profileResponse._bodyText);
               if (userProfile) {
                 profile = userProfile;
-                // this.saveLocation();
               }
             } catch (error) { }
           }

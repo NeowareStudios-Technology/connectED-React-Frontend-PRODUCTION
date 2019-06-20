@@ -204,17 +204,21 @@ export const fetchUserTeams = async () => {
  * path: /profiles
  * @async
  * @function saveUserLocation
- * @param {double} lat - lattitude coordinate of user in decimal form
- * @param {double} lon - longitude coordinate of user in decimal form
- * @returns {object} contains team names and team ids of various type (created, pending, registered, leader)
+ * @param {float} lat - lattitude coordinate of user in decimal form
+ * @param {float} lon - longitude coordinate of user in decimal form
+ * @returns {object} empty object or error
  */
 export const saveUserLocation = async () => {
   console.log(`PUT https://connected-dev-214119.appspot.com/_ah/api/connected/v1/profiles`)
   let user = await User.isLoggedIn()
   let location = await _getLocationAsync()
-  if(!location) {
+  if (!location) {
     console.log('no location found')
-    return
+    return ({
+      error: {
+        message: "Could not retrieve your location",
+      }
+    })
   }
   const { latitude, longitude } = location.coords
 
@@ -230,7 +234,6 @@ export const saveUserLocation = async () => {
         },
         body: JSON.stringify({ lat: latitude, lon: longitude })
       })
-      console.log(response)
       let responseJson = await response.json()
       console.log('API RESPONSE', responseJson)
       // check if error returned from server/database

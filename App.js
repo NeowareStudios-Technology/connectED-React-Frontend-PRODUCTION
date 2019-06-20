@@ -4,14 +4,10 @@ import { AppLoading, Asset, Font, Icon, Permissions, Location, Constants } from 
 import AppNavigator from "./navigation/AppNavigator";
 import SigninNavigator from "./navigation/SigninNavigator";
 import HomeScreen from "./screens/HomeScreen";
-import firebase from "./components/Firebase"
-import User from "./components/User";
-import { saveUserLocation } from "./constants/API";
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this._bootstrapAsync();
   }
   state = {
     isLoadingComplete: false,
@@ -19,17 +15,6 @@ export default class App extends React.Component {
     errorMessage: null,
     location: null,
     login: null
-  };
-  // check if user is logged in
-  _bootstrapAsync = async () => {
-    console.log("Bootstrap App")
-    firebase.auth().onAuthStateChanged(user => {
-      if (user != null) {
-        User.login(user).then(login => {
-          this.login = login
-        });
-      }
-    });
   };
 
   getStarted = () => {

@@ -58,6 +58,5 @@ export const _getLocationAsync = async () => {
     return null
   }
   let pos = await Location.getCurrentPositionAsync({});
-  console.log("Utils:", pos)
   return pos
 };
