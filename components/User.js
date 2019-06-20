@@ -63,6 +63,8 @@ const User = {
     }
   },
   saveLocation: async function(token) {
+    if(!token) return
+    // Get location
     try {
       let bodyData = JSON.stringify({
         lat: 28.541053771972656,
